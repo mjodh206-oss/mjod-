@@ -1,0 +1,13 @@
+# نواتج البناء — لا تدخل Git
+build/
+keys/
+dist/
+*.apk
+*.jks
+
+# أنظمة التشغيل والمحررات
+.DS_Store
+.idea/
+*.iml
+.gradle/
+local.properties

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- الوضع الداكن: نفس الهوية بعمق أكبر -->
+    <color name="bg">#FF08131A</color>
+    <color name="surface">#FF0F1E26</color>
+    <color name="surface_2">#FF15272F</color>
+    <color name="surface_3">#FF1C323B</color>
+    <color name="text_primary">#FFEAF3F5</color>
+    <color name="text_secondary">#FFA8BCC3</color>
+    <color name="text_tertiary">#FF75898F</color>
+    <color name="outline">#FF1E343C</color>
+    <color name="outline_strong">#FF2C4650</color>
+    <color name="scrim">#99000000</color>
+    <color name="nav_bar">#FF0B1920</color>
+    <color name="status_bar">#FF08131A</color>
+    <color name="status_bar_icons">#FFEAF3F5</color>
+
+    <color name="brand_50">#FF0C2A2A</color>
+    <color name="brand_100">#FF0F3733</color>
+    <color name="brand_200">#FF14524A</color>
+    <color name="brand_300">#FF2AA795</color>
+    <color name="brand_400">#FF45BFA9</color>
+    <color name="brand_500">#FF4FC6B0</color>
+    <color name="brand_600">#FF6FD6C2</color>
+
+    <color name="gold_100">#FF33290E</color>
+    <color name="gold_400">#FFEFC45F</color>
+    <color name="gold_500">#FFE0AE33</color>
+
+    <color name="income">#FF3FCE96</color>
+    <color name="income_soft">#FF0F3126</color>
+    <color name="expense">#FFFF6B7D</color>
+    <color name="expense_soft">#FF351620</color>
+    <color name="debt">#FFFFA765</color>
+    <color name="debt_soft">#FF33210F</color>
+    <color name="info">#FF63B3F0</color>
+    <color name="info_soft">#FF122739</color>
+    <color name="warn">#FFEFC45F</color>
+    <color name="warn_soft">#FF2E2411</color>
+</resources>
