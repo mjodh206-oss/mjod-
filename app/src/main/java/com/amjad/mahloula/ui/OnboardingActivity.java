@@ -143,7 +143,7 @@ public class OnboardingActivity extends BaseActivity {
         moneyCard.addView(Ui.txt(this, ar ? "💰 إعدادات سريعة (اختيارية)" : "💰 Quick settings (optional)", 16, R.color.text_primary, Typeface.BOLD));
 
         moneyCard.addView(UiKit.label(this, ar ? "العملة" : "Currency"));
-        String[] curLabels = {"$", "ر.س", "د.إ", "ج.م", "د.أ", "€", "د.م", "د.ج", "د.ك", "ر.ق"};
+        String[] curLabels = {"ل.س", "$", "ر.س", "د.إ", "ج.م", "د.أ", "€", "د.م", "د.ج", "د.ك", "ر.ق"};
         UiKit.HorizontalScroll curRow = UiKit.chipRow(this, curLabels, 0, i -> currencyIdx = i);
         moneyCard.addView(curRow);
 
@@ -249,7 +249,7 @@ public class OnboardingActivity extends BaseActivity {
         if (bioOn && bioOnlySwitch.isChecked() && !p.hasPin()) {
             // بصمة فقط: لا رمز
         }
-        String[] curValues = {"$", "ر.س", "د.إ", "ج.م", "د.أ", "€", "د.م", "د.ج", "د.ك", "ر.ق"};
+        String[] curValues = {"ل.س", "$", "ر.س", "د.إ", "ج.م", "د.أ", "€", "د.م", "د.ج", "د.ك", "ر.ق"};
         p.currency(curValues[currencyIdx]);
         try {
             double budget = Double.parseDouble(budgetField.getText().toString().trim());

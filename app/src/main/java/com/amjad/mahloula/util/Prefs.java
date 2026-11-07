@@ -91,6 +91,7 @@ public final class Prefs {
             country = "";
         }
         switch (country) {
+            case "SY": return "ل.س";
             case "SA": return "ر.س";
             case "AE": return "د.إ";
             case "KW": return "د.ك";
@@ -111,7 +112,7 @@ public final class Prefs {
             case "IN": return "₹";
             case "GB": return "£";
             case "EU": case "DE": case "FR": case "ES": case "IT": return "€";
-            default: return "$";
+            default: return "ل.س"; // عملة المستخدم الافتراضية: الليرة السورية
         }
     }
 }
