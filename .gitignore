@@ -2,6 +2,7 @@
 build/
 keys/
 dist/
+!release/
 *.apk
 *.jks
 

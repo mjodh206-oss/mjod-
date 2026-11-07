@@ -1,0 +1,2 @@
+# ignore everything except the shipped apk
+!*\.apk
