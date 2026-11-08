@@ -78,7 +78,7 @@ public class MainActivity extends BaseActivity implements Repo.OnChange {
         Panel p = panelAt(i);
         android.view.View v = p.build();
         container.addView(v, new FrameLayout.LayoutParams(-1, -1));
-        p.refresh();
+        safeRefresh(p);
         p.onShow();
         Ui.fadeSlideIn(v, 0);
     }
@@ -98,8 +98,30 @@ public class MainActivity extends BaseActivity implements Repo.OnChange {
             return;
         }
         backgrounded = false;
-        watchAlerts();
-        if (panels[current] != null) panels[current].refresh();
+        try { watchAlerts(); } catch (Throwable ignored) {}
+        try { dailyFallback(); } catch (Throwable ignored) {}
+        if (panels[current] != null) safeRefresh(panels[current]);
+    }
+
+    /** تحديث محمي: أي خطأ في لوحة لا يُسقط التطبيق أبدًا. */
+    private void safeRefresh(Panel p) {
+        try { p.refresh(); } catch (Throwable t) { com.amjad.mahloula.util.CrashGuard.install(this); throwIfFatal(t); }
+    }
+
+    private void throwIfFatal(Throwable t) {
+        if (t instanceof VirtualMachineError || t instanceof ThreadDeath) throw (Error) t;
+    }
+
+    /** إن لم يصل تذكير اليوم بعد (قيود خلفية من النظام) نُظهره عند الفتح. */
+    private void dailyFallback() {
+        com.amjad.mahloula.util.Prefs p = com.amjad.mahloula.util.Prefs.get(this);
+        if (!p.remindersOn()) return;
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        if (now.get(java.util.Calendar.HOUR_OF_DAY) < p.reminderHour()) return;
+        long today = com.amjad.mahloula.util.Fmt.dayKey(System.currentTimeMillis());
+        if (p.lastDailyDay() == today) return;
+        p.lastDailyDay(today);
+        Notifier.postDaily(this);
     }
 
     /** إذا ظهر تنبيه حرج جديد منذ آخر زيارة → إشعار بصوت فورًا. */

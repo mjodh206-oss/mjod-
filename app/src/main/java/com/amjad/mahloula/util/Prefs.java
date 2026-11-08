@@ -73,6 +73,9 @@ public final class Prefs {
     public boolean soundOn() { return sp.getBoolean("sound_on", true); }
     public void soundOn(boolean v) { sp.edit().putBoolean("sound_on", v).apply(); }
 
+    public long lastDailyDay() { return sp.getLong("last_daily_day", 0L); }
+    public void lastDailyDay(long v) { sp.edit().putLong("last_daily_day", v).apply(); }
+
     public String lastAlertSig() { return sp.getString("alert_sig", ""); }
     public void lastAlertSig(String v) { sp.edit().putString("alert_sig", v).apply(); }
 

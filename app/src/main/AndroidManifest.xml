@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.amjad.mahloula"
     android:versionCode="1"
-    android:versionName="1.0.0">
+    android:versionName="1.2.0">
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -54,6 +54,12 @@
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.CrashActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
             android:screenOrientation="portrait" />
 
         <activity

@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -202,35 +203,61 @@ public class GuidePanel implements Panel {
         head.addView(t);
         card.addView(head);
         for (Advisor.Insight in : ins) {
-            int iconRes;
-            switch (in.icon) {
-                case "alert": iconRes = R.drawable.ic_alert; break;
-                case "trend_down": iconRes = R.drawable.ic_trend_down; break;
-                case "bell": iconRes = R.drawable.ic_bell; break;
-                case "target": iconRes = R.drawable.ic_target; break;
-                case "piggy": iconRes = R.drawable.ic_piggy; break;
-                case "pie": iconRes = R.drawable.ic_pie; break;
-                case "refresh": iconRes = R.drawable.ic_refresh; break;
-                case "handshake": iconRes = R.drawable.ic_handshake; break;
-                case "clock": iconRes = R.drawable.ic_clock; break;
-                case "swap": iconRes = R.drawable.ic_swap; break;
-                case "edit": iconRes = R.drawable.ic_edit; break;
-                case "shield": iconRes = R.drawable.ic_shield; break;
-                default: iconRes = R.drawable.ic_check_circle; break;
-            }
-            int tint = in.level == 2 ? R.color.expense : in.level == 1 ? R.color.warn : R.color.brand_600;
-            int bgc = in.level == 2 ? R.color.expense_soft : in.level == 1 ? R.color.warn_soft : R.color.brand_50;
-            LinearLayout row = UiKit.row(a, iconRes, tint, bgc, in.title, in.body, null, 0);
-            ((TextView) ((LinearLayout) row.getChildAt(1)).getChildAt(1)).setMaxLines(4);
-            if (in.action != null && in.actionTab >= 0) {
-                row.setOnClickListener(v -> ((MainActivity) a).jump(in.actionTab));
-            }
-            LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
-            rlp.topMargin = Ui.dp(a, 9);
-            row.setLayoutParams(rlp);
-            card.addView(row);
+            card.addView(safeAlertRow(in));
         }
         return card;
+    }
+
+    private LinearLayout safeAlertRow(final Advisor.Insight in) {
+        int iconRes;
+        switch (in.icon) {
+            case "alert": iconRes = R.drawable.ic_alert; break;
+            case "trend_down": iconRes = R.drawable.ic_trend_down; break;
+            case "bell": iconRes = R.drawable.ic_bell; break;
+            case "target": iconRes = R.drawable.ic_target; break;
+            case "piggy": iconRes = R.drawable.ic_piggy; break;
+            case "pie": iconRes = R.drawable.ic_pie; break;
+            case "refresh": iconRes = R.drawable.ic_refresh; break;
+            case "handshake": iconRes = R.drawable.ic_handshake; break;
+            case "clock": iconRes = R.drawable.ic_clock; break;
+            case "swap": iconRes = R.drawable.ic_swap; break;
+            case "edit": iconRes = R.drawable.ic_edit; break;
+            case "shield": iconRes = R.drawable.ic_shield; break;
+            default: iconRes = R.drawable.ic_check_circle; break;
+        }
+        int tint = in.level == 2 ? R.color.expense : in.level == 1 ? R.color.warn : R.color.brand_600;
+        int bgc = in.level == 2 ? R.color.expense_soft : in.level == 1 ? R.color.warn_soft : R.color.brand_50;
+        LinearLayout row = Ui.h(a);
+        row.setBackground(Ui.round(Ui.color(a, bgc), 15, a));
+        row.setPadding(Ui.dp(a, 12), Ui.dp(a, 11), Ui.dp(a, 12), Ui.dp(a, 11));
+        android.widget.FrameLayout badge = new android.widget.FrameLayout(a);
+        badge.setBackground(Ui.round(Ui.color(a, tint), 12, a));
+        badge.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 38), Ui.dp(a, 38)));
+        ImageView iv = Ui.iconSized(a, iconRes, Color.WHITE, 20);
+        android.widget.FrameLayout.LayoutParams ilp = new android.widget.FrameLayout.LayoutParams(Ui.dp(a, 20), Ui.dp(a, 20));
+        ilp.gravity = Gravity.CENTER;
+        iv.setLayoutParams(ilp);
+        badge.addView(iv);
+        row.addView(badge);
+        LinearLayout mid = Ui.v(a);
+        LinearLayout.LayoutParams mlp = new LinearLayout.LayoutParams(0, -2, 1f);
+        mlp.setMarginStart(Ui.dp(a, 11));
+        mid.setLayoutParams(mlp);
+        mid.addView(Ui.txt(a, in.title, 14.5f, R.color.text_primary, Typeface.BOLD));
+        TextView body = Ui.txt(a, in.body, 12.5f, R.color.text_secondary);
+        body.setMaxLines(4);
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-2, -2);
+        blp.topMargin = Ui.dp(a, 3);
+        body.setLayoutParams(blp);
+        mid.addView(body);
+        row.addView(mid);
+        if (in.action != null && in.actionTab >= 0) {
+            row.setOnClickListener(v -> ((MainActivity) a).jump(in.actionTab));
+        }
+        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
+        rlp.topMargin = Ui.dp(a, 9);
+        row.setLayoutParams(rlp);
+        return row;
     }
 
     // ---------- الدروس المرقّمة ----------

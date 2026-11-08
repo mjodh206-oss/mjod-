@@ -16,5 +16,6 @@ public class ReminderReceiver extends BroadcastReceiver {
             return;
         }
         Notifier.postDaily(c);
+        if (com.amjad.mahloula.util.Prefs.get(c).remindersOn()) Notifier.scheduleDaily(c);
     }
 }

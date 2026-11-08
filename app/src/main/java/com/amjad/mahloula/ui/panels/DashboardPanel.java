@@ -79,8 +79,8 @@ public class DashboardPanel implements Panel {
         LinearLayout top = Ui.h(a);
         LinearLayout greet = Ui.v(a);
         greet.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
-        greet.addView(Ui.txt(a, ar() ? "أهلًا بك 👋" : "Hello 👋", 15, R.color.brand_100, Typeface.BOLD));
-        greet.addView(Ui.txt(a, Fmt.dayMonth(a, System.currentTimeMillis()), 12.5f, R.color.brand_200));
+        greet.addView(Ui.txt(a, a.getString(R.string.app_name), 24, R.color.on_brand, Typeface.BOLD));
+        greet.addView(Ui.txt(a, (ar() ? "أهلًا بك • " : "Welcome • ") + Fmt.dayMonth(a, System.currentTimeMillis()), 12.5f, R.color.brand_100));
         top.addView(greet);
 
         ImageView eye = Ui.iconSized(a, p.hideBalance() ? R.drawable.ic_eye_off : R.drawable.ic_eye,
@@ -305,17 +305,45 @@ public class DashboardPanel implements Panel {
     }
 
     private View insightRow(final Advisor.Insight in) {
-        int iconRes = iconByName(in.icon);
-        int tint = in.level == 2 ? R.color.expense : in.level == 1 ? R.color.warn : R.color.brand_600;
-        int bgc = in.level == 2 ? R.color.expense_soft : in.level == 1 ? R.color.warn_soft : R.color.brand_50;
-        LinearLayout row = UiKit.row(a, iconRes, tint, bgc, in.title, in.body, null, 0);
-        ((TextView) ((LinearLayout) row.getChildAt(1)).getChildAt(1)).setMaxLines(3);
-        if (in.action != null && in.actionTab >= 0) {
-            row.setOnClickListener(v -> ((MainActivity) a).jump(in.actionTab));
-        }
+        LinearLayout row = safeAlertRow(in);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
         lp.topMargin = Ui.dp(a, 10);
         row.setLayoutParams(lp);
+        return row;
+    }
+
+    /** صف تنبيه مبني يدويًا — بدون أي افتراضات عن بنية جاهزة. */
+    private LinearLayout safeAlertRow(final Advisor.Insight in) {
+        int iconRes = iconByName(in.icon);
+        int tint = in.level == 2 ? R.color.expense : in.level == 1 ? R.color.warn : R.color.brand_600;
+        int bgc = in.level == 2 ? R.color.expense_soft : in.level == 1 ? R.color.warn_soft : R.color.brand_50;
+        LinearLayout row = Ui.h(a);
+        row.setBackground(Ui.round(Ui.color(a, bgc), 15, a));
+        row.setPadding(Ui.dp(a, 12), Ui.dp(a, 11), Ui.dp(a, 12), Ui.dp(a, 11));
+        android.widget.FrameLayout badge = new android.widget.FrameLayout(a);
+        badge.setBackground(Ui.round(Ui.color(a, tint), 12, a));
+        badge.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 38), Ui.dp(a, 38)));
+        ImageView iv = Ui.iconSized(a, iconRes, Color.WHITE, 20);
+        android.widget.FrameLayout.LayoutParams ilp = new android.widget.FrameLayout.LayoutParams(Ui.dp(a, 20), Ui.dp(a, 20));
+        ilp.gravity = Gravity.CENTER;
+        iv.setLayoutParams(ilp);
+        badge.addView(iv);
+        row.addView(badge);
+        LinearLayout mid = Ui.v(a);
+        LinearLayout.LayoutParams mlp = new LinearLayout.LayoutParams(0, -2, 1f);
+        mlp.setMarginStart(Ui.dp(a, 11));
+        mid.setLayoutParams(mlp);
+        mid.addView(Ui.txt(a, in.title, 14.5f, R.color.text_primary, Typeface.BOLD));
+        TextView body = Ui.txt(a, in.body, 12.5f, R.color.text_secondary);
+        body.setMaxLines(3);
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-2, -2);
+        blp.topMargin = Ui.dp(a, 3);
+        body.setLayoutParams(blp);
+        mid.addView(body);
+        row.addView(mid);
+        if (in.action != null && in.actionTab >= 0) {
+            row.setOnClickListener(v -> ((MainActivity) a).jump(in.actionTab));
+        }
         return row;
     }
 

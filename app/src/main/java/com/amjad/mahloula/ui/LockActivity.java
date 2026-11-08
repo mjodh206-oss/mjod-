@@ -47,7 +47,7 @@ public class LockActivity extends BaseActivity {
         logo.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(this, 84), Ui.dp(this, 84)));
         root.addView(logo);
 
-        TextView title = Ui.txt(this, getString(R.string.app_name), 26, R.color.on_brand, Typeface.BOLD);
+        TextView title = Ui.txt(this, getString(R.string.app_name), 31, R.color.on_brand, Typeface.BOLD);
         LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(-2, -2);
         tlp.topMargin = Ui.dp(this, 10);
         title.setLayoutParams(tlp);

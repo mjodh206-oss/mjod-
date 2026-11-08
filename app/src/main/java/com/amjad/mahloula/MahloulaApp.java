@@ -14,6 +14,7 @@ public class MahloulaApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        com.amjad.mahloula.util.CrashGuard.install(this);
         Notifier.ensureChannel(this);
         if (Prefs.get(this).remindersOn()) Notifier.scheduleDaily(this);
     }

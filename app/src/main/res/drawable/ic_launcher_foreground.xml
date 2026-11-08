@@ -8,10 +8,10 @@
     <!-- العملة الذهبية -->
     <path
         android:pathData="M54,20 A34,34 0 1,1 53.9,20 Z"
-        android:fillColor="#E8B84B" />
+        android:fillColor="#FFFFFF" />
     <path
         android:pathData="M54,25 A29,29 0 1,1 53.9,25 Z"
-        android:fillColor="#D4A017" />
+        android:fillColor="#FFFFFF" />
 
     <!-- حرف الميم -->
     <path

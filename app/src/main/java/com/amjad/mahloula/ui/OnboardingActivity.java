@@ -70,14 +70,14 @@ public class OnboardingActivity extends BaseActivity {
                 {"خانّة المسحوبات", "سجّل كل مصروف بتصنيف وطريقة دفع، وراقب الفئات برسوم حيّة.", "ic_receipt"},
                 {"خانّة تسديد الديون", "ديونك عليك ولك، بتتبّع التسديدات والمواعيد وتنبيهات التأخر.", "ic_handshake"},
                 {"خانّة الملاحظات", "أفكارك وقوائمك المالية المثبّتة، بألوان وبحث فوري.", "ic_note"},
-                {"خانّة تعليمي", "12 درسًا و18 قاعدة عالمية: من 50/30/20 إلى كرة الثلج وقاعدة 72.", "ic_cap"},
+                {"خانّة تعليمي", "16 درسًا و24 قاعدة عالمية و10 أخطاء شائعة: من 50/30/20 إلى كرة الثلج وقاعدة 72.", "ic_cap"},
                 {"مستشار ينبهك", "يفحص صرفك الحقيقي: تجاوز ميزانية، مصروف شاذ، تسريبات متكررة — وينبهك فورًا.", "ic_bulb"},
                 {"بصمة وأمان", "التطبيق لا يفتح إلا ببصمتك، وبدون أي اتصال بالإنترنت.", "ic_fingerprint"},
         } : new String[][]{
                 {"Spending tab", "Log every expense with category & method; live category charts.", "ic_receipt"},
                 {"Debts tab", "Track what you owe and what's owed to you, with payments & due alerts.", "ic_handshake"},
                 {"Notes tab", "Pinned money notes & lists with colors and instant search.", "ic_note"},
-                {"Academy tab", "12 lessons & 18 global rules: 50/30/20, snowball, rule of 72…", "ic_cap"},
+                {"Academy tab", "16 lessons, 24 global rules & 10 common mistakes: 50/30/20, snowball, rule of 72…", "ic_cap"},
                 {"Advisor alerts", "Scans your real spending: budget breach, anomalies, recurring leaks.", "ic_bulb"},
                 {"Fingerprint security", "The app opens only with your fingerprint; fully offline.", "ic_fingerprint"},
         };

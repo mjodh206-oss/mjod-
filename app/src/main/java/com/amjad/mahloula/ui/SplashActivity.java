@@ -30,7 +30,7 @@ public class SplashActivity extends BaseActivity {
         logo.setLayoutParams(llp);
         root.addView(logo);
 
-        android.widget.TextView name = Ui.txt(this, getString(R.string.app_name), 34, R.color.on_brand, Typeface.BOLD);
+        android.widget.TextView name = Ui.txt(this, getString(R.string.app_name), 44, R.color.on_brand, Typeface.BOLD);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(this, 18);
         name.setLayoutParams(nlp);
@@ -47,7 +47,7 @@ public class SplashActivity extends BaseActivity {
         android.widget.TextView credit = Ui.txt(this, "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب", 12.5f, R.color.brand_200);
         credit.setGravity(Gravity.CENTER);
         root.addView(credit);
-        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.1.0", 11, R.color.brand_300);
+        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.2.0", 11, R.color.brand_300);
         ver.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams vlp = new LinearLayout.LayoutParams(-2, -2);
         vlp.topMargin = Ui.dp(this, 4);

@@ -25,7 +25,7 @@ public final class Notifier {
 
     private Notifier() {}
 
-    public static final String CHANNEL = "mahloula_daily";
+    public static final String CHANNEL = "mahloula_daily_v2";
 
     public static void ensureChannel(Context c) {
         if (Build.VERSION.SDK_INT < 26) return;
@@ -43,8 +43,8 @@ public final class Notifier {
                     .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
                     .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build();
-            ch.setSound(android.media.RingtoneManager.getDefaultUri(
-                    android.media.RingtoneManager.TYPE_NOTIFICATION), aa);
+            ch.setSound(android.net.Uri.parse(android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://" + c.getPackageName() + "/" + R.raw.chime), aa);
         }
         nm.createNotificationChannel(ch);
     }
@@ -75,7 +75,7 @@ public final class Notifier {
     }
 
     /** يبني نص التذكير اليومي الذكي من بياناتك الحقيقية. */
-    static void postDaily(Context c) {
+    public static void postDaily(Context c) {
         if (!Prefs.get(c).remindersOn()) return;
         boolean ar = !Prefs.get(c).language().equals("en");
         Repo r = Repo.get(c);
@@ -133,8 +133,8 @@ public final class Notifier {
                 .setAutoCancel(true);
         if (Prefs.get(c).soundOn()) {
             if (Build.VERSION.SDK_INT < 26) {
-                b.setSound(android.media.RingtoneManager.getDefaultUri(
-                        android.media.RingtoneManager.TYPE_NOTIFICATION));
+                b.setSound(android.net.Uri.parse(android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
+                        + "://" + c.getPackageName() + "/" + R.raw.chime));
             }
             b.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
         }
