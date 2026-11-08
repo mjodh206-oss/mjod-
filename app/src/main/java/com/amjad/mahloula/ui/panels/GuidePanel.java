@@ -1,8 +1,11 @@
 package com.amjad.mahloula.ui.panels;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -24,7 +27,11 @@ import com.amjad.mahloula.util.Ui;
 import java.util.Calendar;
 import java.util.List;
 
-/** الخانة التعليمية: دروس، قواعد عالمية، خطتك الشخصية، وتنبيهات المستشار. */
+/**
+ * الأكاديمية المالية — نسخة احترافية:
+ * تقدّمك، أرقامك، خطتك الشخصية، تنبيهات المستشار، 16 درسًا مرقّمًا،
+ * 10 أخطاء شائعة، و24 قاعدة عالمية.
+ */
 public class GuidePanel implements Panel {
 
     private final Activity a;
@@ -39,7 +46,7 @@ public class GuidePanel implements Panel {
         ScrollView sv = new ScrollView(a);
         sv.setVerticalScrollBarEnabled(false);
         col = Ui.v(a);
-        col.setPadding(Ui.dp(a, 16), Ui.dp(a, 12), Ui.dp(a, 16), Ui.dp(a, 28));
+        col.setPadding(Ui.dp(a, 16), Ui.dp(a, 14), Ui.dp(a, 16), Ui.dp(a, 28));
         sv.addView(col);
         return sv;
     }
@@ -48,68 +55,72 @@ public class GuidePanel implements Panel {
     public void refresh() {
         if (col == null) return;
         col.removeAllViews();
-        Prefs p = Prefs.get(a);
-
         col.addView(header());
         col.addView(myNumbers());
         col.addView(planCard());
         col.addView(alertsCard());
         col.addView(lessonsCard());
+        col.addView(mistakesCard());
         col.addView(rulesCard());
     }
 
+    // ---------- ترويسة الأكاديمية ----------
     private View header() {
-        LinearLayout card = UiKit.card(a, 16);
-        card.setBackground(Ui.gradient(a, new int[]{Ui.color(a, R.color.brand_800), Ui.color(a, R.color.brand_500)}, 22, 1));
+        long mask = Prefs.get(a).lessonsDoneMask();
+        int done = Long.bitCount(mask);
+        LinearLayout card = Ui.v(a);
+        card.setBackground(Ui.gradient(a, new int[]{Ui.color(a, R.color.brand_900), Ui.color(a, R.color.brand_500)}, 24, 1));
+        card.setPadding(Ui.dp(a, 20), Ui.dp(a, 18), Ui.dp(a, 20), Ui.dp(a, 20));
         LinearLayout head = Ui.h(a);
-        head.addView(Ui.iconSized(a, R.drawable.ic_cap, Ui.color(a, R.color.gold_400), 30));
+        head.addView(Ui.iconSized(a, R.drawable.ic_cap, Ui.color(a, R.color.gold_400), 34));
         LinearLayout tx = Ui.v(a);
         LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(0, -2, 1f);
         tlp.setMarginStart(Ui.dp(a, 12));
         tx.setLayoutParams(tlp);
-        tx.addView(Ui.txt(a, ar() ? "أكاديميتك المالية" : "Your money academy", 18, R.color.on_brand, Typeface.BOLD));
-        long mask = Prefs.get(a).lessonsDoneMask();
-        int done = Long.bitCount(mask);
+        tx.addView(Ui.txt(a, ar() ? "أكاديميتك المالية" : "Your money academy", 19, R.color.on_brand, Typeface.BOLD));
         tx.addView(Ui.txt(a, ar()
-                ? Fmt.digits(a, String.valueOf(done)) + " من " + Fmt.digits(a, String.valueOf(Content.LESSONS.size())) + " درسًا مكتملًا"
-                : done + " of " + Content.LESSONS.size() + " lessons done", 12.5f, R.color.brand_200));
+                ? Fmt.digits(a, String.valueOf(done)) + " من " + Fmt.digits(a, String.valueOf(Content.LESSONS.size())) + " درسًا • "
+                  + Fmt.digits(a, String.valueOf(Content.RULES.size())) + " قاعدة عالمية"
+                : done + "/" + Content.LESSONS.size() + " lessons • " + Content.RULES.size() + " global rules",
+                13, R.color.brand_100));
         head.addView(tx);
         card.addView(head);
         Charts.HBar bar = new Charts.HBar(a);
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-1, -2);
-        blp.topMargin = Ui.dp(a, 12);
+        blp.topMargin = Ui.dp(a, 14);
         bar.setLayoutParams(blp);
         bar.set((float) done / Content.LESSONS.size(), R.color.gold_400);
         card.addView(bar);
         return card;
     }
 
+    // ---------- أرقامك ----------
     private View myNumbers() {
         Repo r = Repo.get(a);
         Prefs p = Prefs.get(a);
         Calendar now = Calendar.getInstance();
         Models.MonthTotals mt = r.monthTotals(now);
         double incomeRef = mt.income > 0 ? mt.income : p.monthlyIncome();
-        LinearLayout card = UiKit.card(a, 16);
+        LinearLayout card = UiKit.card(a, 18);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = Ui.dp(a, 12);
+        lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);
-        card.addView(Ui.txt(a, ar() ? "أرقامك هذا الشهر" : "Your numbers this month", 15, R.color.text_primary, Typeface.BOLD));
+        card.addView(Ui.txt(a, ar() ? "أرقامك هذا الشهر" : "Your numbers", 16, R.color.text_primary, Typeface.BOLD));
         LinearLayout row = Ui.h(a);
         LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
-        rlp.topMargin = Ui.dp(a, 10);
+        rlp.topMargin = Ui.dp(a, 12);
         row.setLayoutParams(rlp);
 
         int score = Advisor.healthScore(a);
         Charts.Ring ring = new Charts.Ring(a);
-        ring.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 96), Ui.dp(a, 96)));
+        ring.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 104), Ui.dp(a, 104)));
         ring.set(score / 100f, score >= 70 ? R.color.income : score >= 45 ? R.color.gold_500 : R.color.expense,
                 Fmt.digits(a, String.valueOf(score)), ar() ? "من 100" : "/100");
         row.addView(ring);
 
         LinearLayout stats = Ui.v(a);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(0, -2, 1f);
-        slp.setMarginStart(Ui.dp(a, 14));
+        slp.setMarginStart(Ui.dp(a, 16));
         stats.setLayoutParams(slp);
         double sr = incomeRef > 0 ? mt.saved / incomeRef * 100 : 0;
         double er = incomeRef > 0 ? mt.expense / incomeRef * 100 : 0;
@@ -119,9 +130,9 @@ public class GuidePanel implements Panel {
         stats.addView(statLine(ar() ? "صافي ثروتك" : "Net worth", Fmt.money(a, netWorth), netWorth >= 0 ? R.color.brand_600 : R.color.expense));
         row.addView(stats);
         card.addView(row);
-        TextView lbl = Ui.txt(a, Advisor.healthLabel(a, score), 12.5f, R.color.text_secondary, Typeface.BOLD);
+        TextView lbl = Ui.txt(a, Advisor.healthLabel(a, score), 13, R.color.text_secondary, Typeface.BOLD);
         LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(-2, -2);
-        llp.topMargin = Ui.dp(a, 8);
+        llp.topMargin = Ui.dp(a, 10);
         lbl.setLayoutParams(llp);
         card.addView(lbl);
         return card;
@@ -129,44 +140,45 @@ public class GuidePanel implements Panel {
 
     private View statLine(String label, String value, int colorRes) {
         LinearLayout row = Ui.h(a);
+        row.setBackground(Ui.round(Ui.color(a, R.color.surface_2), 12, a));
+        row.setPadding(Ui.dp(a, 12), Ui.dp(a, 9), Ui.dp(a, 12), Ui.dp(a, 9));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
         lp.topMargin = Ui.dp(a, 6);
         row.setLayoutParams(lp);
-        row.addView(Ui.txt(a, label, 12.5f, R.color.text_secondary));
+        row.addView(Ui.txt(a, label, 13, R.color.text_secondary, Typeface.BOLD));
         row.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
-        row.addView(Ui.txt(a, value, 13.5f, colorRes, Typeface.BOLD));
+        row.addView(Ui.txt(a, value, 14.5f, colorRes, Typeface.BOLD));
         return row;
     }
 
+    // ---------- الخطة الشخصية ----------
     private View planCard() {
         List<Advisor.PlanStep> plan = Advisor.personalPlan(a);
-        LinearLayout card = UiKit.card(a, 16);
-        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.surface), Ui.color(a, R.color.gold_400), 1.2f, 20));
+        LinearLayout card = UiKit.card(a, 18);
+        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.surface), Ui.color(a, R.color.gold_500), 1.6f, 22));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = Ui.dp(a, 12);
+        lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);
         LinearLayout head = Ui.h(a);
-        head.addView(Ui.iconSized(a, R.drawable.ic_sparkle, Ui.color(a, R.color.gold_600), 22));
-        TextView t = Ui.txt(a, ar() ? "خطتك الشخصية لهذا الشهر" : "Your personal plan this month", 15, R.color.text_primary, Typeface.BOLD);
+        head.addView(Ui.iconSized(a, R.drawable.ic_sparkle, Ui.color(a, R.color.gold_600), 24));
+        TextView t = Ui.txt(a, ar() ? "خطتك الشخصية لهذا الشهر" : "Your plan this month", 16, R.color.text_primary, Typeface.BOLD);
         LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(0, -2, 1f);
-        tlp.setMarginStart(Ui.dp(a, 8));
+        tlp.setMarginStart(Ui.dp(a, 10));
         t.setLayoutParams(tlp);
         head.addView(t);
         card.addView(head);
-        TextView sub = Ui.txt(a, ar()
-                ? "مبنية على بياناتك الحقيقية + أفضل الممارسات العالمية"
-                : "Built from your real data + global best practices", 12, R.color.text_tertiary);
-        card.addView(sub);
         for (Advisor.PlanStep s : plan) {
             LinearLayout item = Ui.v(a);
+            item.setBackground(Ui.round(Ui.color(a, R.color.surface_2), 14, a));
+            item.setPadding(Ui.dp(a, 14), Ui.dp(a, 12), Ui.dp(a, 14), Ui.dp(a, 12));
             LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(-1, -2);
-            ilp.topMargin = Ui.dp(a, 10);
+            ilp.topMargin = Ui.dp(a, 9);
             item.setLayoutParams(ilp);
-            item.addView(Ui.txt(a, s.title, 14, R.color.text_primary, Typeface.BOLD));
-            TextView b = Ui.txt(a, s.body, 12.5f, R.color.text_secondary);
+            item.addView(Ui.txt(a, s.title, 14.5f, R.color.text_primary, Typeface.BOLD));
+            TextView b = Ui.txt(a, s.body, 13, R.color.text_secondary);
             b.setLineSpacing(0, 1.3f);
             LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-2, -2);
-            blp.topMargin = Ui.dp(a, 3);
+            blp.topMargin = Ui.dp(a, 4);
             b.setLayoutParams(blp);
             item.addView(b);
             card.addView(item);
@@ -174,17 +186,18 @@ public class GuidePanel implements Panel {
         return card;
     }
 
+    // ---------- تنبيهات المستشار ----------
     private View alertsCard() {
         List<Advisor.Insight> ins = Advisor.scan(a);
-        LinearLayout card = UiKit.card(a, 16);
+        LinearLayout card = UiKit.card(a, 18);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = Ui.dp(a, 12);
+        lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);
         LinearLayout head = Ui.h(a);
-        head.addView(Ui.iconSized(a, R.drawable.ic_bell, Ui.color(a, R.color.warn), 22));
-        TextView t = Ui.txt(a, ar() ? "تنبيهات المستشار المالي" : "Advisor alerts", 15, R.color.text_primary, Typeface.BOLD);
+        head.addView(Ui.iconSized(a, R.drawable.ic_bell, Ui.color(a, R.color.warn), 24));
+        TextView t = Ui.txt(a, ar() ? "تنبيهات المستشار المالي" : "Advisor alerts", 16, R.color.text_primary, Typeface.BOLD);
         LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(0, -2, 1f);
-        tlp.setMarginStart(Ui.dp(a, 8));
+        tlp.setMarginStart(Ui.dp(a, 10));
         t.setLayoutParams(tlp);
         head.addView(t);
         card.addView(head);
@@ -213,97 +226,126 @@ public class GuidePanel implements Panel {
                 row.setOnClickListener(v -> ((MainActivity) a).jump(in.actionTab));
             }
             LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
-            rlp.topMargin = Ui.dp(a, 8);
+            rlp.topMargin = Ui.dp(a, 9);
             row.setLayoutParams(rlp);
             card.addView(row);
         }
         return card;
     }
 
+    // ---------- الدروس المرقّمة ----------
     private View lessonsCard() {
         long mask = Prefs.get(a).lessonsDoneMask();
-        LinearLayout card = UiKit.card(a, 16);
+        LinearLayout card = UiKit.card(a, 18);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = Ui.dp(a, 12);
+        lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);
-        card.addView(Ui.txt(a, ar() ? "الدروس — كيف تدير مصاريفك كالمحترفين" : "Lessons — manage money like the pros",
-                15, R.color.text_primary, Typeface.BOLD));
+        card.addView(Ui.txt(a, ar() ? "الدروس — من الصفر إلى الاحتراف" : "Lessons — zero to pro",
+                16, R.color.text_primary, Typeface.BOLD));
+        card.addView(Ui.txt(a, ar() ? "اضغط أي درس لقراءته وخطوته العملية" : "Tap any lesson to read it",
+                12.5f, R.color.text_tertiary));
         for (int i = 0; i < Content.LESSONS.size(); i++) {
             final int idx = i;
             Content.Lesson l = Content.LESSONS.get(i);
             boolean done = (mask & (1L << i)) != 0;
-            int iconRes;
-            switch (l.icon) {
-                case "search": iconRes = R.drawable.ic_search; break;
-                case "pie": iconRes = R.drawable.ic_pie; break;
-                case "piggy": iconRes = R.drawable.ic_piggy; break;
-                case "shield": iconRes = R.drawable.ic_shield; break;
-                case "handshake": iconRes = R.drawable.ic_handshake; break;
-                case "clock": iconRes = R.drawable.ic_clock; break;
-                case "trend_up": iconRes = R.drawable.ic_trend_up; break;
-                case "coins": iconRes = R.drawable.ic_coins; break;
-                case "wallet": iconRes = R.drawable.ic_wallet; break;
-                case "chart_line": iconRes = R.drawable.ic_chart_line; break;
-                case "bulb": iconRes = R.drawable.ic_bulb; break;
-                default: iconRes = R.drawable.ic_calendar; break;
-            }
-            LinearLayout row = UiKit.row(a, iconRes, R.color.brand_600, R.color.brand_50,
-                    ar() ? l.titleAr : l.titleEn,
-                    (done ? (ar() ? "✔ مكتمل • " : "✔ done • ") : "") + (ar() ? l.sourceAr : l.sourceEn),
-                    null, 0);
-            TextView sub = (TextView) ((LinearLayout) row.getChildAt(1)).getChildAt(1);
-            sub.setMaxLines(2);
-            if (done) {
-                TextView title = (TextView) ((LinearLayout) row.getChildAt(1)).getChildAt(0);
-                title.setTextColor(Ui.color(a, R.color.text_tertiary));
-            }
-            row.setOnClickListener(v -> InfoSheets.lesson(a, idx));
+            LinearLayout row = Ui.h(a);
+            row.setBackground(Ui.ripple(a, Ui.round(Ui.color(a, R.color.surface_2), 14, a), Ui.color(a, R.color.surface_3)));
+            row.setPadding(Ui.dp(a, 12), Ui.dp(a, 11), Ui.dp(a, 12), Ui.dp(a, 11));
             LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
             rlp.topMargin = Ui.dp(a, 8);
             row.setLayoutParams(rlp);
+
+            FrameLayout num = new FrameLayout(a);
+            num.setBackground(Ui.round(Ui.color(a, done ? R.color.income : R.color.brand_600), 11, a));
+            num.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 34), Ui.dp(a, 34)));
+            TextView n = Ui.txt(a, Fmt.digits(a, String.valueOf(i + 1)), 14, R.color.on_brand, Typeface.BOLD);
+            n.setGravity(Gravity.CENTER);
+            FrameLayout.LayoutParams nlp = new FrameLayout.LayoutParams(-1, -1);
+            n.setLayoutParams(nlp);
+            num.addView(n);
+            row.addView(num);
+
+            LinearLayout mid = Ui.v(a);
+            LinearLayout.LayoutParams mlp = new LinearLayout.LayoutParams(0, -2, 1f);
+            mlp.setMarginStart(Ui.dp(a, 12));
+            mid.setLayoutParams(mlp);
+            TextView title = Ui.txt(a, ar() ? l.titleAr : l.titleEn, 14.5f,
+                    done ? R.color.text_tertiary : R.color.text_primary, Typeface.BOLD);
+            mid.addView(title);
+            TextView src = Ui.txt(a, (done ? (ar() ? "✔ مكتمل • " : "✔ done • ") : "") + (ar() ? l.sourceAr : l.sourceEn),
+                    12, R.color.text_secondary);
+            src.setMaxLines(1);
+            mid.addView(src);
+            row.addView(mid);
+
+            row.addView(Ui.iconSized(a, done ? R.drawable.ic_check_circle : R.drawable.ic_book,
+                    Ui.color(a, done ? R.color.income : R.color.text_tertiary), 20));
+            row.setOnClickListener(v -> InfoSheets.lesson(a, idx));
             card.addView(row);
         }
         return card;
     }
 
-    private View rulesCard() {
-        LinearLayout card = UiKit.card(a, 16);
+    // ---------- الأخطاء الشائعة ----------
+    private View mistakesCard() {
+        LinearLayout card = UiKit.card(a, 18);
+        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.surface), Ui.color(a, R.color.expense), 1.4f, 22));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = Ui.dp(a, 12);
+        lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);
-        card.addView(Ui.txt(a, ar() ? "القواعد العالمية الذهبية" : "Golden global rules", 15, R.color.text_primary, Typeface.BOLD));
-        card.addView(Ui.txt(a, ar()
-                ? "خلاصة أشهر منهجيات إدارة المال في العالم — اضغط أي قاعدة للتفاصيل"
-                : "The world's most famous money frameworks — tap any rule", 12, R.color.text_tertiary));
-        UiKit.HorizontalScroll hs = new UiKit.HorizontalScroll(a);
-        LinearLayout row = Ui.h(a);
-        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(-1, -2);
-        hlp.topMargin = Ui.dp(a, 10);
-        hs.setLayoutParams(hlp);
+        LinearLayout head = Ui.h(a);
+        head.addView(Ui.iconSized(a, R.drawable.ic_alert, Ui.color(a, R.color.expense), 24));
+        TextView t = Ui.txt(a, ar() ? "10 أخطاء مالية شائعة — وهل تقع فيها؟" : "10 common money mistakes", 16, R.color.text_primary, Typeface.BOLD);
+        LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(0, -2, 1f);
+        tlp.setMarginStart(Ui.dp(a, 10));
+        t.setLayoutParams(tlp);
+        head.addView(t);
+        card.addView(head);
+        for (Content.Mistake m : Content.MISTAKES) {
+            LinearLayout item = Ui.v(a);
+            item.setBackground(Ui.round(Ui.color(a, R.color.expense_soft), 13, a));
+            item.setPadding(Ui.dp(a, 13), Ui.dp(a, 11), Ui.dp(a, 13), Ui.dp(a, 11));
+            LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(-1, -2);
+            ilp.topMargin = Ui.dp(a, 8);
+            item.setLayoutParams(ilp);
+            item.addView(Ui.txt(a, ar() ? "✘ " + m.ar : "✘ " + m.en, 13.5f, R.color.text_primary, Typeface.BOLD));
+            TextView fix = Ui.txt(a, (ar() ? "الصواب: " + m.fixAr : "Fix: " + m.fixEn), 12.5f, R.color.income, Typeface.BOLD);
+            LinearLayout.LayoutParams flp = new LinearLayout.LayoutParams(-2, -2);
+            flp.topMargin = Ui.dp(a, 4);
+            fix.setLayoutParams(flp);
+            item.addView(fix);
+            card.addView(item);
+        }
+        return card;
+    }
+
+    // ---------- القواعد العالمية (قائمة أنيقة) ----------
+    private View rulesCard() {
+        LinearLayout card = UiKit.card(a, 18);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        card.addView(Ui.txt(a, ar() ? "القواعد العالمية الذهبية" : "Golden global rules", 16, R.color.text_primary, Typeface.BOLD));
+        card.addView(Ui.txt(a, ar() ? "اضغط أي قاعدة لشرحها" : "Tap any rule for details", 12.5f, R.color.text_tertiary));
         for (int i = 0; i < Content.RULES.size(); i++) {
             final int idx = i;
             Content.Rule r = Content.RULES.get(idx);
-            LinearLayout c = UiKit.cardStroke(a, 13);
-            c.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 190), -2));
-            LinearLayout.LayoutParams clp = (LinearLayout.LayoutParams) c.getLayoutParams();
-            clp.setMarginEnd(Ui.dp(a, 8));
-            c.addView(Ui.txt(a, ar() ? r.nameAr : r.nameEn, 14, R.color.brand_600, Typeface.BOLD));
-            TextView b = Ui.txt(a, ar() ? r.bodyAr : r.bodyEn, 12.5f, R.color.text_secondary);
-            b.setLineSpacing(0, 1.3f);
-            LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-2, -2);
-            blp.topMargin = Ui.dp(a, 5);
-            b.setLayoutParams(blp);
-            c.addView(b);
-            TextView tag = Ui.txt(a, ar() ? r.tagAr : "", 11, R.color.text_tertiary, Typeface.BOLD);
-            LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(-2, -2);
-            tlp.topMargin = Ui.dp(a, 8);
-            tag.setLayoutParams(tlp);
-            c.addView(tag);
-            c.setOnClickListener(v -> InfoSheets.rule(a, idx));
-            row.addView(c);
+            LinearLayout row = Ui.h(a);
+            row.setBackground(Ui.ripple(a, Ui.round(Ui.color(a, R.color.surface_2), 13, a), Ui.color(a, R.color.surface_3)));
+            row.setPadding(Ui.dp(a, 12), Ui.dp(a, 10), Ui.dp(a, 12), Ui.dp(a, 10));
+            LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
+            rlp.topMargin = Ui.dp(a, 7);
+            row.setLayoutParams(rlp);
+            LinearLayout mid = Ui.v(a);
+            mid.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
+            mid.addView(Ui.txt(a, ar() ? r.nameAr : r.nameEn, 14, R.color.text_primary, Typeface.BOLD));
+            TextView tag = Ui.txt(a, ar() ? r.tagAr : "", 11.5f, R.color.brand_600, Typeface.BOLD);
+            mid.addView(tag);
+            row.addView(mid);
+            row.addView(Ui.iconSized(a, R.drawable.ic_bulb, Ui.color(a, R.color.gold_600), 19));
+            row.setOnClickListener(v -> InfoSheets.rule(a, idx));
+            card.addView(row);
         }
-        hs.addView(row);
-        card.addView(hs);
         return card;
     }
 

@@ -45,10 +45,10 @@ public final class BottomNav extends LinearLayout {
             item.setLayoutParams(lp);
             item.setPadding(0, Ui.dp(c, 4), 0, 0);
 
-            ivs[i] = Ui.iconSized(c, icons[i], Ui.color(c, R.color.text_tertiary), 23);
+            ivs[i] = Ui.iconSized(c, icons[i], Ui.color(c, R.color.text_tertiary), 26);
             item.addView(ivs[i]);
 
-            tvs[i] = Ui.txt(c, labels[i], 10.5f, R.color.text_tertiary, Typeface.BOLD);
+            tvs[i] = Ui.txt(c, labels[i], 11.5f, R.color.text_tertiary, Typeface.BOLD);
             LayoutParams tlp = new LayoutParams(-2, -2);
             tlp.topMargin = Ui.dp(c, 3);
             tvs[i].setLayoutParams(tlp);

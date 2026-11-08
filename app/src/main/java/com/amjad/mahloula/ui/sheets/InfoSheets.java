@@ -120,6 +120,15 @@ public final class InfoSheets {
             a.recreate();
         }));
 
+        Switch sound = switchRow(a, ar ? "صوت التنبيهات والإشعارات" : "Alert & notification sounds", p.soundOn());
+        sound.setOnCheckedChangeListener((v, on) -> p.soundOn(on));
+        sh.content.addView(sound);
+
+        sh.content.addView(UiKit.sectionTitleIn(a, ar ? "👛 المحافظ والحسابات" : "👛 Wallets & accounts"));
+        TextView walletsBtn = UiKit.button(a, ar ? "إدارة المحافظ والأرصدة الافتتاحية" : "Manage wallets & opening balances", R.drawable.ic_wallet, false);
+        walletsBtn.setOnClickListener(v -> { sh.dismiss(); wallets(a); });
+        sh.content.addView(walletsBtn);
+
         sh.content.addView(UiKit.sectionTitleIn(a, ar ? "🗄 البيانات" : "🗄 Data"));
         TextView backupBtn = UiKit.button(a, ar ? "نسخ احتياطي واستعادة" : "Backup & restore", R.drawable.ic_save_disk, false);
         backupBtn.setOnClickListener(v -> { sh.dismiss(); backup(a); });
@@ -294,7 +303,7 @@ public final class InfoSheets {
         llp.gravity = Gravity.CENTER_HORIZONTAL;
         logo.setLayoutParams(llp);
         sh.content.addView(logo);
-        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.0.1", 18, R.color.text_primary, Typeface.BOLD);
+        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.1.0", 18, R.color.text_primary, Typeface.BOLD);
         name.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(a, 8);
@@ -316,8 +325,8 @@ public final class InfoSheets {
         dev.setLayoutParams(dlp);
         credit.addView(dev);
         TextView line = Ui.txt(a, ar
-                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.0.1"
-                : "Authored & developed by Amjad Habib — version 1.0.1", 12.5f, R.color.text_tertiary);
+                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.1.0"
+                : "Authored & developed by Amjad Habib — version 1.1.0", 12.5f, R.color.text_tertiary);
         line.setGravity(Gravity.CENTER);
         credit.addView(line);
         sh.content.addView(credit);
@@ -346,6 +355,27 @@ public final class InfoSheets {
             c2.addView(b2);
             sh.content.addView(c2);
         }
+        sh.show();
+    }
+
+    // ---------------- المحافظ ----------------
+    public static void wallets(Activity a) {
+        boolean ar = ar(a);
+        com.amjad.mahloula.data.Repo r = com.amjad.mahloula.data.Repo.get(a);
+        UiKit.Sheet sh = UiKit.sheet(a, ar ? "المحافظ والحسابات" : "Wallets & accounts");
+        for (final com.amjad.mahloula.data.Models.Wallet w : r.wallets()) {
+            LinearLayout row = UiKit.row(a, w.icon(), R.color.brand_600, R.color.brand_100,
+                    w.name + (w.def ? (ar ? "  (الرئيسية)" : "  (main)") : ""),
+                    ar ? "الرصيد الحالي" : "Current balance",
+                    com.amjad.mahloula.util.Fmt.amount(a, r.walletBalance(w.id)), R.color.text_primary);
+            row.setOnClickListener(v -> { sh.dismiss(); Sheets.wallet(a, w); });
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+            lp.topMargin = Ui.dp(a, 8);
+            row.setLayoutParams(lp);
+            sh.content.addView(row);
+        }
+        TextView add = UiKit.sheetButton(sh, ar ? "+ محفظة جديدة" : "+ New wallet", false);
+        add.setOnClickListener(v -> { sh.dismiss(); Sheets.wallet(a, null); });
         sh.show();
     }
 

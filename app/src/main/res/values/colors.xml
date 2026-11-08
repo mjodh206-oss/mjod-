@@ -1,61 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- ===== العلامة اللونية: زمردى عميق + ذهبي ===== -->
-    <color name="brand_900">#FF052E2B</color>
-    <color name="brand_800">#FF073B36</color>
-    <color name="brand_700">#FF0A4F47</color>
-    <color name="brand_600">#FF0E6B5E</color>
-    <color name="brand_500">#FF128577</color>
-    <color name="brand_400">#FF2AA795</color>
-    <color name="brand_300">#FF63C7B7</color>
-    <color name="brand_200">#FFA6E2D8</color>
-    <color name="brand_100">#FFD9F2ED</color>
-    <color name="brand_50">#FFEFFAF7</color>
+    <!-- ===== الهوية: زمردي مشبع + ذهبي واضح (تباين عالٍ) ===== -->
+    <color name="brand_900">#FF022E29</color>
+    <color name="brand_800">#FF05453D</color>
+    <color name="brand_700">#FF085E52</color>
+    <color name="brand_600">#FF0B7A69</color>
+    <color name="brand_500">#FF0FA08C</color>
+    <color name="brand_400">#FF23B7A2</color>
+    <color name="brand_300">#FF5BD0BE</color>
+    <color name="brand_200">#FF9FE6DA</color>
+    <color name="brand_100">#FFD7F5EF</color>
+    <color name="brand_50">#FFECFAF7</color>
 
-    <color name="gold_600">#FFB07D18</color>
-    <color name="gold_500">#FFD4A017</color>
-    <color name="gold_400">#FFE8B84B</color>
-    <color name="gold_100">#FFFDF3D8</color>
+    <color name="gold_600">#FF96660A</color>
+    <color name="gold_500">#FFD99E0B</color>
+    <color name="gold_400">#FFF2C037</color>
+    <color name="gold_100">#FFFFF6DA</color>
 
-    <!-- دلالية -->
-    <color name="income">#FF12855C</color>
-    <color name="income_soft">#FFE3F6EC</color>
-    <color name="expense">#FFC62F45</color>
-    <color name="expense_soft">#FFFDEAEC</color>
-    <color name="debt">#FFB4531A</color>
-    <color name="debt_soft">#FFFDF0E4</color>
-    <color name="info">#FF1667A8</color>
-    <color name="info_soft">#FFE7F1FA</color>
-    <color name="warn">#FFA8720B</color>
-    <color name="warn_soft">#FFFDF4E0</color>
+    <!-- دلالية عالية التباين -->
+    <color name="income">#FF0E9E6E</color>
+    <color name="income_soft">#FFDFF6EA</color>
+    <color name="expense">#FFE11D3C</color>
+    <color name="expense_soft">#FFFFE5E9</color>
+    <color name="debt">#FFC2410C</color>
+    <color name="debt_soft">#FFFFEDD5</color>
+    <color name="info">#FF1559A8</color>
+    <color name="info_soft">#FFE3EEFA</color>
+    <color name="warn">#FFB45309</color>
+    <color name="warn_soft">#FFFEF3C7</color>
 
-    <!-- الوضع الفاتح -->
-    <color name="bg">#FFF4F6F8</color>
+    <!-- الوضع الفاتح: خلفية أغمق قليلًا لتبرز البطاقات البيضاء -->
+    <color name="bg">#FFEBF0F3</color>
     <color name="surface">#FFFFFFFF</color>
-    <color name="surface_2">#FFF7F9FA</color>
-    <color name="surface_3">#FFEDF1F3</color>
-    <color name="text_primary">#FF0D1B1E</color>
-    <color name="text_secondary">#FF55676D</color>
-    <color name="text_tertiary">#FF8B9AA0</color>
-    <color name="outline">#FFE2E8EB</color>
-    <color name="outline_strong">#FFC9D3D8</color>
+    <color name="surface_2">#FFF1F5F7</color>
+    <color name="surface_3">#FFE0E8EC</color>
+    <color name="text_primary">#FF08181C</color>
+    <color name="text_secondary">#FF3E525A</color>
+    <color name="text_tertiary">#FF69808A</color>
+    <color name="outline">#FFD3DDE2</color>
+    <color name="outline_strong">#FFB4C3CA</color>
     <color name="scrim">#66000000</color>
     <color name="on_brand">#FFFFFFFF</color>
     <color name="nav_bar">#FFFFFFFF</color>
-    <color name="status_bar">#FFF4F6F8</color>
-    <color name="status_bar_icons">#FF0D1B1E</color>
+    <color name="status_bar">#FFEBF0F3</color>
+    <color name="status_bar_icons">#FF08181C</color>
 
-    <color name="cat_food">#FFE0653A</color>
-    <color name="cat_transport">#FF2F6FD0</color>
-    <color name="cat_home">#FF7A5CD0</color>
-    <color name="cat_bills">#FF12857A</color>
-    <color name="cat_health">#FFD03F6B</color>
-    <color name="cat_edu">#FF2F8FD0</color>
-    <color name="cat_shop">#FFC0392B</color>
-    <color name="cat_fun">#FFE0A020</color>
-    <color name="cat_family">#FF6FA63C</color>
-    <color name="cat_save">#FF12855C</color>
-    <color name="cat_debt">#FFB4531A</color>
-    <color name="cat_other">#FF6B7A80</color>
+    <!-- تصنيفات مشبعة أوضح -->
+    <color name="cat_food">#FFE4572E</color>
+    <color name="cat_transport">#FF1D6FD6</color>
+    <color name="cat_home">#FF6D4FD0</color>
+    <color name="cat_bills">#FF0E8C7E</color>
+    <color name="cat_health">#FFE0356B</color>
+    <color name="cat_edu">#FF1E8FD6</color>
+    <color name="cat_shop">#FFD32F2F</color>
+    <color name="cat_fun">#FFF2A007</color>
+    <color name="cat_family">#FF5E9E2F</color>
+    <color name="cat_save">#FF0E9E6E</color>
+    <color name="cat_debt">#FFC2410C</color>
+    <color name="cat_other">#FF5B6B72</color>
 </resources>

@@ -1,40 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- الوضع الداكن: نفس الهوية بعمق أكبر -->
-    <color name="bg">#FF08131A</color>
-    <color name="surface">#FF0F1E26</color>
-    <color name="surface_2">#FF15272F</color>
-    <color name="surface_3">#FF1C323B</color>
-    <color name="text_primary">#FFEAF3F5</color>
-    <color name="text_secondary">#FFA8BCC3</color>
-    <color name="text_tertiary">#FF75898F</color>
-    <color name="outline">#FF1E343C</color>
-    <color name="outline_strong">#FF2C4650</color>
+    <!-- الوضع الداكن: تباين مرتفع ونصوص أسطع -->
+    <color name="bg">#FF050D12</color>
+    <color name="surface">#FF0E1C24</color>
+    <color name="surface_2">#FF14262F</color>
+    <color name="surface_3">#FF1D3540</color>
+    <color name="text_primary">#FFF2F7F8</color>
+    <color name="text_secondary">#FFB9CBD2</color>
+    <color name="text_tertiary">#FF8CA2AA</color>
+    <color name="outline">#FF24414C</color>
+    <color name="outline_strong">#FF3A5763</color>
     <color name="scrim">#99000000</color>
-    <color name="nav_bar">#FF0B1920</color>
-    <color name="status_bar">#FF08131A</color>
-    <color name="status_bar_icons">#FFEAF3F5</color>
+    <color name="nav_bar">#FF0A161D</color>
+    <color name="status_bar">#FF050D12</color>
+    <color name="status_bar_icons">#FFF2F7F8</color>
 
-    <color name="brand_50">#FF0C2A2A</color>
-    <color name="brand_100">#FF0F3733</color>
-    <color name="brand_200">#FF14524A</color>
-    <color name="brand_300">#FF2AA795</color>
-    <color name="brand_400">#FF45BFA9</color>
-    <color name="brand_500">#FF4FC6B0</color>
-    <color name="brand_600">#FF6FD6C2</color>
+    <color name="brand_50">#FF0B2A28</color>
+    <color name="brand_100">#FF0E3B36</color>
+    <color name="brand_200">#FF15564C</color>
+    <color name="brand_300">#FF23B7A2</color>
+    <color name="brand_400">#FF3ED2B8</color>
+    <color name="brand_500">#FF52DCC4</color>
+    <color name="brand_600">#FF7FE6D2</color>
 
-    <color name="gold_100">#FF33290E</color>
-    <color name="gold_400">#FFEFC45F</color>
-    <color name="gold_500">#FFE0AE33</color>
+    <color name="gold_100">#FF3A2E0C</color>
+    <color name="gold_400">#FFF5C84C</color>
+    <color name="gold_500">#FFE3AC1E</color>
+    <color name="gold_600">#FFF0C554</color>
 
-    <color name="income">#FF3FCE96</color>
-    <color name="income_soft">#FF0F3126</color>
-    <color name="expense">#FFFF6B7D</color>
-    <color name="expense_soft">#FF351620</color>
-    <color name="debt">#FFFFA765</color>
-    <color name="debt_soft">#FF33210F</color>
-    <color name="info">#FF63B3F0</color>
-    <color name="info_soft">#FF122739</color>
-    <color name="warn">#FFEFC45F</color>
-    <color name="warn_soft">#FF2E2411</color>
+    <color name="income">#FF4ADE9C</color>
+    <color name="income_soft">#FF0E3126</color>
+    <color name="expense">#FFFF7A8A</color>
+    <color name="expense_soft">#FF3A151D</color>
+    <color name="debt">#FFFFA066</color>
+    <color name="debt_soft">#FF38200E</color>
+    <color name="info">#FF7CB8F2</color>
+    <color name="info_soft">#FF10273A</color>
+    <color name="warn">#FFFBBF24</color>
+    <color name="warn_soft">#FF332708</color>
 </resources>

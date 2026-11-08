@@ -11,7 +11,9 @@ import android.widget.LinearLayout;
 
 import com.amjad.mahloula.R;
 import com.amjad.mahloula.data.Repo;
+import com.amjad.mahloula.brain.Advisor;
 import com.amjad.mahloula.lock.Security;
+import com.amjad.mahloula.notify.Notifier;
 import com.amjad.mahloula.ui.kit.BottomNav;
 import com.amjad.mahloula.ui.panels.DashboardPanel;
 import com.amjad.mahloula.ui.panels.DebtsPanel;
@@ -96,7 +98,30 @@ public class MainActivity extends BaseActivity implements Repo.OnChange {
             return;
         }
         backgrounded = false;
+        watchAlerts();
         if (panels[current] != null) panels[current].refresh();
+    }
+
+    /** إذا ظهر تنبيه حرج جديد منذ آخر زيارة → إشعار بصوت فورًا. */
+    private void watchAlerts() {
+        Prefs p = Prefs.get(this);
+        if (!p.alertsOn()) return;
+        StringBuilder sig = new StringBuilder();
+        String firstTitle = null;
+        for (Advisor.Insight in : Advisor.scan(this)) {
+            if (in.level == 2) {
+                sig.append(in.title).append('|');
+                if (firstTitle == null) firstTitle = in.title;
+            }
+        }
+        String now = sig.toString();
+        String last = p.lastAlertSig();
+        p.lastAlertSig(now);
+        if (!last.isEmpty() && !now.equals(last) && firstTitle != null) {
+            Notifier.show(this,
+                    p.language().equals("en") ? "⚠️ Critical money alert" : "⚠️ تنبيه مالي حرج",
+                    firstTitle);
+        }
     }
 
     @Override

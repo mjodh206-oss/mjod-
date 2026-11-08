@@ -379,4 +379,151 @@ public final class Content {
                 "20 دقيقة نهاية الشهر لمراجعة الأرقام واتخاذ 3 قرارات فقط.",
                 "20 minutes monthly to review numbers and make exactly 3 decisions.", "أنظمة"));
     }
+
+    // ================= الدفعة الثانية: دروس إضافية =================
+    static {
+        LESSONS.add(new Lesson(
+                "ميزانية الأسبوع: المظروف الأسبوعي",
+                "The weekly envelope",
+                "wallet",
+                "الميزانية الشهرية تصمد أسبوعين فقط عند أغلب الناس. الحل الاحترافي: قسّم سقف الشهر على 4 أسابيع، وامنح كل أسبوع «مظروفًا» مستقلًا. انتهى مظروف الأسبوع؟ تنتظر الاثنين القادم — هكذا يتحول الانضباط من قرار شهري كبير إلى قرارات أسبوعية صغيرة يسهل الفوز بها.",
+                "Monthly budgets collapse by week two for most people. The pro fix: split the month cap into 4 weekly envelopes. When one empties, you wait for Monday — discipline becomes small winnable decisions.",
+                new String[]{
+                        "اقسم ميزانيتك الشهرية ÷ 4.3 وضع ناتج الأسبوع في مَحلولة كسقف أسبوعي ذهني.",
+                        "لا تستلف من أسبوع قادم إلا بقرار مسجل — الاستدانة الصامتة هي ثقب الميزانية.",
+                        "الفائض الأسبوعي يُرحّل تلقائيًا للادخار، لا للأسبوع التالي.",
+                        "بعد 4 أسابيع قارن: أي أسبوع ينهار دائمًا؟ هناك يكمن النمط."
+                },
+                new String[]{
+                        "Divide your monthly cap by 4.3 and treat it as a weekly envelope.",
+                        "Never borrow from next week silently — log any transfer as a decision.",
+                        "Weekly surplus rolls to savings, not to next week.",
+                        "After 4 weeks compare: which week always collapses? That's your pattern."
+                },
+                "احسب سقف أسبوعك الآن من ميزانيتك الشهرية واكتبه في ملاحظة مثبتة.",
+                "Compute your weekly cap now and pin it in a note.",
+                "Envelope budgeting — weekly cadence variant",
+                "Envelope budgeting — weekly cadence"));
+
+        LESSONS.add(new Lesson(
+                "فاصل التكلفة بالاستخدام: السعر الحقيقي",
+                "Cost per use: the real price",
+                "chart_line",
+                "حذاء بـ100 يُلبس 200 مرة أرخص من قميص بـ20 يُلبس مرتين. قاعدة «التكلفة لكل استخدام» تعيد تعريف الغالي والرخيص: اقسم السعر على عدد الاستخدامات المتوقعة؛ أقل من وحدة واحدة لكل استخدام = صفقة جيدة عادة. تستخدمها الشركات في تقييم المعدات، وتعمل تمامًا في خزانة ملابسك.",
+                "A 100 shoe worn 200 times beats a 20 shirt worn twice. Cost-per-use redefines cheap vs expensive: price ÷ expected uses; under ~1 per use is usually a good buy.",
+                new String[]{
+                        "قبل شراء دائم: احسب التكلفة/استخدام خلال سنة.",
+                        "الأدوات اليومية تستحق جودة أعلى؛ النادرة تستحق استئجارًا أو استعارة.",
+                        "قارن بدائل نفس الغرض بالتكلفة/استخدام لا بالسعر الظاهر.",
+                        "سجّل في الملاحظات: كم مرة استخدمت آخر 3 أشياء اشتريتها؟"
+                },
+                new String[]{
+                        "Before durable purchases: compute cost/use over a year.",
+                        "Daily tools deserve quality; rare-use items deserve renting or borrowing.",
+                        "Compare alternatives by cost/use, not sticker price.",
+                        "Log: how often did you use your last 3 purchases?"
+                },
+                "اختر آخر شراء كبير واحسب تكلفته لكل استخدام حتى اليوم.",
+                "Pick your last big purchase and compute its cost per use so far.",
+                "Cost-per-use — consumer economics practice",
+                "Cost-per-use practice"));
+
+        LESSONS.add(new Lesson(
+                "دخل إضافي آمن: ابدأ صغيرًا وذكياً",
+                "Safe side income: start small and smart",
+                "trend_up",
+                "توفير وحده له سقف؛ الدخل لا سقف له. القاعدة العالمية للأمان: لا تستدِن ولا تستثمر مدخراتك لتبدأ عملًا جانبيًا — ابدأ بمهارة تملكها ووقت ميت (ساعتان مساءً)، وبِع خدمة لا منتجًا أولًا (الخدمات بلا مخزون). كل دخل إضافي يوجّه 50٪ منه للديون/الادخار مباشرة حتى تتحقق وسادتك.",
+                "Saving has a ceiling; income doesn't. Global safety rule: never borrow or invest savings to start a side hustle — begin with a skill you own and dead time, selling services first (no inventory). Route 50% of side income to debts/savings until your cushion is complete.",
+                new String[]{
+                        "عدد 3 مهارات يدفع الناس لك مقابلها اليوم.",
+                        "اختبر الطلب بأصغر عرض ممكن قبل أي تجهيز أو شراء.",
+                        "سجّل الدخل الجانبي في مَحلولة كمصدر مستقل لتراه بوضوح.",
+                        "لا تخلط مال المشروع بالمال الشخصي — محفظة منفصلة."
+                },
+                new String[]{
+                        "List 3 skills people would pay for today.",
+                        "Test demand with the smallest offer before buying anything.",
+                        "Log side income in Mahloula as its own source.",
+                        "Never mix business money with personal money — separate wallet."
+                },
+                "أنشئ محفظة باسم «عملي الجانبي» في مَحلولة اليوم.",
+                "Create a wallet named 'Side work' in Mahloula today.",
+                "Lean startup principles — Eric Ries",
+                "Lean startup — Eric Ries"));
+
+        LESSONS.add(new Lesson(
+                "أطفال ماليًا أذكياء: العادة تبدأ من البيت",
+                "Money-smart kids: habits start at home",
+                "family",
+                "الأبحاث التربوية تؤكد أن عادات المال تتشكل قبل سن العاشرة. ثلاث ممارسات تصنع الفرق: مصروف أسبوعي ثابت بقرار الطفل (لا رقابة لصيقة)، تقسيمه لثلاثة أوعية (إنفاق/ادخار/عطاء)، واجتماع عائلي قصير يرى فيه الطفل كيف تخطط الأسرة ميزانيتها. الطفل الذي يقرر ويخطأ صغيرًا لا يخطئ كبيرًا.",
+                "Research shows money habits form before age ten. Three practices: a fixed weekly allowance the child controls, three jars (spend/save/give), and a short family meeting where kids see real budgeting.",
+                new String[]{
+                        "مصروف ثابت أسبوعي = درس ميزانية مصغر.",
+                        "ثلاثة أوعية مرئية: إنفاق، ادخار، عطاء.",
+                        "دع الخطأ الصغير يحدث: إنه أرخص درس في حياتهم.",
+                        "اشركهم في مقارنة سعرين بالسوبرماركت — لعبة تصنع مهارة."
+                },
+                new String[]{
+                        "Fixed weekly allowance = a miniature budget lesson.",
+                        "Three visible jars: spend, save, give.",
+                        "Let small mistakes happen: the cheapest lesson ever.",
+                        "Have them compare two prices at the store — a game that builds skill."
+                },
+                "افتح نقاشًا عائليًا هذا الأسبوع حول هدف ادخار مشترك.",
+                "Start a family talk this week about a shared savings goal.",
+                "Cambridge University — Money habits in childhood study",
+                "Cambridge childhood money-habits study"));
+
+        // ---------------- قواعد إضافية ----------------
+        RULES.add(new Rule("قائمة واحد-داخل/واحد-خارج", "One in, one out",
+                "كل غرض جديد يدخل البيت يخرج مقابله غرض قديم — يحجم الفوضى والمصروف معًا.",
+                "Every new item in means one old item out — caps both clutter and spending.", "إنفاق واعي"));
+        RULES.add(new Rule("التكلفة لكل استخدام", "Cost per use",
+                "السعر ÷ عدد الاستخدامات المتوقعة = الحكم الحقيقي على الصفقة.",
+                "Price ÷ expected uses = the true verdict on a deal.", "قرارات شراء"));
+        RULES.add(new Rule("لا تسوّق وأنت جائع أو متعب", "Never shop hungry or tired",
+                "الجوع والتعب يرفعان فاتورة السوبرماركت 10–20٪ وفق دراسات السلوك الاستهلاكي.",
+                "Hunger and fatigue inflate grocery bills 10–20% per consumer studies.", "إنفاق واعي"));
+        RULES.add(new Rule("هامش 10٪ في كل ميزانية", "10% budget buffer",
+                "اضف 10٪ هامش طوارئ داخل الميزانية نفسها — الميزانية بدون هامش تنكسر أول أسبوع.",
+                "Build a 10% buffer inside the budget itself — bufferless budgets break in week one.", "ميزانية"));
+        RULES.add(new Rule("يوم التفاوض السنوي", "Annual negotiation day",
+                "مرة سنويًا: فاوض على الإنترنت، التأمين، الاشتراكات، وحتى الإيجار. المتوسط العالمي للتوفير: 15–30٪ من الفاتورة.",
+                "Once a year negotiate internet, insurance, subscriptions, even rent. Typical global savings: 15–30%.", "فواتير"));
+        RULES.add(new Rule("قاعدة 48 ساعة للاشتراكات", "48-hour rule for subscriptions",
+                "أي اشتراك جديد ينتظر 48 ساعة، ويُقيَّم كل 3 أشهر بالاستخدام الفعلي لا بالنوايا.",
+                "New subscriptions wait 48 hours and get audited quarterly by actual use, not intent.", "اشتراكات"));
+    }
+
+    // ---------------- الأخطاء المالية الشائعة ----------------
+    public static final class Mistake {
+        public final String ar, en, fixAr, fixEn;
+
+        Mistake(String a, String e, String fa, String fe) { ar = a; en = e; fixAr = fa; fixEn = fe; }
+    }
+
+    public static final java.util.List<Mistake> MISTAKES = new java.util.ArrayList<>();
+
+    static {
+        MISTAKES.add(new Mistake("دفع الفواتير آخرًا والادخار بالفاضل", "Paying bills last and saving the leftovers",
+                "اعكس: ادّخر أولًا ثم ادفع ثم أنفق.", "Reverse it: save first, pay, then spend."));
+        MISTAKES.add(new Mistake("الحد الأدنى لبطاقات الديون", "Paying only credit minimums",
+                "الحد الأدنى يطيل عمر الدين سنوات ويضاعف الفوائد.", "Minimums stretch debt for years and double interest."));
+        MISTAKES.add(new Mistake("ميزانية ورقية لا تُراجع", "A paper budget never reviewed",
+                "ميزانية بلا مراجعة أسبوعية ديكورٌ رقمي.", "A budget without weekly review is digital décor."));
+        MISTAKES.add(new Mistake("اشتراكات نائمة", "Zombie subscriptions",
+                "افحص كشوفك الشهرية: كل اشتراك لم يُستخدم شهرًا يُلغى.", "Audit statements monthly: unused for a month = cancel."));
+        MISTAKES.add(new Mistake("شراء المكانة لا المنفعة", "Buying status, not utility",
+                "اسأل: لمن أشتري هذا؟ لي أم لنظرة الآخرين؟", "Ask: am I buying this for me or for their eyes?"));
+        MISTAKES.add(new Mistake("لا صندوق طوارئ ثم استدانة عند أول طارئ", "No emergency fund, then borrowing at first shock",
+                "الوسادة النقدية تسبق أي استثمار أو ترقية أسلوب حياة.", "Cash cushion before any investing or lifestyle upgrade."));
+        MISTAKES.add(new Mistake("تقسيط كل شيء", "Installments on everything",
+                "التقسيط المقبول: أصل معمر (سكن/سيارة عمل). لا تقسِّط استهلاكًا يوميًا.", "Finance assets that last; never daily consumption."));
+        MISTAKES.add(new Mistake("مجاراة دخل الجيران", "Keeping up with the neighbors",
+                "قارن نفسك بنسختك السابقة لا ببيت الجيران.", "Compare yourself to your past self, not the neighbors."));
+        MISTAKES.add(new Mistake("أرقام تقريبية في الرأس", "Rough numbers in your head",
+                "ما لا يُسجل لا يُدار — سجل خلال 24 ساعة كحد أقصى.", "Unlogged money is unmanaged — log within 24h."));
+        MISTAKES.add(new Mistake("استثمار قبل سدّ الديون العالية", "Investing before killing high-interest debt",
+                "عائد مضمون 25٪ (فائدة دين) لا يهزمه أي سوق.", "A guaranteed 25% return (debt interest) beats any market."));
+    }
 }

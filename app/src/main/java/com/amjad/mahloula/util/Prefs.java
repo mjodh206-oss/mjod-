@@ -65,7 +65,17 @@ public final class Prefs {
     public String language() { return sp.getString("language", "ar"); }
     public void language(String v) { sp.edit().putString("language", v).apply(); }
 
+    // ---------- الخصوصية ----------
+    public boolean hideBalance() { return sp.getBoolean("hide_balance", false); }
+    public void hideBalance(boolean v) { sp.edit().putBoolean("hide_balance", v).apply(); }
+
     // ---------- التنبيهات ----------
+    public boolean soundOn() { return sp.getBoolean("sound_on", true); }
+    public void soundOn(boolean v) { sp.edit().putBoolean("sound_on", v).apply(); }
+
+    public String lastAlertSig() { return sp.getString("alert_sig", ""); }
+    public void lastAlertSig(String v) { sp.edit().putString("alert_sig", v).apply(); }
+
     public boolean remindersOn() { return sp.getBoolean("reminders_on", true); }
     public void remindersOn(boolean v) { sp.edit().putBoolean("reminders_on", v).apply(); }
 

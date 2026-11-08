@@ -38,6 +38,14 @@ public final class Notifier {
                 ? "A gentle daily nudge to log your spending"
                 : "تنبيه يومي لطيف لتسجيل مصاريفك ومتابعة ميزانيتك");
         ch.enableVibration(true);
+        if (Prefs.get(c).soundOn()) {
+            android.media.AudioAttributes aa = new android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+            ch.setSound(android.media.RingtoneManager.getDefaultUri(
+                    android.media.RingtoneManager.TYPE_NOTIFICATION), aa);
+        }
         nm.createNotificationChannel(ch);
     }
 
@@ -123,6 +131,13 @@ public final class Notifier {
                 .setStyle(new Notification.BigTextStyle().bigText(body))
                 .setContentIntent(pi)
                 .setAutoCancel(true);
+        if (Prefs.get(c).soundOn()) {
+            if (Build.VERSION.SDK_INT < 26) {
+                b.setSound(android.media.RingtoneManager.getDefaultUri(
+                        android.media.RingtoneManager.TYPE_NOTIFICATION));
+            }
+            b.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+        }
         nm.notify(777, b.build());
     }
 }
