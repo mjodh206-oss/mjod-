@@ -212,6 +212,11 @@ public final class UiKit {
 
     // ---------------- صف قائمة عام ----------------
 
+    /** يقبل معرّف مورد (0x7f…) أو لونًا خامًا (ARGB) — لا ينهار أبدًا. */
+    private static int col(Context c, int v) {
+        return (v >>> 24) == 0x7f ? Ui.color(c, v) : v;
+    }
+
     public static LinearLayout row(Context c, int iconRes, int iconTint, int iconBg,
                                    String title, String sub, String trailing, int trailingColor) {
         LinearLayout row = Ui.h(c);
@@ -220,10 +225,10 @@ public final class UiKit {
                 Ui.color(c, R.color.surface_3)));
 
         FrameLayout badge = new FrameLayout(c);
-        badge.setBackground(Ui.round(Ui.color(c, iconBg), 13, c));
+        badge.setBackground(Ui.round(col(c, iconBg), 13, c));
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(Ui.dp(c, 44), Ui.dp(c, 44));
         badge.setLayoutParams(blp);
-        ImageView iv = Ui.iconSized(c, iconRes, Ui.color(c, iconTint), 22);
+        ImageView iv = Ui.iconSized(c, iconRes, col(c, iconTint), 22);
         FrameLayout.LayoutParams ilp = new FrameLayout.LayoutParams(Ui.dp(c, 22), Ui.dp(c, 22));
         ilp.gravity = Gravity.CENTER;
         iv.setLayoutParams(ilp);
