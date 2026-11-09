@@ -2,3 +2,12 @@
 @media(min-width:700px){.app-shell{padding-top:38px}.welcome-row{margin-top:42px}.balance-card{padding:26px 29px 22px}.balance-amount{font-size:44px}.stats-grid,.actions{gap:15px}.stat-card{padding:16px 18px}.transactions-section{margin-top:28px}}
 @media(max-width:430px){.app-shell{padding:20px 17px 14px}.welcome-row{margin-top:26px}.welcome-row h1{font-size:24px}.welcome-sub{font-size:11px}.privacy-badge{font-size:9px;padding:6px 8px}.balance-card{padding:19px 18px 16px;border-radius:18px}.balance-amount{font-size:35px;margin:12px 0 7px}.stats-grid,.actions{gap:9px}.stat-card{padding:12px 11px}.stat-heading{font-size:10px;gap:5px}.stat-card>strong{font-size:19px}.action-button{padding:10px 9px;gap:8px}.action-icon{width:33px;height:33px}.action-button strong{font-size:12px}.action-button small{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Color-coded money movements: deposits in green, withdrawals in red. */
+.stat-symbol.in,.deposit-button .action-icon,.transaction-symbol.deposit,.modal-mark{background:#e8f5ec;color:#21864d}
+.transaction-value.deposit,#incomeAmount,.modal-kicker{color:#21864d}
+#incomeAmount small,#expenseAmount small{color:#8c9790}
+.stat-symbol.out,.withdraw-button .action-icon,.transaction-symbol.withdraw,.modal-mark.withdraw{background:#fff0ef;color:#d94f4f}
+.transaction-value.withdraw,#expenseAmount,.modal-kicker.withdraw{color:#d94f4f}
+.submit-button{background:#21864d;color:#fff}
+.submit-button.withdraw{background:#d94f4f;color:#fff}
