@@ -1,41 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ليلي: بني كاكاوي عميق + برتقالي مضيء -->
-    <color name="bg">#FF17100A</color>
-    <color name="surface">#FF221810</color>
-    <color name="surface_2">#FF2B1E14</color>
-    <color name="surface_3">#FF382818</color>
-    <color name="text_primary">#FFF7EFE4</color>
-    <color name="text_secondary">#FFD9C4B0</color>
-    <color name="text_tertiary">#FFAC9684</color>
-    <color name="outline">#FF453322</color>
-    <color name="outline_strong">#FF5E4732</color>
-    <color name="scrim">#99000000</color>
-    <color name="nav_bar">#FF1B120B</color>
-    <color name="status_bar">#FF17100A</color>
-    <color name="status_bar_icons">#FFF7EFE4</color>
+    <!-- الهوية المثبتة: خلفية بيضاء، كتابة سوداء، لوحات برتقالية -->
+    <color name="brand_900">#FF7A2A00</color>
+    <color name="brand_800">#FFA83A00</color>
+    <color name="brand_700">#FFD64A00</color>
+    <color name="brand_600">#FFF25C05</color>
+    <color name="brand_500">#FFFF7A1A</color>
+    <color name="brand_400">#FFFF8A3C</color>
+    <color name="brand_300">#FFFFA468</color>
+    <color name="brand_200">#FFFFC79E</color>
+    <color name="brand_100">#FFFFE3CC</color>
+    <color name="brand_50">#FFFFF4EA</color>
 
-    <color name="brand_50">#FF2B1E14</color>
-    <color name="brand_100">#FF382818</color>
-    <color name="brand_200">#FF55351A</color>
-    <color name="brand_300">#FFFF9440</color>
-    <color name="brand_400">#FFFFB77A</color>
-    <color name="brand_500">#FFFFC894</color>
-    <color name="brand_600">#FFFFD9B3</color>
+    <color name="panel">#FFF25C05</color>
+    <color name="panel_deep">#FFD64A00</color>
+    <color name="panel_soft">#FFFF8A3C</color>
+    <color name="on_panel">#FF000000</color>
+    <color name="on_panel_2">#FF2A1203</color>
+    <color name="on_dark">#FFFFFFFF</color>
 
-    <color name="gold_100">#FF382818</color>
-    <color name="gold_400">#FFFFB77A</color>
-    <color name="gold_500">#FFFF9440</color>
-    <color name="gold_600">#FFFFC894</color>
+    <color name="gold_600">#FF9C5A18</color>
+    <color name="gold_500">#FFC77800</color>
+    <color name="gold_400">#FFFFA468</color>
+    <color name="gold_100">#FFFCEBD8</color>
 
-    <color name="income">#FFCBA88F</color>
-    <color name="income_soft">#FF33261C</color>
-    <color name="expense">#FFFF7A1A</color>
-    <color name="expense_soft">#FF3A2010</color>
-    <color name="debt">#FFFF9E5E</color>
-    <color name="debt_soft">#FF361D0C</color>
-    <color name="info">#FFCBA88F</color>
-    <color name="info_soft">#FF2B1E14</color>
-    <color name="warn">#FFFFC894</color>
-    <color name="warn_soft">#FF33250F</color>
+    <color name="income">#FF000000</color>
+    <color name="income_soft">#FFFFFFFF</color>
+    <color name="expense">#FFD64A00</color>
+    <color name="expense_soft">#FFFFE3CC</color>
+    <color name="debt">#FFA83A00</color>
+    <color name="debt_soft">#FFFFEAD6</color>
+    <color name="info">#FF2A1203</color>
+    <color name="info_soft">#FFFFFFFF</color>
+    <color name="warn">#FFC77800</color>
+    <color name="warn_soft">#FFFFF1DC</color>
+
+    <color name="bg">#FFFFFFFF</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="surface_2">#FFFFFFFF</color>
+    <color name="surface_3">#FFFFD9B3</color>
+    <color name="text_primary">#FF000000</color>
+    <color name="text_secondary">#FF1F1207</color>
+    <color name="text_tertiary">#FF4A2C17</color>
+    <color name="outline">#FFFFD9B3</color>
+    <color name="outline_strong">#FFA83A00</color>
+    <color name="scrim">#66000000</color>
+    <color name="on_brand">#FF000000</color>
+    <color name="nav_bar">#FFFFFFFF</color>
+    <color name="status_bar">#FFFFFFFF</color>
+    <color name="status_bar_icons">#FF000000</color>
+
+    <color name="cat_food">#FFF25C05</color>
+    <color name="cat_transport">#FFFF7A1A</color>
+    <color name="cat_home">#FFD64A00</color>
+    <color name="cat_bills">#FFE4581F</color>
+    <color name="cat_health">#FFB34700</color>
+    <color name="cat_edu">#FFFF9440</color>
+    <color name="cat_shop">#FFA83A00</color>
+    <color name="cat_fun">#FFFF5A00</color>
+    <color name="cat_family">#FF8A5A2B</color>
+    <color name="cat_save">#FF6D4C41</color>
+    <color name="cat_debt">#FFBF360C</color>
+    <color name="cat_other">#FF795548</color>
 </resources>

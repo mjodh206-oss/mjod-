@@ -34,7 +34,7 @@ public final class UiKit {
 
     public static LinearLayout card(Context c, int padDp) {
         LinearLayout l = Ui.v(c);
-        l.setBackground(Ui.round(Ui.color(c, R.color.surface), 20, c));
+        l.setBackground(Ui.round(Ui.color(c, R.color.panel), 20, c));
         l.setPadding(Ui.dp(c, padDp), Ui.dp(c, padDp), Ui.dp(c, padDp), Ui.dp(c, padDp));
         if (android.os.Build.VERSION.SDK_INT >= 21) {
             l.setElevation(Ui.dp(c, 1.5f));
@@ -44,7 +44,7 @@ public final class UiKit {
 
     public static LinearLayout cardStroke(Context c, int padDp) {
         LinearLayout l = card(c, padDp);
-        l.setBackground(Ui.roundStroke(c, Ui.color(c, R.color.surface), Ui.color(c, R.color.outline), 1, 20));
+        l.setBackground(Ui.roundStroke(c, Ui.color(c, R.color.panel), Ui.color(c, R.color.on_panel), 1, 20));
         if (android.os.Build.VERSION.SDK_INT >= 21) l.setElevation(0);
         return l;
     }
@@ -71,13 +71,13 @@ public final class UiKit {
     // ---------------- زر أساسي ----------------
 
     public static TextView button(Context c, String label, int iconRes, boolean filled) {
-        TextView b = Ui.txt(c, label, 14.5f, filled ? R.color.on_brand : R.color.brand_600, Typeface.BOLD);
+        TextView b = Ui.txt(c, label, 14.5f, filled ? R.color.on_dark : R.color.brand_700, Typeface.BOLD);
         b.setGravity(Gravity.CENTER);
         b.setMinHeight(Ui.dp(c, 48));
         b.setPadding(Ui.dp(c, 20), Ui.dp(c, 12), Ui.dp(c, 20), Ui.dp(c, 12));
         if (filled) {
             GradientDrawable g = Ui.gradient(c, new int[]{
-                    Ui.color(c, R.color.brand_500), Ui.color(c, R.color.brand_700)}, 14, 1);
+                    Ui.color(c, R.color.text_primary), Ui.color(c, R.color.text_secondary)}, 14, 1);
             b.setBackground(Ui.ripple(c, g, Color.argb(40, 255, 255, 255)));
         } else {
             b.setBackground(Ui.ripple(c,
@@ -88,7 +88,7 @@ public final class UiKit {
             b.setCompoundDrawablesRelativeWithIntrinsicBounds(iconRes, 0, 0, 0);
             b.setCompoundDrawablePadding(Ui.dp(c, 8));
             b.getCompoundDrawablesRelative();
-            tintCompounds(b, filled ? Ui.color(c, R.color.on_brand) : Ui.color(c, R.color.brand_600));
+            tintCompounds(b, filled ? Ui.color(c, R.color.on_dark) : Ui.color(c, R.color.brand_700));
         }
         return b;
     }
@@ -108,7 +108,7 @@ public final class UiKit {
         e.setTypeface(Ui.font(c, Typeface.NORMAL));
         e.setTextColor(Ui.color(c, R.color.text_primary));
         e.setHintTextColor(Ui.color(c, R.color.text_tertiary));
-        e.setBackground(Ui.roundStroke(c, Ui.color(c, R.color.surface_2), Ui.color(c, R.color.outline), 1.2f, 14));
+        e.setBackground(Ui.roundStroke(c, Ui.color(c, R.color.surface_3), Ui.color(c, R.color.outline_strong), 1.2f, 14));
         e.setPadding(Ui.dp(c, 14), Ui.dp(c, 12), Ui.dp(c, 14), Ui.dp(c, 12));
         e.setMinHeight(Ui.dp(c, 48));
         if (number) e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -165,11 +165,11 @@ public final class UiKit {
     private static void styleChips(Context c, TextView[] chips, int selected) {
         for (int i = 0; i < chips.length; i++) {
             if (i == selected) {
-                chips[i].setBackground(Ui.round(Ui.color(c, R.color.brand_600), 12, c));
-                chips[i].setTextColor(Ui.color(c, R.color.on_brand));
+                chips[i].setBackground(Ui.round(Ui.color(c, R.color.text_primary), 12, c));
+                chips[i].setTextColor(Ui.color(c, R.color.on_dark));
             } else {
-                chips[i].setBackground(Ui.roundStroke(c, Ui.color(c, R.color.surface_2),
-                        Ui.color(c, R.color.outline), 1, 12));
+                chips[i].setBackground(Ui.roundStroke(c, Ui.color(c, R.color.surface_3),
+                        Ui.color(c, R.color.outline_strong), 1, 12));
                 chips[i].setTextColor(Ui.color(c, R.color.text_secondary));
             }
         }
@@ -221,8 +221,8 @@ public final class UiKit {
                                    String title, String sub, String trailing, int trailingColor) {
         LinearLayout row = Ui.h(c);
         row.setPadding(Ui.dp(c, 14), Ui.dp(c, 12), Ui.dp(c, 14), Ui.dp(c, 12));
-        row.setBackground(Ui.ripple(c, Ui.round(Ui.color(c, R.color.surface), 18, c),
-                Ui.color(c, R.color.surface_3)));
+        row.setBackground(Ui.ripple(c, Ui.round(Ui.color(c, R.color.surface_3), 18, c),
+                Ui.color(c, R.color.brand_100)));
 
         FrameLayout badge = new FrameLayout(c);
         badge.setBackground(Ui.round(col(c, iconBg), 13, c));
@@ -345,10 +345,10 @@ public final class UiKit {
 
     /** زر عريض داخل الشيت. */
     public static TextView sheetButton(Sheet sh, String label, boolean danger) {
-        TextView b = Ui.txt(sh.content.getContext(), label, 15, danger ? R.color.on_brand : R.color.on_brand, Typeface.BOLD);
+        TextView b = Ui.txt(sh.content.getContext(), label, 15, R.color.on_dark, Typeface.BOLD);
         b.setGravity(Gravity.CENTER);
         b.setMinHeight(Ui.dp(sh.content.getContext(), 50));
-        int col = danger ? R.color.expense : R.color.brand_600;
+        int col = danger ? R.color.expense : R.color.text_primary;
         b.setBackground(Ui.ripple(sh.content.getContext(),
                 Ui.round(Ui.color(sh.content.getContext(), col), 15, sh.content.getContext()),
                 Color.argb(35, 255, 255, 255)));
@@ -363,7 +363,7 @@ public final class UiKit {
 
     public static void snack(Activity a, String msg, String actionLabel, Runnable action) {
         ViewGroup root = a.findViewById(android.R.id.content);
-        TextView tv = Ui.txt(a, msg, 13.5f, R.color.on_brand, Typeface.NORMAL);
+        TextView tv = Ui.txt(a, msg, 13.5f, R.color.on_dark, Typeface.NORMAL);
         tv.setBackground(Ui.round(Ui.color(a, R.color.brand_800), 14, a));
         tv.setPadding(Ui.dp(a, 16), Ui.dp(a, 13), Ui.dp(a, 16), Ui.dp(a, 13));
         if (actionLabel != null) {

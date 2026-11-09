@@ -59,7 +59,7 @@ public class TxPanel implements Panel {
         LinearLayout.LayoutParams selp = new LinearLayout.LayoutParams(-1, -2);
         selp.topMargin = Ui.dp(a, 12);
         seg.setLayoutParams(selp);
-        seg.setBackground(Ui.round(Ui.color(a, R.color.surface_2), 14, a));
+        seg.setBackground(Ui.round(Ui.color(a, R.color.surface_3), 14, a));
         seg.setPadding(Ui.dp(a, 4), Ui.dp(a, 4), Ui.dp(a, 4), Ui.dp(a, 4));
         String[] labels = ar() ? new String[]{"مسحوبات", "دخول", "الكل"} : new String[]{"Expenses", "Income", "All"};
         final TextView[] segs = new TextView[3];
@@ -75,9 +75,9 @@ public class TxPanel implements Panel {
         segSync = () -> {
             for (int i = 0; i < 3; i++) {
                 segs[i].setBackground(i == kindFilter
-                        ? Ui.round(Ui.color(a, R.color.brand_600), 11, a)
+                        ? Ui.round(Ui.color(a, R.color.surface), 11, a)
                         : Ui.round(Color.TRANSPARENT, 11, a));
-                segs[i].setTextColor(Ui.color(a, i == kindFilter ? R.color.on_brand : R.color.text_secondary));
+                segs[i].setTextColor(Ui.color(a, i == kindFilter ? R.color.text_primary : R.color.text_secondary));
             }
         };
         segSync.run();
@@ -114,7 +114,7 @@ public class TxPanel implements Panel {
         root.addView(outer, new FrameLayout.LayoutParams(-1, -1));
 
         FrameLayout fab = new FrameLayout(a);
-        fab.setBackground(Ui.ripple(a, Ui.round(Ui.color(a, R.color.brand_600), 20, a), Color.argb(40, 255, 255, 255)));
+        fab.setBackground(Ui.ripple(a, Ui.round(Ui.color(a, R.color.text_primary), 20, a), Color.argb(40, 255, 255, 255)));
         fab.setElevation(Ui.dp(a, 7));
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(Ui.dp(a, 62), Ui.dp(a, 62));
         flp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;

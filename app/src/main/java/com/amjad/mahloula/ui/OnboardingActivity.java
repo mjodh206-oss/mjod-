@@ -88,7 +88,7 @@ public class OnboardingActivity extends BaseActivity {
             card.setLayoutParams(clp);
             LinearLayout row = Ui.h(this);
             int iconRes = iconByName(f[2]);
-            ImageView iv = Ui.iconSized(this, iconRes, Ui.color(this, R.color.brand_600), 26);
+            ImageView iv = Ui.iconSized(this, iconRes, Ui.color(this, R.color.on_panel), 26);
             row.addView(iv);
             LinearLayout tx = Ui.v(this);
             LinearLayout.LayoutParams tlp2 = new LinearLayout.LayoutParams(0, -2, 1f);

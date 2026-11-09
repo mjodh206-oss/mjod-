@@ -73,24 +73,24 @@ public class DashboardPanel implements Panel {
         Prefs p = Prefs.get(a);
         LinearLayout card = Ui.v(a);
         card.setBackground(Ui.gradient(a, new int[]{
-                Ui.color(a, R.color.brand_900), Ui.color(a, R.color.brand_600)}, 26, 1));
+                Ui.color(a, R.color.panel_deep), Ui.color(a, R.color.panel_soft)}, 26, 1));
         card.setPadding(Ui.dp(a, 20), Ui.dp(a, 20), Ui.dp(a, 20), Ui.dp(a, 22));
 
         LinearLayout top = Ui.h(a);
         LinearLayout greet = Ui.v(a);
         greet.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
         greet.addView(Ui.txt(a, a.getString(R.string.app_name), 24, R.color.on_brand, Typeface.BOLD));
-        greet.addView(Ui.txt(a, (ar() ? "أهلًا بك • " : "Welcome • ") + Fmt.dayMonth(a, System.currentTimeMillis()), 12.5f, R.color.brand_100));
+        greet.addView(Ui.txt(a, (ar() ? "أهلًا بك • " : "Welcome • ") + Fmt.dayMonth(a, System.currentTimeMillis()), 12.5f, R.color.on_panel_2));
         top.addView(greet);
 
         ImageView eye = Ui.iconSized(a, p.hideBalance() ? R.drawable.ic_eye_off : R.drawable.ic_eye,
-                Ui.color(a, R.color.brand_100), 24);
+                Ui.color(a, R.color.on_panel), 24);
         eye.setPadding(Ui.dp(a, 6), Ui.dp(a, 6), Ui.dp(a, 6), Ui.dp(a, 6));
         eye.setBackground(Ui.ripple(a, Ui.round(Color.argb(35, 255, 255, 255), 12, a), Color.argb(45, 255, 255, 255)));
         eye.setOnClickListener(v -> { p.hideBalance(!p.hideBalance()); refresh(); });
         top.addView(eye);
 
-        ImageView gear = Ui.iconSized(a, R.drawable.ic_gear, Ui.color(a, R.color.brand_100), 24);
+        ImageView gear = Ui.iconSized(a, R.drawable.ic_gear, Ui.color(a, R.color.on_panel), 24);
         LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(Ui.dp(a, 36), Ui.dp(a, 36));
         glp.setMarginStart(Ui.dp(a, 8));
         gear.setLayoutParams(glp);
@@ -100,7 +100,7 @@ public class DashboardPanel implements Panel {
         top.addView(gear);
         card.addView(top);
 
-        TextView balLabel = Ui.txt(a, ar() ? "رصيدك الكلي" : "Total balance", 13.5f, R.color.brand_200, Typeface.BOLD);
+        TextView balLabel = Ui.txt(a, ar() ? "رصيدك الكلي" : "Total balance", 13.5f, R.color.on_panel_2, Typeface.BOLD);
         LinearLayout.LayoutParams bllp = new LinearLayout.LayoutParams(-2, -2);
         bllp.topMargin = Ui.dp(a, 18);
         balLabel.setLayoutParams(bllp);
@@ -115,11 +115,11 @@ public class DashboardPanel implements Panel {
         int score = Advisor.healthScore(a);
         Charts.Ring ring = new Charts.Ring(a);
         ring.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 82), Ui.dp(a, 82)));
-        ring.set(score / 100f, score >= 70 ? R.color.gold_400 : score >= 45 ? R.color.brand_300 : R.color.expense,
+        ring.set(score / 100f, R.color.on_panel,
                 Fmt.digits(a, String.valueOf(score)), ar() ? "صحتك المالية" : "health");
         balRow.addView(ring);
         card.addView(balRow);
-        card.addView(Ui.txt(a, Advisor.healthLabel(a, score), 13, R.color.brand_100, Typeface.BOLD));
+        card.addView(Ui.txt(a, Advisor.healthLabel(a, score), 13, R.color.on_panel_2, Typeface.BOLD));
         return card;
     }
 
@@ -223,7 +223,7 @@ public class DashboardPanel implements Panel {
         LinearLayout head = Ui.h(a);
         head.addView(Ui.txt(a, ar() ? "ميزانية الشهر" : "Monthly budget", 15.5f, R.color.text_primary, Typeface.BOLD));
         head.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
-        head.addView(Ui.txt(a, Fmt.percent(a, ratio * 100), 17, colRes, Typeface.BOLD));
+        head.addView(Ui.txt(a, Fmt.percent(a, ratio * 100), 17, R.color.on_panel, Typeface.BOLD));
         card.addView(head);
         Charts.HBar bar = new Charts.HBar(a);
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-1, -2);
@@ -237,7 +237,7 @@ public class DashboardPanel implements Panel {
         foot.setLayoutParams(flp);
         foot.addView(Ui.txt(a, (ar() ? "أُنفق: " : "Spent: ") + Fmt.money(a, mt.expense), 13.5f, R.color.text_secondary, Typeface.BOLD));
         foot.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
-        foot.addView(Ui.txt(a, (ar() ? "تبقّى: " : "Left: ") + Fmt.money(a, Math.max(0, budget - mt.expense)), 13.5f, colRes, Typeface.BOLD));
+        foot.addView(Ui.txt(a, (ar() ? "تبقّى: " : "Left: ") + Fmt.money(a, Math.max(0, budget - mt.expense)), 13.5f, R.color.on_panel, Typeface.BOLD));
         card.addView(foot);
         return card;
     }
@@ -256,7 +256,7 @@ public class DashboardPanel implements Panel {
         LinearLayout head = Ui.h(a);
         head.addView(Ui.txt(a, ar() ? "أين يذهب مالك؟" : "Where money goes", 15.5f, R.color.text_primary, Typeface.BOLD));
         head.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
-        TextView more = Ui.txt(a, ar() ? "التفاصيل ←" : "Details ←", 13, R.color.brand_600, Typeface.BOLD);
+        TextView more = Ui.txt(a, ar() ? "التفاصيل ←" : "Details ←", 13, R.color.on_panel, Typeface.BOLD);
         more.setOnClickListener(v -> ((MainActivity) a).jump(1));
         head.addView(more);
         card.addView(head);
@@ -277,7 +277,7 @@ public class DashboardPanel implements Panel {
     private View advisorCard() {
         List<Advisor.Insight> ins = Advisor.scan(a);
         LinearLayout card = UiKit.card(a, 18);
-        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.surface), Ui.color(a, R.color.gold_500), 1.6f, 22));
+        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.panel), Ui.color(a, R.color.on_dark), 1.6f, 22));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
         lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);
@@ -296,7 +296,7 @@ public class DashboardPanel implements Panel {
         if (ins.size() > 2) {
             TextView all = Ui.txt(a, ar()
                     ? "عرض كل التنبيهات والخطط (" + Fmt.digits(a, String.valueOf(ins.size())) + ")"
-                    : "See all alerts & plans (" + ins.size() + ")", 13.5f, R.color.brand_600, Typeface.BOLD);
+                    : "See all alerts & plans (" + ins.size() + ")", 13.5f, R.color.on_panel, Typeface.BOLD);
             all.setPadding(Ui.dp(a, 6), Ui.dp(a, 10), Ui.dp(a, 6), Ui.dp(a, 2));
             all.setOnClickListener(v -> ((MainActivity) a).jump(4));
             card.addView(all);

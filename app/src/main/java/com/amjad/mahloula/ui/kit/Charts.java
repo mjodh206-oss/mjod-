@@ -121,8 +121,8 @@ public final class Charts {
                 float x = i * (bw + gap);
                 boolean hl = i == highlightIndex;
                 paint.setColor(v <= 0
-                        ? Ui.color(getContext(), R.color.surface_3)
-                        : (hl ? Ui.color(getContext(), R.color.gold_500) : Ui.color(getContext(), R.color.brand_400)));
+                        ? Ui.color(getContext(), R.color.surface)
+                        : (hl ? Ui.color(getContext(), R.color.expense) : Ui.color(getContext(), R.color.text_primary)));
                 float rr = Math.min(bw / 2, Ui.dp(getContext(), 3));
                 cv.drawRoundRect(x, base - Math.max(bh, Ui.dp(getContext(), 2)), x + bw, base, rr, rr, paint);
             }
@@ -170,7 +170,7 @@ public final class Charts {
             fg.setStrokeWidth(stroke);
             float pad = stroke / 2 + Ui.dp(getContext(), 1);
             rect.set(pad, pad, w - pad, h - pad);
-            bg.setColor(Ui.color(getContext(), R.color.surface_3));
+            bg.setColor(Ui.color(getContext(), R.color.surface));
             cv.drawArc(rect, 0, 360, false, bg);
             fg.setColor(ringColor);
             cv.drawArc(rect, -90, value * 360, false, fg);
@@ -216,7 +216,7 @@ public final class Charts {
             super.onDraw(cv);
             float w = getWidth(), h = getHeight();
             float r = h / 2;
-            bg.setColor(Ui.color(getContext(), R.color.surface_3));
+            bg.setColor(Ui.color(getContext(), R.color.surface));
             cv.drawRoundRect(0, 0, w, h, r, r, bg);
             fg.setColor(Ui.color(getContext(), colorRes));
             cv.drawRoundRect(0, 0, Math.max(h, w * value), h, r, r, fg);

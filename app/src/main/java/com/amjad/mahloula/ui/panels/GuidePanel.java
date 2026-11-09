@@ -70,7 +70,7 @@ public class GuidePanel implements Panel {
         long mask = Prefs.get(a).lessonsDoneMask();
         int done = Long.bitCount(mask);
         LinearLayout card = Ui.v(a);
-        card.setBackground(Ui.gradient(a, new int[]{Ui.color(a, R.color.brand_900), Ui.color(a, R.color.brand_500)}, 24, 1));
+        card.setBackground(Ui.gradient(a, new int[]{Ui.color(a, R.color.panel_deep), Ui.color(a, R.color.panel_soft)}, 24, 1));
         card.setPadding(Ui.dp(a, 20), Ui.dp(a, 18), Ui.dp(a, 20), Ui.dp(a, 20));
         LinearLayout head = Ui.h(a);
         head.addView(Ui.iconSized(a, R.drawable.ic_cap, Ui.color(a, R.color.gold_400), 34));
@@ -83,14 +83,14 @@ public class GuidePanel implements Panel {
                 ? Fmt.digits(a, String.valueOf(done)) + " من " + Fmt.digits(a, String.valueOf(Content.LESSONS.size())) + " درسًا • "
                   + Fmt.digits(a, String.valueOf(Content.RULES.size())) + " قاعدة عالمية"
                 : done + "/" + Content.LESSONS.size() + " lessons • " + Content.RULES.size() + " global rules",
-                13, R.color.brand_100));
+                13, R.color.on_panel_2));
         head.addView(tx);
         card.addView(head);
         Charts.HBar bar = new Charts.HBar(a);
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-1, -2);
         blp.topMargin = Ui.dp(a, 14);
         bar.setLayoutParams(blp);
-        bar.set((float) done / Content.LESSONS.size(), R.color.gold_400);
+        bar.set((float) done / Content.LESSONS.size(), R.color.on_panel);
         card.addView(bar);
         return card;
     }
@@ -115,7 +115,7 @@ public class GuidePanel implements Panel {
         int score = Advisor.healthScore(a);
         Charts.Ring ring = new Charts.Ring(a);
         ring.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 104), Ui.dp(a, 104)));
-        ring.set(score / 100f, score >= 70 ? R.color.income : score >= 45 ? R.color.gold_500 : R.color.expense,
+        ring.set(score / 100f, R.color.on_panel,
                 Fmt.digits(a, String.valueOf(score)), ar() ? "من 100" : "/100");
         row.addView(ring);
 
@@ -156,7 +156,7 @@ public class GuidePanel implements Panel {
     private View planCard() {
         List<Advisor.PlanStep> plan = Advisor.personalPlan(a);
         LinearLayout card = UiKit.card(a, 18);
-        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.surface), Ui.color(a, R.color.gold_500), 1.6f, 22));
+        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.panel), Ui.color(a, R.color.on_dark), 1.6f, 22));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
         lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);
@@ -283,9 +283,9 @@ public class GuidePanel implements Panel {
             row.setLayoutParams(rlp);
 
             FrameLayout num = new FrameLayout(a);
-            num.setBackground(Ui.round(Ui.color(a, done ? R.color.income : R.color.brand_600), 11, a));
+            num.setBackground(Ui.round(Ui.color(a, done ? R.color.text_primary : R.color.brand_600), 11, a));
             num.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a, 34), Ui.dp(a, 34)));
-            TextView n = Ui.txt(a, Fmt.digits(a, String.valueOf(i + 1)), 14, R.color.on_brand, Typeface.BOLD);
+            TextView n = Ui.txt(a, Fmt.digits(a, String.valueOf(i + 1)), 14, done ? R.color.on_dark : R.color.on_brand, Typeface.BOLD);
             n.setGravity(Gravity.CENTER);
             FrameLayout.LayoutParams nlp = new FrameLayout.LayoutParams(-1, -1);
             n.setLayoutParams(nlp);
@@ -316,7 +316,7 @@ public class GuidePanel implements Panel {
     // ---------- الأخطاء الشائعة ----------
     private View mistakesCard() {
         LinearLayout card = UiKit.card(a, 18);
-        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.surface), Ui.color(a, R.color.expense), 1.4f, 22));
+        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.panel), Ui.color(a, R.color.on_dark), 1.4f, 22));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
         lp.topMargin = Ui.dp(a, 14);
         card.setLayoutParams(lp);

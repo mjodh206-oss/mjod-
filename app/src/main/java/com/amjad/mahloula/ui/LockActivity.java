@@ -38,7 +38,7 @@ public class LockActivity extends BaseActivity {
 
         LinearLayout root = Ui.v(this);
         root.setBackground(Ui.gradient(this, new int[]{
-                Ui.color(this, R.color.brand_900), Ui.color(this, R.color.brand_700)}, 0, 1));
+                Ui.color(this, R.color.panel_deep), Ui.color(this, R.color.panel_soft)}, 0, 1));
         root.setGravity(Gravity.CENTER_HORIZONTAL);
         root.setPadding(Ui.dp(this, 28), Ui.dp(this, 56), Ui.dp(this, 28), Ui.dp(this, 28));
 
@@ -54,7 +54,7 @@ public class LockActivity extends BaseActivity {
         root.addView(title);
 
         status = Ui.txt(this, ar ? "افتح التطبيق ببصمة إصبعك" : "Unlock with your fingerprint",
-                14, R.color.brand_200);
+                14, R.color.on_panel_2);
         status.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(-2, -2);
         slp.topMargin = Ui.dp(this, 6);
@@ -69,7 +69,7 @@ public class LockActivity extends BaseActivity {
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(Ui.dp(this, 92), Ui.dp(this, 92));
         blp.topMargin = Ui.dp(this, 26);
         bioBtn.setLayoutParams(blp);
-        ImageView fp = Ui.iconSized(this, R.drawable.ic_fingerprint, Ui.color(this, R.color.brand_200), 46);
+        ImageView fp = Ui.iconSized(this, R.drawable.ic_fingerprint, Ui.color(this, R.color.on_panel), 46);
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(Ui.dp(this, 46), Ui.dp(this, 46));
         flp.gravity = Gravity.CENTER;
         fp.setLayoutParams(flp);
@@ -87,7 +87,7 @@ public class LockActivity extends BaseActivity {
             TextView pinTitle = Ui.txt(this, p.hasPin()
                             ? (ar ? "أو أدخل رمزك المكوّن من 4 أرقام" : "or enter your 4-digit PIN")
                             : (ar ? "أدخل رمزك المكوّن من 4 أرقام" : "enter your 4-digit PIN"),
-                    12.5f, R.color.brand_200);
+                    12.5f, R.color.on_panel_2);
             LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(-2, -2);
             plp.topMargin = Ui.dp(this, 24);
             pinTitle.setLayoutParams(plp);
@@ -114,7 +114,7 @@ public class LockActivity extends BaseActivity {
             TextView only = Ui.txt(this, ar
                             ? "هذا التطبيق محمي بالبصمة فقط، حسب إعداداتك.\nإن لم تستجب المستشعر، سجّل بصمتك من إعدادات النظام."
                             : "This app is fingerprint-only, per your settings.\nIf the sensor doesn't respond, enroll a fingerprint in system settings.",
-                    12.5f, R.color.brand_200);
+                    12.5f, R.color.on_panel_2);
             only.setGravity(Gravity.CENTER);
             LinearLayout.LayoutParams olp = new LinearLayout.LayoutParams(-2, -2);
             olp.topMargin = Ui.dp(this, 28);
@@ -123,7 +123,7 @@ public class LockActivity extends BaseActivity {
         }
 
         root.addView(new android.view.View(this), new LinearLayout.LayoutParams(0, 0, 1f));
-        TextView credit = Ui.txt(this, ar ? "تأليف وتطوير: أمجد حبيب" : "By Amjad Habib", 11.5f, R.color.brand_300);
+        TextView credit = Ui.txt(this, ar ? "تأليف وتطوير: أمجد حبيب" : "By Amjad Habib", 11.5f, R.color.on_panel_2);
         root.addView(credit);
 
         setContentView(root);

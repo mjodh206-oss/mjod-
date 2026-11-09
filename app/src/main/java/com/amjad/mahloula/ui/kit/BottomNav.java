@@ -55,7 +55,7 @@ public final class BottomNav extends LinearLayout {
             item.addView(tvs[i]);
 
             inds[i] = new View(c);
-            inds[i].setBackground(Ui.round(Ui.color(c, R.color.brand_500), 3, c));
+            inds[i].setBackground(Ui.round(Ui.color(c, R.color.brand_600), 3, c));
             LayoutParams ilp = new LayoutParams(Ui.dp(c, 18), Ui.dp(c, 3.5f));
             ilp.topMargin = Ui.dp(c, 4);
             inds[i].setLayoutParams(ilp);
@@ -75,8 +75,8 @@ public final class BottomNav extends LinearLayout {
         current = idx;
         for (int i = 0; i < 5; i++) {
             boolean on = i == idx;
-            ivs[i].getDrawable().mutate().setTint(Ui.color(getContext(), on ? R.color.brand_500 : R.color.text_tertiary));
-            tvs[i].setTextColor(Ui.color(getContext(), on ? R.color.brand_600 : R.color.text_tertiary));
+            ivs[i].getDrawable().mutate().setTint(Ui.color(getContext(), on ? R.color.brand_600 : R.color.text_tertiary));
+            tvs[i].setTextColor(Ui.color(getContext(), on ? R.color.text_primary : R.color.text_tertiary));
             if (on) {
                 inds[i].setVisibility(VISIBLE);
                 ivs[i].animate().scaleX(1.12f).scaleY(1.12f).setDuration(160).start();

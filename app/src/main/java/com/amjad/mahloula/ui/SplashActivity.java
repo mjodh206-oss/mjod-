@@ -21,6 +21,7 @@ public class SplashActivity extends BaseActivity {
         super.onCreate(b);
         darkBars(true);
         LinearLayout root = Ui.v(this);
+        root.setBackgroundColor(Ui.color(this, R.color.bg));
         root.setGravity(Gravity.CENTER_HORIZONTAL);
         root.setPadding(Ui.dp(this, 32), Ui.dp(this, 80), Ui.dp(this, 32), Ui.dp(this, 40));
 
@@ -30,14 +31,14 @@ public class SplashActivity extends BaseActivity {
         logo.setLayoutParams(llp);
         root.addView(logo);
 
-        android.widget.TextView name = Ui.txt(this, getString(R.string.app_name), 44, R.color.on_brand, Typeface.BOLD);
+        android.widget.TextView name = Ui.txt(this, getString(R.string.app_name), 44, R.color.text_primary, Typeface.BOLD);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(this, 18);
         name.setLayoutParams(nlp);
         name.setGravity(Gravity.CENTER);
         root.addView(name);
 
-        android.widget.TextView tag = Ui.txt(this, getString(R.string.app_tagline), 15, R.color.brand_200);
+        android.widget.TextView tag = Ui.txt(this, getString(R.string.app_tagline), 15, R.color.text_secondary);
         tag.setGravity(Gravity.CENTER);
         root.addView(tag);
 
@@ -60,10 +61,10 @@ public class SplashActivity extends BaseActivity {
         android.view.View space = new android.view.View(this);
         root.addView(space, new LinearLayout.LayoutParams(0, 0, 1f));
 
-        android.widget.TextView credit = Ui.txt(this, "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب", 12.5f, R.color.brand_200);
+        android.widget.TextView credit = Ui.txt(this, "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب", 12.5f, R.color.text_tertiary);
         credit.setGravity(Gravity.CENTER);
         root.addView(credit);
-        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.3.0", 11, R.color.brand_300);
+        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.3.1", 11, R.color.text_tertiary);
         ver.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams vlp = new LinearLayout.LayoutParams(-2, -2);
         vlp.topMargin = Ui.dp(this, 4);
