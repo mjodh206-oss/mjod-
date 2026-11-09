@@ -239,6 +239,14 @@ public class DashboardPanel implements Panel {
         foot.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
         foot.addView(Ui.txt(a, (ar() ? "تبقّى: " : "Left: ") + Fmt.money(a, Math.max(0, budget - mt.expense)), 13.5f, R.color.on_panel, Typeface.BOLD));
         card.addView(foot);
+        double proj = Advisor.forecastMonth(a);
+        TextView fc = Ui.txt(a, (ar() ? "🔮 توقع نهاية الشهر على وتيرتك: " : "🔮 Projected month-end: ") + Fmt.money(a, proj)
+                + (proj > budget ? (ar() ? "  ⚠️ فوق السقف" : "  ⚠️ over cap") : (ar() ? "  ✔ ضمن السقف" : "  ✔ within cap")),
+                13, proj > budget ? R.color.expense : R.color.on_panel, Typeface.BOLD);
+        LinearLayout.LayoutParams flp2 = new LinearLayout.LayoutParams(-2, -2);
+        flp2.topMargin = Ui.dp(a, 10);
+        fc.setLayoutParams(flp2);
+        card.addView(fc);
         return card;
     }
 

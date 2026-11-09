@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.amjad.mahloula"
     android:versionCode="1"
-    android:versionName="1.4.1">
+    android:versionName="1.5.0">
 
     <uses-sdk
         android:minSdkVersion="24"
