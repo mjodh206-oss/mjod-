@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "language": "en",
+  "voice": "Curious, warm, specific. One new fact OR one question per reply. Never generic.",
+  "rules": {
+    "max_replies_per_run": 30,
+    "min_comment_chars": 3,
+    "skip_own_comments": true,
+    "skip_threads_already_replied_by_channel": true,
+    "skip_links_from_strangers": true,
+    "never": [
+      "argue, dunk on, or mock a viewer",
+      "invent facts, statistics, or sources",
+      "give medical, legal, financial, or safety advice",
+      "promise uploads, giveaways, or shout-outs that don't exist",
+      "repeat the exact same reply on many comments in one run",
+      "mention credentials, API keys, automation, or internal tooling",
+      "use 'Thanks!' or 'Glad you liked it' with nothing added"
+    ],
+    "human_queue_keywords": [
+      "lawyer", "sue", "legal", "medical", "doctor", "diagnose", "medicine", "dose",
+      "invest", "crypto", "refund", "sponsor", "collab", "business email", "copyright",
+      "strike", "dox", "address", "phone number", "self harm", "suicide"
+    ],
+    "spam_patterns": [
+      "sub for sub", "sub4sub", "follow for follow", "free followers", "check my channel",
+      "promo code", "telegram", "whatsapp", "bit.ly", "tinyurl", "cash app giveaway"
+    ],
+    "variables": {
+      "{name}": "commenter display name, first word only, capped at 20 chars",
+      "{topic}": "episode topic from content/episodes/*.json",
+      "{next}": "next episode topic from the calendar"
+    }
+  },
+  "categories": {
+    "answer_yes": {
+      "match": ["yes", "yep", "yeah", "i did", "worked", "managed", "me too", "same", "yess"],
+      "replies": [
+        "Okay {name}, you're in the minority — the delay in the robot experiment is usually what it takes. Which part felt weirdest?",
+        "Genuinely? Most people can't. Did it feel like someone else's hand or just odd?",
+        "{name} reporting success — adding this to the follow-up. Was it the surprise or the timing?"
+      ]
+    },
+    "answer_no": {
+      "match": ["no", "nope", "can't", "couldn't", "nothing", "didn't work", "nah", "nada"],
+      "replies": [
+        "That's the expected result, {name} — your cerebellum cancelled it before you felt it. Want the version with the 200 ms delay?",
+        "Exactly the point of the video. The brake only lifts when the brain can't predict the touch.",
+        "{name}, that 'nothing' IS the experiment working. Try it with your eyes closed and tell me if it changes."
+      ]
+    },
+    "praise": {
+      "match": ["love", "great", "amazing", "wow", "awesome", "best", "cool", "nice", "underrated", "🔥", "❤", "👏"],
+      "replies": [
+        "Thanks {name} — the 243/225/117 clock mess is still my favourite bit of this series. Which number surprised you?",
+        "Appreciate it {name}! There's a whole other planet where this gets stranger. Want part two?",
+        "Glad it landed, {name}. Should the next one go deeper into the mechanism or stay this short?"
+      ]
+    },
+    "question": {
+      "match": ["why", "how", "what if", "does", "is it", "can you", "?", "explain"],
+      "replies": [
+        "Short version: {topic} comes down to one mechanism, not a list of causes. I'm making a full 45-second answer — A or B for the angle?",
+        "Good question, {name}. The honest answer is 'it depends which definition you use' — that ambiguity is the whole trick here.",
+        "You just found the part I had to cut for time, {name}. Saving it for the follow-up — want the technical or the everyday version?"
+      ]
+    },
+    "correction": {
+      "match": ["actually", "wrong", "incorrect", "that's not", "source says", "misleading", "you forgot", "but"],
+      "replies": [
+        "You're right to push on this, {name} — the wording here matters a lot. I'll check the primary source and pin the correction if needed. Thank you.",
+        "Fair catch, {name}. The simplified version loses a detail I should have kept. Adding it to the pinned comment.",
+        "Good correction, {name}. This is exactly why the descriptions carry sources instead of just claims."
+      ],
+      "escalate": "heart_or_pin"
+    },
+    "source_request": {
+      "match": ["source", "citation", "proof", "study", "paper", "link", "reference", "where did you"],
+      "replies": [
+        "The source hint is in the description under the CTA, {name}. Happy to name the specific paper in a follow-up — want it?",
+        "Good instinct, {name}. Everything in this series gets a source hint before publishing; this one is listed below the description.",
+        "Yes — {name}, it's in the description. If I got any number wrong, say so and I'll correct it openly."
+      ]
+    },
+    "part_two": {
+      "match": ["part 2", "part two", "more", "next", "do one about", "continue", "series", "follow up"],
+      "replies": [
+        "Already scripted, {name} 🙌 Which should go first: the mechanism deep-dive or the weirder exception?",
+        "Yes — this is a series. Drop the topic you want and I'll put it in the calendar.",
+        "Part two exists in draft, {name}. A or B: keep it 45 seconds or go a bit deeper?"
+      ]
+    },
+    "disagreement": {
+      "match": ["disagree", "i don't think", "not true", "that's false", "clickbait", "overrated", "boring"],
+      "replies": [
+        "Fair, {name} — the headline version is definitely the simplified one. Which specific bit didn't hold up for you?",
+        "Reasonable take, {name}. I tried to keep the definition honest in the last 10 seconds — did that part land or not?",
+        "I'd rather get this right than win the point, {name}. Tell me what you'd change and I'll check it."
+      ]
+    },
+    "negative": {
+      "match": ["hate", "stupid", "trash", "worst", "unsubscribed", "cringe", "ai garbage"],
+      "replies": [
+        "Sorry it didn't land, {name}. Any one thing I should fix for the next one?",
+        "Fair enough, {name}. If there's a specific bit that felt off, I'd genuinely use the note."
+      ],
+      "max_per_run": 3
+    },
+    "first": {
+      "match": ["first", "early", "notification", "here before"],
+      "replies": [
+        "Early squad, {name} — since you're here first: job or name, which did you remember?",
+        "{name} got here before the algorithm did. One-word verdict on the hook?"
+      ]
+    },
+    "off_topic": {
+      "match": ["hello", "hi ", "anyone", "who's watching", "2026", "from ", "greetings"],
+      "replies": [
+        "Hey {name}! Since you're here — yes or no on the question in the video?",
+        "Welcome {name}. One-word answer to the CTA and you're officially part of the experiment 😄"
+      ]
+    },
+    "default": {
+      "match": [],
+      "replies": [
+        "Appreciate you watching, {name} — which bit stuck with you, the hook or the payoff?",
+        "{name}, curious: was the explanation clear enough at this speed, or should I slow the next one down?",
+        "Thanks for the comment, {name}. A or B: more numbers next time, or more visuals?"
+      ]
+    }
+  }
+}

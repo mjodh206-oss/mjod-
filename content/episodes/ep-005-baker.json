@@ -1,0 +1,97 @@
+{
+  "id": "ep-005",
+  "status": "ready",
+  "series": "Brain Glitches",
+  "topic": "The baker/baker paradox — why occupations are remembered better than proper names",
+  "format": "shorts",
+  "duration_seconds": 45,
+  "language": "en",
+  "publish_at": "2026-11-16T17:30:00Z",
+  "fact_check": {
+    "claim": "Semantically meaningful labels (an occupation) are recalled better than arbitrary proper names because they connect to existing associative networks — the 'baker/baker paradox' discussed alongside levels-of-processing research.",
+    "source_hint": "Craik & Lockhart's levels-of-processing framework; cognitive psychology literature on proper-name recall and the baker-baker paradox. Present as a well-known demonstration, not a single definitive study.",
+    "verified": false
+  },
+  "hooks": [
+    "I'm a baker. I'm Baker. One sticks. One vanishes.",
+    "You'll forget my name in ten seconds. Not my job.",
+    "Your brain stores meaning, not labels."
+  ],
+  "selected_hook": 0,
+  "titles": [
+    "Why You Forget A Name In 10 Seconds (Baker/Baker Paradox)",
+    "'Baker' The Job Sticks. 'Baker' The Name Doesn't. Here's Why.",
+    "The Memory Trick That Fixes Forgetting Names"
+  ],
+  "beats": [
+    {
+      "t": "0-3",
+      "vo": "I'm a baker. I'm Baker. One sticks. One vanishes.",
+      "on_screen": "BAKER  /  BAKER",
+      "visual": "Two identical words side by side on frame 1; one starts fading immediately",
+      "device": "hook / name-drop paradox"
+    },
+    {
+      "t": "3-8",
+      "vo": "Say both out loud. Ten seconds from now you'll remember the job, not the name.",
+      "on_screen": "10 SECONDS FROM NOW...",
+      "visual": "Ten-second timer starts; presenter points at the camera",
+      "device": "you-test / open loop"
+    },
+    {
+      "t": "8-16",
+      "vo": "That's the baker-baker paradox. Same sound, same letters, completely different memory strength.",
+      "on_screen": "SAME WORD. DIFFERENT MEMORY.",
+      "visual": "The two words get a strength bar each; one bar collapses",
+      "device": "comparison"
+    },
+    {
+      "t": "16-22",
+      "vo": "A job comes with a whole network: flour, ovens, early mornings, smell of bread.",
+      "on_screen": "FLOUR · OVENS · 4AM",
+      "visual": "Fast four-shot montage, each word appearing with its image",
+      "device": "pattern interrupt"
+    },
+    {
+      "t": "22-27",
+      "vo": "A name comes with nothing. It's an arbitrary label taped to a face.",
+      "on_screen": "NO NETWORK = NO HOOK",
+      "visual": "A blank label slapping onto a silhouette; music drops",
+      "device": "re-hook"
+    },
+    {
+      "t": "27-37",
+      "vo": "Your brain stores meaning, not labels. The moment you link a name to something — 'Baker, always wears red' — recall jumps. Repetition alone barely moves it.",
+      "on_screen": "LINK IT OR LOSE IT",
+      "visual": "Animated connection lines from a face to red jacket, then to the word Baker",
+      "device": "mechanism / actionable"
+    },
+    {
+      "t": "37-43",
+      "vo": "So next time you forget a name, don't blame memory. Blame the missing connection.",
+      "on_screen": "BLAME THE LINK",
+      "visual": "Back to the two words from frame 1, now one connected by lines",
+      "device": "payoff"
+    },
+    {
+      "t": "43-45",
+      "vo": "Job or name? Comment one.",
+      "on_screen": "JOB OR NAME?",
+      "visual": "Exact frame-1 composition restored for the loop",
+      "device": "loop / CTA"
+    }
+  ],
+  "payoff": "Names are arbitrary labels; memory needs a meaningful connection to hold onto.",
+  "cta": "Which did you remember: the job or the name?",
+  "pinned_comment": "Be honest: did you remember the JOB or the NAME? One word 👇 I'm collecting results for a follow-up.",
+  "description": "I'm a baker. I'm Baker. One sticks, one vanishes.\n\nThe baker-baker paradox: an occupation arrives with a whole network of meaning (flour, ovens, 4am), while a proper name is an arbitrary label with nothing to attach to. Link the name to a detail and recall jumps; repeating it barely helps.\n\nWhich did you remember: the job or the name?\n\nConcept: levels of processing / proper-name recall. Educational summary.",
+  "hashtags": ["#shorts", "#psychology", "#memory", "#brain"],
+  "tags": ["education", "psychology", "memory", "brain", "learning", "shorts"],
+  "thumbnail": {
+    "text": "BAKER ≠ BAKER",
+    "prompt": "9:16 educational thumbnail: the word BAKER twice in bold condensed type, one crisp one fading, high-contrast black and yellow, subtle bread texture, no faces"
+  },
+  "video_file": null,
+  "youtube_video_id": null,
+  "notes": "This is the highest-comment-potential episode: the viewer reports their own result, so the CTA is effortless. Use it as the week's comment-velocity play."
+}

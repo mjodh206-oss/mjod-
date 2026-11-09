@@ -1,0 +1,5 @@
+# Local, one-time OAuth setup + all automation scripts.
+# Install:  python3 -m pip install -r requirements.txt
+google-api-python-client>=2.100.0,<3
+google-auth>=2.25.0,<3
+google-auth-oauthlib>=1.2.0,<2

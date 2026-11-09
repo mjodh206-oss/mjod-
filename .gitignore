@@ -1,0 +1,30 @@
+# --- Secrets: NEVER commit these ---
+client_secret*.json
+token*.json
+.env
+*.pem
+*.p12
+service-account*.json
+
+# --- Media: large binaries stay out of Git ---
+content/videos/
+*.mp4
+*.mov
+*.mkv
+*.wav
+*.mp3
+*.m4a
+assets/renders/
+
+# --- Runtime state / generated reports ---
+state/
+reports/
+content/SCRIPTS.md
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage

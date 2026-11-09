@@ -1,0 +1,97 @@
+{
+  "id": "ep-004",
+  "status": "ready",
+  "series": "Everyday Impossible",
+  "topic": "Why honey resists spoilage: low water activity, acidity, and bee-derived hydrogen peroxide",
+  "format": "shorts",
+  "duration_seconds": 45,
+  "language": "en",
+  "publish_at": "2026-11-13T17:30:00Z",
+  "fact_check": {
+    "claim": "Honey's low water content (~17%), acidic pH (~3.9), glucose oxidase-derived hydrogen peroxide and high osmotic pressure inhibit microbial growth; pots of honey thousands of years old have been reported in archaeological tombs.",
+    "source_hint": "Food science reviews on honey's antimicrobial properties (e.g. Mandal & Mandal 2011); archaeological reports on honey in ancient tombs. Wording: 'preserved / still recognisable as honey', NOT 'edible' or 'tasted'.",
+    "verified": false
+  },
+  "hooks": [
+    "This honey is 3,000 years old. Still honey.",
+    "Archaeologists opened a tomb. The honey hadn't rotted.",
+    "No fridge, no preservatives — and bacteria still can't live."
+  ],
+  "selected_hook": 0,
+  "titles": [
+    "Why 3,000-Year-Old Honey Still Hasn't Spoiled",
+    "Honey Doesn't Fight Bacteria. It Makes Them Physically Impossible.",
+    "The Three Weapons Inside A Jar Of Honey"
+  ],
+  "beats": [
+    {
+      "t": "0-3",
+      "vo": "This honey is 3,000 years old. Still honey.",
+      "on_screen": "3,000 YEARS OLD",
+      "visual": "Macro shot of amber honey dripping from a spoon; '3000' stamped on frame 1",
+      "device": "hook / time collapse"
+    },
+    {
+      "t": "3-8",
+      "vo": "Archaeologists have opened ancient tombs and found pots of honey that never rotted.",
+      "on_screen": "FOUND IN A TOMB",
+      "visual": "Cut to a dim stone chamber, clay vessel, dust particles in a light beam",
+      "device": "open loop"
+    },
+    {
+      "t": "8-16",
+      "vo": "No refrigerator, no preservatives, no sealing magic. Just a food that bacteria can't live in.",
+      "on_screen": "NOTHING CAN GROW HERE",
+      "visual": "Animated microbe trying to land on a honey surface and bouncing off",
+      "device": "personified obstacle"
+    },
+    {
+      "t": "16-22",
+      "vo": "Honey is about 17 percent water. Bacteria need water. It's also acidic, around pH 4.",
+      "on_screen": "17% WATER  /  pH ~4",
+      "visual": "Two big counters: a water gauge near empty, a pH scale sliding to acid",
+      "device": "progressive numbers"
+    },
+    {
+      "t": "22-27",
+      "vo": "But the third weapon is the clever one — and the bees make it.",
+      "on_screen": "THE BEES DID THIS",
+      "visual": "Bee on a comb, hard zoom, warm colour shift, music hit",
+      "device": "re-hook"
+    },
+    {
+      "t": "27-37",
+      "vo": "Bees add an enzyme that slowly releases hydrogen peroxide. And the sugar pulls water out of microbes by osmosis — they dry out before they can grow.",
+      "on_screen": "ENZYME → PEROXIDE → OSMOSIS",
+      "visual": "Three-step animated chain; microbe shrivelling in the last step",
+      "device": "mechanism"
+    },
+    {
+      "t": "37-43",
+      "vo": "So honey doesn't fight spoilage. It makes spoilage physically impossible.",
+      "on_screen": "SPOILAGE: IMPOSSIBLE",
+      "visual": "Back to the opening honey pour, slow motion",
+      "device": "payoff"
+    },
+    {
+      "t": "43-45",
+      "vo": "Taste it? Yes or no?",
+      "on_screen": "YES OR NO?",
+      "visual": "Spoon and honey in the exact frame-1 position, seamless loop",
+      "device": "loop / CTA"
+    }
+  ],
+  "payoff": "Honey is an environment where microbes physically cannot grow, not a food that resists them.",
+  "cta": "Would you taste 3,000-year-old honey? Yes or no?",
+  "pinned_comment": "Would you actually taste it? Yes or no 👇 (Next: the food that never expires for a completely different reason — A or B?)",
+  "description": "This honey is 3,000 years old — and it's still honey.\n\nNo fridge, no preservatives. Honey is only ~17% water, sits around pH 4, and bees add an enzyme that releases hydrogen peroxide. The sugar pulls water out of microbes by osmosis, so they can't grow.\n\nWould you taste it? Yes or no?\n\nNote: ancient honey is described as preserved, not as eaten. Educational summary, not food-safety advice.",
+  "hashtags": ["#shorts", "#science", "#foodscience", "#history"],
+  "tags": ["education", "science", "foodscience", "history", "biology", "shorts"],
+  "thumbnail": {
+    "text": "3,000 YEARS OLD",
+    "prompt": "9:16 educational thumbnail: golden honey pouring in extreme macro, dark tomb-like background, huge condensed '3000 YEARS' text, warm amber and near-black palette"
+  },
+  "video_file": null,
+  "youtube_video_id": null,
+  "notes": "Do not say 'edible' or 'still safe to eat'. The verified wording is 'preserved / still recognisably honey'."
+}

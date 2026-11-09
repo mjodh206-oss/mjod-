@@ -1,0 +1,70 @@
+name: Publish a Short
+
+# Manual only — publishing is never unattended. Provide a direct HTTPS URL to the
+# rendered 9:16 mp4 (S3/Drive/dropbox direct link). Video binaries are NOT committed.
+# The publisher still refuses any episode with fact_check.verified = false.
+on:
+  workflow_dispatch:
+    inputs:
+      episode_id:
+        description: "Episode id (ep-001 …)"
+        required: true
+        default: "ep-001"
+      video_url:
+        description: "Direct HTTPS URL to the rendered .mp4"
+        required: true
+      thumbnail_url:
+        description: "Optional direct HTTPS URL to a .jpg thumbnail"
+        required: false
+      schedule:
+        description: "Optional ISO-8601 UTC publish time, e.g. 2026-11-11T17:30:00Z"
+        required: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: youtube-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install API client
+        run: python -m pip install -r requirements.txt
+      - name: Verify secrets
+        env:
+          CLIENT: ${{ secrets.YT_CLIENT_SECRET_JSON }}
+          TOKEN: ${{ secrets.YT_TOKEN_JSON }}
+        run: |
+          if [ -z "$CLIENT" ] || [ -z "$TOKEN" ]; then
+            echo "::error::Add the YT_CLIENT_SECRET_JSON and YT_TOKEN_JSON repository secrets first."
+            exit 1
+          fi
+      - name: Fetch rendered video
+        env:
+          VIDEO_URL: ${{ github.event.inputs.video_url }}
+          THUMB_URL: ${{ github.event.inputs.thumbnail_url }}
+        run: |
+          curl -fL --retry 3 --connect-timeout 20 -o "$RUNNER_TEMP/short.mp4" "$VIDEO_URL"
+          ls -lh "$RUNNER_TEMP/short.mp4"
+          if [ -n "$THUMB_URL" ]; then
+            curl -fL --retry 3 --connect-timeout 20 -o "$RUNNER_TEMP/thumb.jpg" "$THUMB_URL"
+          fi
+      - name: Upload
+        env:
+          YT_CLIENT_SECRET_JSON: ${{ secrets.YT_CLIENT_SECRET_JSON }}
+          YT_TOKEN_JSON: ${{ secrets.YT_TOKEN_JSON }}
+          EPISODE: ${{ github.event.inputs.episode_id }}
+          SCHEDULE: ${{ github.event.inputs.schedule }}
+        run: |
+          ARGS=""
+          if [ -f "$RUNNER_TEMP/thumb.jpg" ]; then ARGS="$ARGS --thumbnail $RUNNER_TEMP/thumb.jpg"; fi
+          if [ -n "$SCHEDULE" ]; then ARGS="$ARGS --schedule $SCHEDULE"; fi
+          python automation/publish_video.py \
+            --episode "$EPISODE" \
+            --file "$RUNNER_TEMP/short.mp4" \
+            --send --yes $ARGS
+      - name: Reminder
+        run: echo "::notice::Pin the channel's question comment in YouTube Studio — the API cannot pin comments."

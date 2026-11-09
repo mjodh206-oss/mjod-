@@ -1,0 +1,97 @@
+{
+  "id": "ep-002",
+  "status": "ready",
+  "series": "Space Math",
+  "topic": "A sidereal day on Venus (243 Earth days) is longer than its year (225 Earth days); the solar day is ~117 Earth days",
+  "format": "shorts",
+  "duration_seconds": 45,
+  "language": "en",
+  "publish_at": "2026-11-11T17:30:00Z",
+  "fact_check": {
+    "claim": "Venus rotates once every ~243 Earth days (retrograde) and orbits the Sun in ~224.7 Earth days; its solar day (noon to noon) is ~116.75 Earth days.",
+    "source_hint": "NASA Venus fact sheet / NASA Planetary Fact Sheet. Keep 'day' definitions explicit to avoid the common misleading headline.",
+    "verified": false
+  },
+  "hooks": [
+    "A day on Venus is longer than its year.",
+    "Venus finishes a year before it finishes one spin.",
+    "It spins backwards. And sunrise takes 117 days."
+  ],
+  "selected_hook": 0,
+  "titles": [
+    "A Day On Venus Is Longer Than Its Year (Here's The Catch)",
+    "243 Days To Spin, 225 Days To Orbit — The Planet That Breaks Clocks",
+    "Why Venus Has Three Different 'Days' And None Agree"
+  ],
+  "beats": [
+    {
+      "t": "0-3",
+      "vo": "A day on Venus is longer than its year.",
+      "on_screen": "DAY > YEAR",
+      "visual": "Venus fills frame, already rotating; giant '243' slams on screen on frame 1",
+      "device": "hook / number shock"
+    },
+    {
+      "t": "3-8",
+      "vo": "Venus needs 243 Earth days to spin once. It circles the Sun in only 225.",
+      "on_screen": "243 DAYS  /  225 DAYS",
+      "visual": "Two counters side by side racing at different speeds",
+      "device": "progressive numbers"
+    },
+    {
+      "t": "8-16",
+      "vo": "So the planet finishes a whole year before it finishes one rotation. Everywhere else in the solar system, days are the short part.",
+      "on_screen": "ONE YEAR < ONE SPIN",
+      "visual": "Solar system strip with fast little planets, Venus frozen almost still",
+      "device": "scale comparison"
+    },
+    {
+      "t": "16-22",
+      "vo": "It also spins backwards. On Venus, the Sun rises in the west.",
+      "on_screen": "SUN RISES IN THE WEST",
+      "visual": "Rotation arrow flips direction; sunrise wipes right-to-left",
+      "device": "pattern interrupt / second fact"
+    },
+    {
+      "t": "22-27",
+      "vo": "And here's the part that breaks the headline: sunrise to sunrise is just 117 days.",
+      "on_screen": "WAIT — 117 DAYS?",
+      "visual": "Big '117' punches in; music drops for one beat",
+      "device": "re-hook / contradiction"
+    },
+    {
+      "t": "27-37",
+      "vo": "Because 'day' has two meanings. One full spin takes 243 days. But the planet is also moving around the Sun, so noon returns every 117 days.",
+      "on_screen": "SPIN 243  /  NOON 117",
+      "visual": "Top-down orbit diagram with a marker for noon, showing the two clocks",
+      "device": "mechanism"
+    },
+    {
+      "t": "37-43",
+      "vo": "Same planet, three clocks, none of them matching. That's the whole trick.",
+      "on_screen": "THREE CLOCKS. ONE PLANET.",
+      "visual": "Three counters stack into one frame; cut back to the opening Venus shot",
+      "device": "payoff"
+    },
+    {
+      "t": "43-45",
+      "vo": "Which day counts? Tell me.",
+      "on_screen": "243 OR 117?",
+      "visual": "Final frame identical to frame 1 for the loop",
+      "device": "loop / CTA"
+    }
+  ],
+  "payoff": "The headline is true only for a sidereal day; 'day' has more than one definition.",
+  "cta": "Which number should count as a day: 243 or 117?",
+  "pinned_comment": "243 (one spin) or 117 (sunrise to sunrise) — which one gets to be called a 'day'? Drop a number 👇",
+  "description": "A day on Venus is longer than its year — but only if you mean one full spin.\n\nVenus rotates once every ~243 Earth days, orbits the Sun in ~225, and spins backwards. Because it's also moving along its orbit, noon-to-noon takes ~117 Earth days. Three clocks, one planet.\n\nWhich number should count as a day: 243 or 117?\n\nFigures: NASA Planetary Fact Sheet. Educational summary.",
+  "hashtags": ["#shorts", "#space", "#venus", "#astronomy"],
+  "tags": ["education", "space", "astronomy", "venus", "science", "shorts"],
+  "thumbnail": {
+    "text": "DAY > YEAR",
+    "prompt": "9:16 space educational thumbnail: pale yellow Venus against black, two huge numbers 243 and 225, bold condensed white type, subtle orbit line, no people"
+  },
+  "video_file": null,
+  "youtube_video_id": null,
+  "notes": "Must explicitly distinguish sidereal vs solar day. This is the episode that earns trust by correcting the viral version of the fact."
+}

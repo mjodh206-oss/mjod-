@@ -1,0 +1,97 @@
+{
+  "id": "ep-003",
+  "status": "ready",
+  "series": "One Question, One Universe",
+  "topic": "Olbers' paradox — why the night sky is dark",
+  "format": "shorts",
+  "duration_seconds": 45,
+  "language": "en",
+  "publish_at": "2026-11-12T17:30:00Z",
+  "fact_check": {
+    "claim": "In an infinite, static, eternal universe every line of sight would end on a stellar surface and the sky would be bright; the observed darkness is explained mainly by the finite age of the universe (~13.8 billion years) and cosmic expansion/redshift.",
+    "source_hint": "Standard cosmology texts on Olbers' paradox; NASA/ESA cosmology age estimates. Note that redshift and finite stellar lifetimes are contributing factors, finite age is the dominant one.",
+    "verified": false
+  },
+  "hooks": [
+    "The night sky should be as bright as the Sun.",
+    "Why is space black? Not because there are no stars.",
+    "'Infinite' is the word that breaks the sky."
+  ],
+  "selected_hook": 0,
+  "titles": [
+    "The Night Sky Should Be Blindingly Bright. Why Isn't It?",
+    "Darkness Is Proof The Universe Has An Age",
+    "Olbers' Paradox: The Simple Question That Broke Cosmology"
+  ],
+  "beats": [
+    {
+      "t": "0-3",
+      "vo": "The night sky should be as bright as the Sun.",
+      "on_screen": "THE SKY SHOULD BURN",
+      "visual": "Real night sky that instantly blows out to white; hard flash on frame 1",
+      "device": "hook / false belief"
+    },
+    {
+      "t": "3-8",
+      "vo": "If the universe is infinite and eternal, every direction ends on a star.",
+      "on_screen": "EVERY LINE → A STAR",
+      "visual": "Animated sight-lines shooting out from the viewer into a dense star field",
+      "device": "open loop"
+    },
+    {
+      "t": "8-16",
+      "vo": "Even a distant star is a tiny disk of light. Stack enough of them and the whole sky glows. This is Olbers' paradox.",
+      "on_screen": "TINY DISKS × INFINITY",
+      "visual": "Shells of stars stacking outward, brightness meter climbing to white",
+      "device": "progressive visual"
+    },
+    {
+      "t": "16-22",
+      "vo": "So the darkness isn't empty space. It's a clue about time.",
+      "on_screen": "DARKNESS = A CLUE",
+      "visual": "White sky snaps back to black; a clock icon appears",
+      "device": "pattern interrupt"
+    },
+    {
+      "t": "22-27",
+      "vo": "And the fix isn't 'stars are too far'. That doesn't help.",
+      "on_screen": "NOPE. DISTANCE ISN'T IT.",
+      "visual": "'TOO FAR' stamped and crossed out in red",
+      "device": "re-hook / correction"
+    },
+    {
+      "t": "27-37",
+      "vo": "The universe is about 13.8 billion years old. Light from farther away simply hasn't arrived yet. On top of that, expansion stretches that light into infrared our eyes can't see.",
+      "on_screen": "13.8 BILLION YEARS OF LIGHT",
+      "visual": "Expanding sphere with an outer dark rim; visible light stretching into red",
+      "device": "mechanism / number"
+    },
+    {
+      "t": "37-43",
+      "vo": "You're not looking at emptiness. You're looking at the edge of how far light has travelled.",
+      "on_screen": "A HORIZON, NOT A VOID",
+      "visual": "Slow push back into the same night sky from frame 1",
+      "device": "payoff"
+    },
+    {
+      "t": "43-45",
+      "vo": "Black sky, or a horizon?",
+      "on_screen": "VOID OR HORIZON?",
+      "visual": "Identical composition to frame 1, seamless loop",
+      "device": "loop / CTA"
+    }
+  ],
+  "payoff": "Darkness is a horizon in time, not an absence of stars.",
+  "cta": "Void or horizon — which word fits the night sky?",
+  "pinned_comment": "Void or horizon? One word 👇 (And should I do the 'why is anything here at all' follow-up? A or B)",
+  "description": "The night sky should be as bright as the surface of the Sun. It isn't — and the reason isn't a lack of stars.\n\nIn an infinite, eternal universe, every line of sight would eventually hit a star. The sky is dark because the universe is ~13.8 billion years old: light from farther away hasn't reached us, and expansion redshifts much of the rest.\n\nVoid or horizon — which word fits?\n\nConcept: Olbers' paradox / finite age of the universe. Educational summary.",
+  "hashtags": ["#shorts", "#space", "#cosmology", "#science"],
+  "tags": ["education", "space", "cosmology", "astronomy", "science", "shorts"],
+  "thumbnail": {
+    "text": "WHY IS IT BLACK?",
+    "prompt": "9:16 educational thumbnail: half blinding white star field, half deep black sky, split down the middle, small silhouetted figure at bottom, bold condensed white type, cinematic"
+  },
+  "video_file": null,
+  "youtube_video_id": null,
+  "notes": "The flash-to-white on frame 1 is the whole hook. Keep it under 200 ms so it reads as a glitch, not a transition."
+}

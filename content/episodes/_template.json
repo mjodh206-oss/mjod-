@@ -1,0 +1,56 @@
+{
+  "_comment": "Copy this file to ep-006-<slug>.json. Files starting with '_' are skipped by validators and publishers. Set status to 'ready' only after fact_check.verified is true.",
+  "id": "ep-000",
+  "status": "draft",
+  "series": "Series name",
+  "topic": "One-sentence topic",
+  "format": "shorts",
+  "duration_seconds": 45,
+  "language": "en",
+  "publish_at": null,
+  "fact_check": {
+    "claim": "The single factual claim the payoff depends on",
+    "source_hint": "Where to verify it (primary source preferred)",
+    "verified": false
+  },
+  "hooks": [
+    "Hook A: contradiction, <= 12 words",
+    "Hook B: number or you-test, <= 12 words",
+    "Hook C: false belief, <= 12 words"
+  ],
+  "selected_hook": 0,
+  "titles": [
+    "Title variant A, 45-70 characters",
+    "Title variant B",
+    "Title variant C"
+  ],
+  "beats": [
+    {
+      "t": "0-3",
+      "vo": "Spoken line. About 2.3-2.8 words per second.",
+      "on_screen": "2-4 words max",
+      "visual": "What changes on screen in this beat",
+      "device": "hook"
+    },
+    {
+      "t": "3-8",
+      "vo": "Open the loop. Promise, don't deliver.",
+      "on_screen": "2-4 words max",
+      "visual": "Cut to a new angle",
+      "device": "open-loop"
+    }
+  ],
+  "payoff": "The one sentence that closes the loop",
+  "cta": "One binary question, answerable in one word",
+  "pinned_comment": "Channel's own first comment: a low-effort binary question",
+  "description": "First line restates the hook. Then 1-2 lines of context. Then the CTA question. Then credits/source hints.",
+  "hashtags": ["#shorts", "#science", "#learnontiktok"],
+  "tags": ["education", "science", "facts"],
+  "thumbnail": {
+    "text": "3 WORDS MAX",
+    "prompt": "Optional art-direction note for a generated or designed thumbnail"
+  },
+  "video_file": null,
+  "youtube_video_id": null,
+  "notes": "Any production note"
+}

@@ -1,0 +1,97 @@
+{
+  "id": "ep-001",
+  "status": "ready",
+  "series": "Brain Glitches",
+  "topic": "Why you can't tickle yourself (cerebellar prediction)",
+  "format": "shorts",
+  "duration_seconds": 45,
+  "language": "en",
+  "publish_at": "2026-11-10T17:30:00Z",
+  "fact_check": {
+    "claim": "The cerebellum predicts self-generated movements and attenuates the resulting somatosensory response; introducing a delay via a robotic 'tickle machine' can make self-tickling feel ticklish.",
+    "source_hint": "Blakemore, Wolpert & Frith, 'Why can't you tickle yourself?', Neuroreport (2000); standard neuroscience textbooks on corollary discharge / sensory attenuation. Verify wording before publishing.",
+    "verified": false
+  },
+  "hooks": [
+    "Try tickling yourself. Nothing. Here's why.",
+    "Your brain cancels touch before you feel it.",
+    "Tickling isn't about your skin at all."
+  ],
+  "selected_hook": 0,
+  "titles": [
+    "Why You Physically Can't Tickle Yourself (It's Not Your Skin)",
+    "Your Brain Deletes This Sensation Before You Feel It",
+    "Scientists Made A Robot That Finally Let People Tickle Themselves"
+  ],
+  "beats": [
+    {
+      "t": "0-3",
+      "vo": "Try tickling yourself. Nothing. Here's why.",
+      "on_screen": "GO ON. TRY IT.",
+      "visual": "Extreme close-up of fingers hovering over a palm; hand twitches on frame 1; zero title card",
+      "device": "hook / you-test"
+    },
+    {
+      "t": "3-8",
+      "vo": "Someone else makes you squirm. Your own fingers do nothing. Same skin.",
+      "on_screen": "SAME SKIN. DIFFERENT RESULT.",
+      "visual": "Split screen: other person's hand vs own hand on the same palm",
+      "device": "open loop"
+    },
+    {
+      "t": "8-16",
+      "vo": "Your cerebellum predicts your own movements. It sends that prediction ahead, then cancels the sensation it already expected.",
+      "on_screen": "PREDICTION SENT → TOUCH CANCELLED",
+      "visual": "Simple animated brain diagram: arrow from cerebellum racing ahead to the skin",
+      "device": "mechanism / progressive graphic"
+    },
+    {
+      "t": "16-22",
+      "vo": "That's why a surprise touch lands, and a planned one disappears. Predictable equals invisible.",
+      "on_screen": "PREDICTABLE = INVISIBLE",
+      "visual": "Two taps on the arm, one expected one from off-frame; zoom punch on the second",
+      "device": "pattern interrupt"
+    },
+    {
+      "t": "22-27",
+      "vo": "Then researchers added a delay. Suddenly, people could tickle themselves.",
+      "on_screen": "BUT THEN... A DELAY",
+      "visual": "Lab-style robot arm with a foam tip; timer counting milliseconds; colour grade shifts warm",
+      "device": "re-hook"
+    },
+    {
+      "t": "27-37",
+      "vo": "Break the prediction and the brake lifts. The brain only silences what it can forecast in time. A few hundred milliseconds of lag made the touch feel like someone else's.",
+      "on_screen": "200 MS OF LAG = SOMEONE ELSE'S HAND",
+      "visual": "Split timeline animation: on-time touch greyed out, delayed touch lighting up",
+      "device": "mechanism / number"
+    },
+    {
+      "t": "37-43",
+      "vo": "So tickling isn't about touch. It's about your brain failing to be surprised.",
+      "on_screen": "TICKLING = FAILED PREDICTION",
+      "visual": "Back to the opening close-up of the palm; slow push-in",
+      "device": "payoff"
+    },
+    {
+      "t": "43-45",
+      "vo": "Could you? Yes or no?",
+      "on_screen": "YES OR NO?",
+      "visual": "Final frame matches frame 1 exactly for a seamless loop",
+      "device": "loop / CTA"
+    }
+  ],
+  "payoff": "Tickling is a prediction error, not a kind of touch.",
+  "cta": "Could you actually tickle yourself? Yes or no?",
+  "pinned_comment": "Serious question: did anyone actually manage to tickle themselves? Yes or no 👀 (Next up: why names vanish in 10 seconds)",
+  "description": "Try tickling yourself. Nothing happens — and the reason has nothing to do with your skin.\n\nYour cerebellum predicts your own movements and dampens the sensation before it arrives. When researchers added a short delay with a robot, self-tickling suddenly worked.\n\nCould you actually tickle yourself? Yes or no?\n\nConcept: sensory attenuation / corollary discharge (Blakemore, Wolpert & Frith). Educational summary, not medical advice.",
+  "hashtags": ["#shorts", "#brain", "#psychology", "#science"],
+  "tags": ["education", "science", "psychology", "brain", "neuroscience", "shorts"],
+  "thumbnail": {
+    "text": "CAN'T TICKLE YOURSELF",
+    "prompt": "High-contrast 9:16 educational thumbnail: a single hand hovering above a palm, bold condensed 3-word text, electric blue and warm orange, no faces, clean studio light"
+  },
+  "video_file": null,
+  "youtube_video_id": null,
+  "notes": "Physically demonstrate the attempt in the first 0.5 s. The viewer must try it before the explanation starts."
+}
