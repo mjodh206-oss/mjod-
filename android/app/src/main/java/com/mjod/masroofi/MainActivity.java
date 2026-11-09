@@ -16,12 +16,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Window window = getWindow();
-        window.setStatusBarColor(0xFFF5F7F5);
-        window.setNavigationBarColor(0xFFF5F7F5);
+        window.setStatusBarColor(0xFFFBF8EF);
+        window.setNavigationBarColor(0xFFFBF8EF);
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
 
         webView = new WebView(this);
-        webView.setBackgroundColor(0xFFF5F7F5);
+        webView.setBackgroundColor(0xFFFBF8EF);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
