@@ -5,6 +5,11 @@ Google Cloud project while logged into the channel's Google account. I never rec
 store it, and never ask for it in chat. You put it in GitHub repo Secrets (or a local `token.json`)
 and the scripts read it from there.
 
+👉 **Want the direct links?** See [docs/AUTH_LINKS.md](AUTH_LINKS.md) — Google Cloud console links,
+this repo's Secrets page, the workflow run page, and the one command that prints *your personal*
+Google consent URL. There is no single "connect my channel" URL that can be sent in chat: a real
+consent URL contains the `client_id` from a Google Cloud project only you can create.
+
 Time: ~15 minutes, once. After this, the loop runs itself.
 
 ---

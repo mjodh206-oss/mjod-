@@ -28,6 +28,11 @@ def main() -> int:
                     help="path to the OAuth client JSON, or set GOOGLE_CLIENT_SECRET_JSON")
     ap.add_argument("--write", default="token.json", help="local output file (gitignored)")
     ap.add_argument("--print", action="store_true", default=True, help="print the token JSON (default)")
+    ap.add_argument("--no-print-token", action="store_true", help="do not echo the token JSON to stdout")
+    ap.add_argument("--port", type=int, default=0,
+                    help="local callback port (0 = auto). Use a fixed port when you need a stable URL.")
+    ap.add_argument("--no-browser", action="store_true",
+                    help="print the EXACT Google consent URL instead of opening a browser")
     args = ap.parse_args()
 
     client = read_secret("GOOGLE_CLIENT_SECRET_JSON", "YT_CLIENT_SECRET_JSON")
@@ -47,9 +52,20 @@ def main() -> int:
         print("ERROR: run `python3 -m pip install -r requirements.txt` first", file=sys.stderr)
         return 2
 
-    print("Opening a browser for Google consent (offline access / refresh token)…")
+    if args.no_browser:
+        print("The exact Google consent URL is printed below. Open it while signed in to the")
+        print("Google account that owns the channel. KEEP THIS PROCESS RUNNING — it is")
+        print("listening on localhost for the callback and will exchange the code for a token.")
+        print("The URL is on accounts.google.com and contains your public client_id only.\n")
+    else:
+        print("Opening a browser for Google consent (offline access / refresh token)…")
     flow = InstalledAppFlow.from_client_config(client, SCOPES)
-    creds = flow.run_local_server(port=0, open_browser=True, prompt="consent", access_type="offline")
+    creds = flow.run_local_server(
+        port=args.port,
+        open_browser=not args.no_browser,
+        prompt="consent",
+        access_type="offline",
+    )
 
     token_json = creds.to_json()
     out = Path(args.write).expanduser()
@@ -62,7 +78,7 @@ def main() -> int:
     print("\nFor GitHub Actions, add TWO repository Secrets:")
     print("  YT_CLIENT_SECRET_JSON = the client JSON contents")
     print("  YT_TOKEN_JSON         = this token JSON contents")
-    if args.print:
+    if args.print and not args.no_print_token:
         print("\n--- TOKEN JSON (store as a secret, never share) ---")
         print(token_json)
         print("--- END ---")

@@ -15,6 +15,10 @@ from GitHub Actions.
 
 ## 1. One-time setup (about 10 minutes, done on your machine)
 
+**Direct links** (Google Cloud console, repo Secrets, workflow run page): `docs/AUTH_LINKS.md`.
+To print the exact Google consent URL instead of opening a browser, add `--no-browser`
+(and optionally `--port 8080`) to `auth_setup.py` below.
+
 1. Google Cloud Console → create a project → enable **YouTube Data API v3** and
    **YouTube Analytics API**.
 2. OAuth consent screen (External, add your own account as a test user) → create an

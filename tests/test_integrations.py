@@ -82,5 +82,30 @@ class QueueTests(unittest.TestCase):
         self.assertFalse(is_due({"publish_at": (now + timedelta(days=1)).isoformat()}, now))
 
 
+class AuthSetupTests(unittest.TestCase):
+    def test_help_works_without_google_dependencies(self):
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, "automation/auth_setup.py", "--help"],
+            cwd=ROOT, capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--no-browser", result.stdout)
+        self.assertIn("--port", result.stdout)
+        self.assertIn("--no-print-token", result.stdout)
+
+    def test_auth_links_doc_has_no_fabricated_consent_url(self):
+        """Every consent URL shown in the doc must be an obvious placeholder, never a real-looking link."""
+        text = (ROOT / "docs" / "AUTH_LINKS.md").read_text(encoding="utf-8")
+        self.assertIn("https://console.cloud.google.com/apis/credentials", text)
+        self.assertIn("https://github.com/mjodh206-oss/mjod-/settings/secrets/actions", text)
+        self.assertIn("--no-browser", text)
+        consent_urls = [line for line in text.splitlines()
+                        if "accounts.google.com/o/oauth2" in line]
+        self.assertTrue(consent_urls)
+        self.assertTrue(all("XXXX" in url for url in consent_urls),
+                        "a consent URL with a real-looking client_id must never be hardcoded")
+
+
 if __name__ == "__main__":
     unittest.main()
