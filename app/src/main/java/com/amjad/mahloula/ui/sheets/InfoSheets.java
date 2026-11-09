@@ -100,21 +100,9 @@ public final class InfoSheets {
         });
 
         sh.content.addView(UiKit.sectionTitleIn(a, ar ? "🎨 المظهر واللغة" : "🎨 Look & language"));
-        sh.content.addView(UiKit.label(a, ar ? "السمة" : "Theme"));
-        String[] themes = ar ? new String[]{"تلقائي (النظام)", "فاتح", "داكن"} : new String[]{"System", "Light", "Dark"};
-        sh.content.addView(UiKit.chipRow(a, themes, p.themeMode(), i -> {
-            p.themeMode(i);
-            sh.dismiss();
-            a.recreate();
-        }));
-        sh.content.addView(UiKit.label(a, ar ? "اللغة" : "Language"));
-        String[] langs = ar ? new String[]{"العربية", "English", "لغة النظام"} : new String[]{"Arabic", "English", "System"};
-        int lSel = p.language().equals("ar") ? 0 : p.language().equals("en") ? 1 : 2;
-        sh.content.addView(UiKit.chipRow(a, langs, lSel, i -> {
-            p.language(i == 0 ? "ar" : i == 1 ? "en" : "system");
-            sh.dismiss();
-            a.recreate();
-        }));
+        sh.content.addView(UiKit.label(a, ar
+                ? "مثبّت: ألوان مَحلولة الرسمية (أبيض/أسود/برتقالي) بلا خيارات، واللغة تتبع لغة نظام جهازك تلقائيًا."
+                : "Fixed: official Mahloula colors (white/black/orange); language follows your system automatically."));
 
         Switch sound = switchRow(a, ar ? "صوت التنبيهات والإشعارات" : "Alert & notification sounds", p.soundOn());
         sound.setOnCheckedChangeListener((v, on) -> p.soundOn(on));
@@ -299,7 +287,7 @@ public final class InfoSheets {
         llp.gravity = Gravity.CENTER_HORIZONTAL;
         logo.setLayoutParams(llp);
         sh.content.addView(logo);
-        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.4.0", 18, R.color.text_primary, Typeface.BOLD);
+        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.4.1", 18, R.color.text_primary, Typeface.BOLD);
         name.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(a, 8);
@@ -321,7 +309,7 @@ public final class InfoSheets {
         dev.setLayoutParams(dlp);
         credit.addView(dev);
         TextView line = Ui.txt(a, ar
-                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.4.0"
+                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.4.1"
                 : "Authored & developed by Amjad Habib — version 1.1.0", 12.5f, R.color.text_tertiary);
         line.setGravity(Gravity.CENTER);
         credit.addView(line);

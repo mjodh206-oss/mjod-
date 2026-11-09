@@ -58,12 +58,12 @@ public final class Prefs {
 
     // ---------- المظهر ----------
     /** 0 = تلقائي، 1 = فاتح، 2 = داكن */
-    public int themeMode() { return sp.getInt("theme_mode", 0); }
-    public void themeMode(int v) { sp.edit().putInt("theme_mode", v).apply(); }
+    public int themeMode() { return 1; }  // مثبّت: فاتح دائمًا
+    public void themeMode(int v) { /* مثبتة */ }
 
     /** ar / en / system */
-    public String language() { return sp.getString("language", "ar"); }
-    public void language(String v) { sp.edit().putString("language", v).apply(); }
+    public String language() { return java.util.Locale.getDefault().getLanguage().equals("en") ? "en" : "ar"; }  // لغة النظام فقط
+    public void language(String v) { /* تتبع النظام */ }
 
     // ---------- الخصوصية ----------
     public boolean hideBalance() { return sp.getBoolean("hide_balance", false); }
