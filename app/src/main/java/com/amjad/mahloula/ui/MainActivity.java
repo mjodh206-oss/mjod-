@@ -122,6 +122,10 @@ public class MainActivity extends BaseActivity implements Repo.OnChange {
         if (p.lastDailyDay() == today) return;
         p.lastDailyDay(today);
         Notifier.postDaily(this);
+        double budget2 = p.monthlyBudget();
+        if (budget2 > 0 && Repo.get(this).monthTotals(now).expense >= budget2 * 0.9) {
+            com.amjad.mahloula.notify.Warn90.fire(this);
+        }
         int pd = Advisor.detectPayday(this);
         if (pd > 0 && pd == now.get(java.util.Calendar.DAY_OF_MONTH) && p.lastPaydayDay() != today) {
             p.lastPaydayDay(today);

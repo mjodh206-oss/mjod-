@@ -73,6 +73,9 @@ public final class Prefs {
     public boolean soundOn() { return sp.getBoolean("sound_on", true); }
     public void soundOn(boolean v) { sp.edit().putBoolean("sound_on", v).apply(); }
 
+    public int lastWarnMonth() { return sp.getInt("last_warn_month", 0); }
+    public void lastWarnMonth(int v) { sp.edit().putInt("last_warn_month", v).apply(); }
+
     public long lastPaydayDay() { return sp.getLong("last_payday_day", 0L); }
     public void lastPaydayDay(long v) { sp.edit().putLong("last_payday_day", v).apply(); }
 

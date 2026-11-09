@@ -17,7 +17,7 @@ BUILD="$ROOT/build"
 OUT="$ROOT/dist"
 KEYSTORE="$ROOT/keys/mahloula-release.jks"
 VERSION_CODE="${VERSION_CODE:-1}"
-VERSION_NAME="${VERSION_NAME:-1.6.0}"
+VERSION_NAME="${VERSION_NAME:-1.7.0}"
 
 echo "──────────────────────────────────────────────"
 echo " بناء تطبيق مَحلولة  v$VERSION_NAME ($VERSION_CODE)"

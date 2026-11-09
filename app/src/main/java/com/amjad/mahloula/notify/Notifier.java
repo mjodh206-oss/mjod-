@@ -27,6 +27,8 @@ public final class Notifier {
 
     public static final String CHANNEL = "mahloula_v3";
 
+    public static final String CHANNEL_ALARM = "mahloula_alarm_v1";
+
     public static void ensureChannel(Context c) {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -52,6 +54,56 @@ public final class Notifier {
                     + "://" + c.getPackageName() + "/" + R.raw.chime), aa);
         }
         nm.createNotificationChannel(ch);
+        if (nm.getNotificationChannel(CHANNEL_ALARM) == null) {
+            NotificationChannel al = new NotificationChannel(CHANNEL_ALARM,
+                    Prefs.get(c).language().equals("en") ? "90% budget danger alarm" : "إنذار خطر: ٩٠٪ من الميزانية",
+                    NotificationManager.IMPORTANCE_HIGH);
+            al.setDescription(Prefs.get(c).language().equals("en")
+                    ? "Fires once a month when spending crosses 90% of budget"
+                    : "يعمل مرة شهريًا عند تجاوز ٩٠٪ من الميزانية");
+            al.enableVibration(true);
+            al.setVibrationPattern(new long[]{0, 500, 120, 500, 120, 700});
+            al.setBypassDnd(true);
+            al.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            al.enableLights(true);
+            al.setLightColor(0xFFE11D3C);
+            if (Prefs.get(c).soundOn()) {
+                android.media.AudioAttributes aa = new android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build();
+                al.setSound(android.net.Uri.parse(android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
+                        + "://" + c.getPackageName() + "/" + R.raw.alarm), aa);
+            }
+            nm.createNotificationChannel(al);
+        }
+    }
+
+    /** إشعار إنذار الخطر (قناة مستقلة برنة الصفير). */
+    public static void showAlarm(Context c, String title, String body) {
+        NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm == null) return;
+        Intent open = new Intent(c, MainActivity.class);
+        open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pi = PendingIntent.getActivity(c, 2003, open,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26
+                ? new Notification.Builder(c, CHANNEL_ALARM)
+                : new Notification.Builder(c);
+        b.setSmallIcon(R.drawable.ic_alert)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setStyle(new Notification.BigTextStyle().bigText(body))
+                .setContentIntent(pi)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setAutoCancel(true);
+        if (Build.VERSION.SDK_INT < 26) {
+            b.setSound(android.net.Uri.parse(android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://" + c.getPackageName() + "/" + R.raw.alarm));
+        }
+        nm.notify(778, b.build());
     }
 
     public static void scheduleDaily(Context c) {

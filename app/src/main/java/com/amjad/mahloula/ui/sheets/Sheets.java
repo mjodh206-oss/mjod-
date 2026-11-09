@@ -181,8 +181,14 @@ public final class Sheets {
             t.note = note.getText().toString().trim();
             t.ts = ts[0];
             final Runnable doSave = () -> {
+                double before = r.monthTotals(java.util.Calendar.getInstance()).expense;
                 if (edit == null) r.addTx(t);
                 else r.updateTx(t);
+                double after = r.monthTotals(java.util.Calendar.getInstance()).expense;
+                double budgetNow = com.amjad.mahloula.util.Prefs.get(a).monthlyBudget();
+                if (budgetNow > 0 && before < budgetNow * 0.9 && after >= budgetNow * 0.9) {
+                    com.amjad.mahloula.notify.Warn90.fire(a);
+                }
                 sh.dismiss();
                 java.util.List<com.amjad.mahloula.brain.Advisor.Insight> g =
                         com.amjad.mahloula.brain.Advisor.guardTx(a, t);
