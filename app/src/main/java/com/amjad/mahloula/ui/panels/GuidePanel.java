@@ -58,6 +58,8 @@ public class GuidePanel implements Panel {
         col.removeAllViews();
         col.addView(header());
         col.addView(myNumbers());
+        col.addView(scorecard());
+        col.addView(envelopesCard());
         col.addView(planCard());
         col.addView(alertsCard());
         col.addView(lessonsCard());
@@ -150,6 +152,83 @@ public class GuidePanel implements Panel {
         row.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
         row.addView(Ui.txt(a, value, 14.5f, colorRes, Typeface.BOLD));
         return row;
+    }
+
+    // ---------- هذا الشهر مقابل الماضي ----------
+    private View scorecard() {
+        Repo r = Repo.get(a);
+        Calendar now = Calendar.getInstance();
+        Calendar prev = (Calendar) now.clone();
+        prev.add(Calendar.MONTH, -1);
+        Models.MonthTotals mt = r.monthTotals(now);
+        Models.MonthTotals pv = r.monthTotals(prev);
+        if (pv.expense <= 0 && pv.income <= 0) return new View(a);
+        LinearLayout card = UiKit.card(a, 18);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        card.addView(Ui.txt(a, ar() ? "هذا الشهر مقابل الماضي" : "This month vs last", 16, R.color.text_primary, Typeface.BOLD));
+        card.addView(deltaLine(ar() ? "المصروف" : "Spending", mt.expense, pv.expense, true));
+        card.addView(deltaLine(ar() ? "الدخل" : "Income", mt.income, pv.income, false));
+        card.addView(deltaLine(ar() ? "الادخار" : "Saved", mt.saved, pv.saved, false));
+        return card;
+    }
+
+    private View deltaLine(String label, double nowV, double prevV, boolean lowerBetter) {
+        LinearLayout row = Ui.h(a);
+        row.setBackground(Ui.round(Ui.color(a, R.color.surface_2), 12, a));
+        row.setPadding(Ui.dp(a, 12), Ui.dp(a, 9), Ui.dp(a, 12), Ui.dp(a, 9));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 7);
+        row.setLayoutParams(lp);
+        row.addView(Ui.txt(a, label, 13, R.color.text_secondary, Typeface.BOLD));
+        row.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
+        row.addView(Ui.txt(a, Fmt.amount(a, nowV), 14, R.color.text_primary, Typeface.BOLD));
+        if (prevV > 0) {
+            double d = (nowV - prevV) / prevV * 100;
+            boolean good = lowerBetter ? d <= 0 : d >= 0;
+            TextView chip = Ui.txt(a, (d >= 0 ? "▲ " : "▼ ") + Fmt.percent(a, Math.abs(d)),
+                    12, good ? R.color.text_primary : R.color.expense, Typeface.BOLD);
+            LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(-2, -2);
+            clp.setMarginStart(Ui.dp(a, 8));
+            chip.setLayoutParams(clp);
+            row.addView(chip);
+        }
+        return row;
+    }
+
+    // ---------- المغلفات المقترحة ----------
+    private View envelopesCard() {
+        List<com.amjad.mahloula.brain.Advisor.Env> envs = com.amjad.mahloula.brain.Advisor.envelopes(a);
+        if (envs.isEmpty()) return new View(a);
+        LinearLayout card = UiKit.card(a, 18);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        card.addView(Ui.txt(a, ar() ? "مغلفاتك المقترحة (من نمط 90 يومًا)" : "Your suggested envelopes", 16, R.color.text_primary, Typeface.BOLD));
+        card.addView(Ui.txt(a, ar() ? "سقف مقترح لكل فئة = متوسطك × 0.9" : "Suggested cap per category = your average × 0.9", 12, R.color.text_tertiary));
+        for (com.amjad.mahloula.brain.Advisor.Env e : envs) {
+            LinearLayout item = Ui.v(a);
+            item.setBackground(Ui.round(Ui.color(a, R.color.surface_2), 13, a));
+            item.setPadding(Ui.dp(a, 12), Ui.dp(a, 10), Ui.dp(a, 12), Ui.dp(a, 10));
+            LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(-1, -2);
+            ilp.topMargin = Ui.dp(a, 8);
+            item.setLayoutParams(ilp);
+            LinearLayout head = Ui.h(a);
+            head.addView(Ui.txt(a, Models.cat(e.cat).ar, 13.5f, R.color.text_primary, Typeface.BOLD));
+            head.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
+            boolean over = e.spent > e.cap;
+            head.addView(Ui.txt(a, Fmt.amount(a, e.spent) + " / " + Fmt.amount(a, e.cap), 12.5f,
+                    over ? R.color.expense : R.color.text_secondary, Typeface.BOLD));
+            item.addView(head);
+            Charts.HBar bar = new Charts.HBar(a);
+            LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-1, -2);
+            blp.topMargin = Ui.dp(a, 6);
+            bar.setLayoutParams(blp);
+            bar.set((float) (e.cap > 0 ? e.spent / e.cap : 1f), over ? R.color.expense : R.color.on_panel);
+            item.addView(bar);
+        }
+        return card;
     }
 
     // ---------- الخطة الشخصية ----------

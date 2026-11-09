@@ -22,6 +22,7 @@ import com.amjad.mahloula.util.Prefs;
 import com.amjad.mahloula.util.Ui;
 
 import java.io.File;
+import java.util.Calendar;
 
 /** شيتات المعلومات: الإعدادات، حول التطبيق، النسخ الاحتياطي، الدرس، القاعدة. */
 public final class InfoSheets {
@@ -287,7 +288,7 @@ public final class InfoSheets {
         llp.gravity = Gravity.CENTER_HORIZONTAL;
         logo.setLayoutParams(llp);
         sh.content.addView(logo);
-        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.5.1", 18, R.color.text_primary, Typeface.BOLD);
+        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.6.0", 18, R.color.text_primary, Typeface.BOLD);
         name.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(a, 8);
@@ -309,7 +310,7 @@ public final class InfoSheets {
         dev.setLayoutParams(dlp);
         credit.addView(dev);
         TextView line = Ui.txt(a, ar
-                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.5.1"
+                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.6.0"
                 : "Authored & developed by Amjad Habib — version 1.1.0", 12.5f, R.color.text_tertiary);
         line.setGravity(Gravity.CENTER);
         credit.addView(line);
@@ -339,6 +340,86 @@ public final class InfoSheets {
             c2.addView(b2);
             sh.content.addView(c2);
         }
+        sh.show();
+    }
+
+
+    // ---------------- سيموليتر التوفير ----------------
+    public static void simulator(Activity a) {
+        final boolean ar = ar(a);
+        final com.amjad.mahloula.data.Repo r = com.amjad.mahloula.data.Repo.get(a);
+        final com.amjad.mahloula.util.Prefs p = com.amjad.mahloula.util.Prefs.get(a);
+        UiKit.Sheet sh = UiKit.sheet(a, ar ? "🧮 سيموليتر التوفير" : "Savings simulator");
+        sh.content.addView(Ui.txt(a, ar
+                ? "اختر نسبة خفض وفئة، وشاهد الأثر فورًا على توقع شهرك ووسادتك وأهدافك — بلا التزام حقيقي."
+                : "Pick a cut % and category; see the impact instantly.", 13, R.color.text_secondary));
+        sh.content.addView(UiKit.label(a, ar ? "نسبة الخفض" : "Cut percent"));
+        final int[] cut = {10};
+        final int[] catSel = {0};
+        final java.util.List<com.amjad.mahloula.brain.Advisor.Env> envs = com.amjad.mahloula.brain.Advisor.envelopes(a);
+        final TextView result = Ui.txt(a, "", 13.5f, R.color.text_primary, Typeface.BOLD);
+        result.setLineSpacing(0, 1.4f);
+        result.setBackground(Ui.round(Ui.color(a, R.color.surface_3), 14, a));
+        result.setPadding(Ui.dp(a, 14), Ui.dp(a, 12), Ui.dp(a, 14), Ui.dp(a, 12));
+        final Runnable[] rec = new Runnable[1];
+        UiKit.HorizontalScroll crow = UiKit.chipRow(a, new String[]{"5%", "10%", "15%", "25%"}, 1, i -> {
+            cut[0] = new int[]{5, 10, 15, 25}[i];
+            rec[0].run();
+        });
+        sh.content.addView(crow);
+        String[] names = new String[Math.max(1, envs.size())];
+        for (int i = 0; i < envs.size(); i++) names[i] = com.amjad.mahloula.data.Models.cat(envs.get(i).cat).ar;
+        if (envs.isEmpty()) names[0] = ar ? "كل المصروف" : "All spending";
+        sh.content.addView(UiKit.label(a, ar ? "الفئة" : "Category"));
+        UiKit.HorizontalScroll catrow = UiKit.chipRow(a, names, 0, i -> { catSel[0] = i; rec[0].run(); });
+        sh.content.addView(catrow);
+        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
+        rlp.topMargin = Ui.dp(a, 12);
+        result.setLayoutParams(rlp);
+        sh.content.addView(result);
+        rec[0] = () -> {
+            Calendar now = Calendar.getInstance();
+            com.amjad.mahloula.data.Models.MonthTotals mt = r.monthTotals(now);
+            int day = now.get(Calendar.DAY_OF_MONTH);
+            int dim = now.getActualMaximum(Calendar.DAY_OF_MONTH);
+            int left = dim - day;
+            double catSpent = envs.isEmpty() ? mt.expense : (catSel[0] < envs.size() ? envs.get(catSel[0]).spent : mt.expense);
+            double future = catSpent * left / Math.max(1, day);
+            double saving = future * cut[0] / 100.0;
+            double proj = com.amjad.mahloula.brain.Advisor.forecastMonth(a);
+            double newProj = Math.max(0, proj - saving);
+            double budget = p.monthlyBudget();
+            StringBuilder sb = new StringBuilder();
+            sb.append(ar ? "التوفير المتوقع بقية الشهر: " : "Expected saving rest of month: ").append(Fmt.money(a, saving)).append('\n');
+            sb.append(ar ? "توقع نهاية الشهر: " : "Projected month-end: ").append(Fmt.money(a, proj))
+              .append(" ← ").append(Fmt.money(a, newProj));
+            if (budget > 0) sb.append(newProj <= budget ? (ar ? "  ✔ ضمن السقف" : "  ✔ within cap") : (ar ? "  ⚠️ فوق السقف" : "  ⚠️ over cap"));
+            sb.append('\n');
+            double incRef = mt.income > 0 ? mt.income : p.monthlyIncome();
+            if (incRef > 0) {
+                double srNew = (mt.saved + saving) / incRef * 100;
+                sb.append(ar ? "معدل الادخار يصبح: " : "Savings rate becomes: ").append(Fmt.percent(a, srNew)).append('\n');
+            }
+            double avg90 = r.avgDaily(now.getTimeInMillis() - 90L * 86400000L, now.getTimeInMillis());
+            if (avg90 > 0) sb.append(ar ? "وسادتك تكسب يوميًا: " : "Cushion gains daily: ").append(Fmt.money(a, saving / Math.max(1, left)));
+            java.util.List<com.amjad.mahloula.data.Models.Goal> goals = r.goals();
+            for (com.amjad.mahloula.data.Models.Goal g : goals) {
+                if (g.due > 0 && g.target > g.saved) {
+                    double monthlyOld = Math.max(mt.saved, 0);
+                    double monthlyNew = monthlyOld + saving;
+                    if (monthlyNew > 0) {
+                        double mNew = (g.target - g.saved) / monthlyNew;
+                        sb.append('\n').append(ar ? "هدف «" : "Goal '").append(g.title)
+                          .append(ar ? "» يُبلغ في " : "' reached in ").append(Fmt.digits(a, String.valueOf((int) Math.ceil(mNew))))
+                          .append(ar ? " شهرًا بدل " : " months instead of ")
+                          .append(monthlyOld > 0 ? Fmt.digits(a, String.valueOf((int) Math.ceil((g.target - g.saved) / monthlyOld))) : "∞");
+                    }
+                    break;
+                }
+            }
+            result.setText(sb.toString());
+        };
+        rec[0].run();
         sh.show();
     }
 

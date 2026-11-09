@@ -122,6 +122,14 @@ public class MainActivity extends BaseActivity implements Repo.OnChange {
         if (p.lastDailyDay() == today) return;
         p.lastDailyDay(today);
         Notifier.postDaily(this);
+        int pd = Advisor.detectPayday(this);
+        if (pd > 0 && pd == now.get(java.util.Calendar.DAY_OF_MONTH) && p.lastPaydayDay() != today) {
+            p.lastPaydayDay(today);
+            boolean ar2 = !p.language().equals("en");
+            Notifier.show(this, ar2 ? "يوم الراتب 💰 احمِ حصتك أولًا" : "Payday 💰 protect your share first",
+                    ar2 ? "رصدها المستشار من نمط دخلك: حوّل نسبة ادخارك الآن، ثم وزّع المغلفات، وأنفق الباقي بلا ذنب."
+                        : "Detected from your income pattern: transfer savings first, then envelopes, then spend guilt-free.");
+        }
     }
 
     /** إذا ظهر تنبيه حرج جديد منذ آخر زيارة → إشعار بصوت فورًا. */

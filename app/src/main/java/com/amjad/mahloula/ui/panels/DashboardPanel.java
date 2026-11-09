@@ -66,6 +66,7 @@ public class DashboardPanel implements Panel {
         col.addView(topCatsCard(r, month));
         col.addView(advisorCard());
         col.addView(quickActions());
+        col.addView(simButton());
     }
 
     // ---------- الترويسة: رصيد + صحة + خصوصية ----------
@@ -372,6 +373,15 @@ public class DashboardPanel implements Panel {
             case "check_circle": return R.drawable.ic_check_circle;
             default: return R.drawable.ic_sparkle;
         }
+    }
+
+    private View simButton() {
+        TextView b = UiKit.button(a, ar() ? "🧮 سيموليتر التوفير: جرّب قبل أن تقرر" : "🧮 Savings simulator: try before you decide", 0, false);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 12);
+        b.setLayoutParams(lp);
+        b.setOnClickListener(v -> InfoSheets.simulator(a));
+        return b;
     }
 
     // ---------- 4 أزرار كبيرة واضحة ----------

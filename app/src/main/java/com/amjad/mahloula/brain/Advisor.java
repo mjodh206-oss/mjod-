@@ -442,6 +442,90 @@ public final class Advisor {
             }
         }
 
+
+        // ================= الدفعة الثالثة: ذكاء شخصي أعمق =================
+        // 12) تضخم يوم الراتب
+        int payday = detectPayday(c);
+        if (payday > 0 && mt.expense > 0) {
+            double near = 0;
+            for (Models.Tx t : r.txRange(ms.getTimeInMillis(), me.getTimeInMillis(), 0, null, null)) {
+                Calendar tc = Calendar.getInstance(); tc.setTimeInMillis(t.ts);
+                int d = tc.get(Calendar.DAY_OF_MONTH);
+                if (d >= payday && d <= payday + 2) near += t.amount;
+            }
+            if (near / mt.expense > 0.4) out.add(new Insight(1, "trend_up",
+                    ar ? "تضخم يوم الراتب" : "Payday inflation",
+                    ar ? Fmt.percent(c, near / mt.expense * 100) + " من مصروف الشهر يُصرف في أيام راتبك الثلاثة الأولى ("
+                       + Fmt.digits(c, String.valueOf(payday)) + " من كل شهر). الفرحة الأولى أغلى فرحة — أجّل أكبر شراء لليوم الخامس."
+                       : Fmt.percent(c, near / mt.expense * 100) + " of monthly spend lands in the first 3 days after payday.",
+                    null, TAB_TX));
+        }
+
+        // 13) خرق المغلفات المقترحة مبكرًا
+        int dayNow = now.get(Calendar.DAY_OF_MONTH);
+        for (Env e : envelopes(c)) {
+            if (e.spent > e.cap && dayNow <= 20) {
+                out.add(new Insight(1, "pie",
+                        ar ? "مغلف «" + Models.cat(e.cat).ar + "» تجاوز اقتراحه" : "Envelope '" + Models.cat(e.cat).en + "' over",
+                        ar ? "صرفت " + Fmt.money(c, e.spent) + " مقابل مغلف مقترح " + Fmt.money(c, e.cap) + " (مبني على نمطك في 90 يومًا × 0.9)."
+                           : "Spent " + Fmt.money(c, e.spent) + " vs suggested " + Fmt.money(c, e.cap) + ".",
+                        ar ? "عرض المغلفات" : "Envelopes", TAB_GUIDE));
+                break;
+            }
+        }
+
+        // 14) شذوذ شخصي مقابل وسيط كل فئة
+        {
+            java.util.HashMap<Integer, java.util.ArrayList<Double>> hist = new java.util.HashMap<>();
+            for (Models.Tx t : r.allTx()) if (t.isExpense()) {
+                java.util.ArrayList<Double> l = hist.get(t.cat);
+                if (l == null) { l = new java.util.ArrayList<>(); hist.put(t.cat, l); }
+                l.add(t.amount);
+            }
+            for (Models.Tx t : r.txRange(ms.getTimeInMillis(), me.getTimeInMillis(), 0, null, null)) {
+                java.util.ArrayList<Double> l = hist.get(t.cat);
+                if (l == null || l.size() < 5) continue;
+                java.util.Collections.sort(l);
+                double med = l.get(l.size() / 2);
+                if (med > 0 && t.amount > med * 4) {
+                    out.add(new Insight(1, "alert",
+                            ar ? "عملية غير معتادة منك" : "Unusual for you",
+                            ar ? "«" + (t.note == null || t.note.isEmpty() ? Models.cat(t.cat).ar : t.note) + "» بمبلغ "
+                               + Fmt.money(c, t.amount) + " بينما وسيطك في هذه الفئة " + Fmt.money(c, med) + ". استثناء؟ سجّل سببه في الملاحظات."
+                               : "This entry is 4x your category median.",
+                            null, TAB_NOTES));
+                    break;
+                }
+            }
+        }
+
+        // 15) تنويع مصادر الدخل
+        if (mt.income > 0) {
+            java.util.HashSet<String> src = new java.util.HashSet<>();
+            for (Models.Tx t : r.txRange(ms.getTimeInMillis(), me.getTimeInMillis(), 1, null, null))
+                src.add(t.note == null || t.note.isEmpty() ? "-" : t.note);
+            if (src.size() == 1) out.add(new Insight(0, "trend_up",
+                    ar ? "دخل الشهر من مصدر واحد" : "Single income source",
+                    ar ? "كل بيض الشهر في سلة واحدة. درس الأكاديمية: الدخل الجانبي الآمن يبدأ بمهارة تملكها وساعتين مساءً."
+                       : "All income from one source this month.",
+                    ar ? "درس الدخل الجانبي" : "Side-income lesson", TAB_GUIDE));
+        }
+
+        // 16) حصة نهاية الأسبوع
+        if (mt.expense > 0) {
+            double we = 0;
+            for (Models.Tx t : r.txRange(ms.getTimeInMillis(), me.getTimeInMillis(), 0, null, null)) {
+                Calendar tc = Calendar.getInstance(); tc.setTimeInMillis(t.ts);
+                int dw = tc.get(Calendar.DAY_OF_WEEK);
+                if (dw == Calendar.FRIDAY || dw == Calendar.SATURDAY) we += t.amount;
+            }
+            if (we / mt.expense > 0.45) out.add(new Insight(0, "pie",
+                    ar ? "نهايتك الأسبوعية مكلفة" : "Pricey weekends",
+                    ar ? Fmt.percent(c, we / mt.expense * 100) + " من مصروفك يقع في الخميس-السبت. خطّط متعة مجانية واحدة كل أسبوع لتستمتع بلا ندم."
+                       : Fmt.percent(c, we / mt.expense * 100) + " of spend lands on weekends.",
+                    null, TAB_GUIDE));
+        }
+
 return out;
     }
 
@@ -630,6 +714,44 @@ return out;
                 if (!dup) out.add(new String[]{label, Fmt.money(c, sum / hits)});
             }
         }
+        return out;
+    }
+
+    /** يوم الراتب الأكثر تكرارًا (0 إن لم يُكتشف). */
+    public static int detectPayday(Context c) {
+        int[] freq = new int[32];
+        for (Models.Tx t : Repo.get(c).allTx()) if (!t.isExpense()) {
+            Calendar d = Calendar.getInstance(); d.setTimeInMillis(t.ts);
+            freq[d.get(Calendar.DAY_OF_MONTH)]++;
+        }
+        int best = 0, bd = 0;
+        for (int i = 1; i <= 31; i++) if (freq[i] > best) { best = freq[i]; bd = i; }
+        return best >= 2 ? bd : 0;
+    }
+
+    /** مغلف مقترح لكل فئة: متوسط 90 يومًا × 0.9 مع صرف الشهر الحالي. */
+    public static final class Env {
+        public int cat; public double cap; public double spent;
+    }
+
+    public static List<Env> envelopes(Context c) {
+        Repo r = Repo.get(c);
+        Calendar now = Calendar.getInstance();
+        long to = now.getTimeInMillis();
+        long from = to - 90L * 86400000L;
+        List<Models.CatTotal> base = r.catTotals(from, to, 0);
+        List<Models.CatTotal> cur = r.catTotals(Fmt.startOfMonth(now).getTimeInMillis(), Fmt.endOfMonth(now).getTimeInMillis(), 0);
+        List<Env> out = new ArrayList<>();
+        for (Models.CatTotal ct : base) {
+            double cap = ct.total / 3.0 * 0.9;
+            if (cap <= 0) continue;
+            double spent = 0;
+            for (Models.CatTotal q : cur) if (q.cat == ct.cat) spent = q.total;
+            Env e = new Env(); e.cat = ct.cat; e.cap = cap; e.spent = spent;
+            out.add(e);
+        }
+        java.util.Collections.sort(out, (a, b) -> Double.compare(b.cap, a.cap));
+        if (out.size() > 5) out = new ArrayList<>(out.subList(0, 5));
         return out;
     }
 }
