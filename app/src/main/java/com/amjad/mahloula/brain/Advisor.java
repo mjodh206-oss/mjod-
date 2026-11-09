@@ -38,6 +38,57 @@ public final class Advisor {
 
     public static final int TAB_DASH = 0, TAB_TX = 1, TAB_DEBT = 2, TAB_NOTES = 3, TAB_GUIDE = 4;
 
+    /** حارس لحظي: فحوص فورية تُنفذ مباشرة بعد حفظ أي مصروف. */
+    public static List<Insight> guardTx(Context c, Models.Tx t) {
+        List<Insight> out = new ArrayList<>();
+        if (t == null || !t.isExpense()) return out;
+        Repo r = Repo.get(c);
+        Prefs p = Prefs.get(c);
+        boolean ar = !p.language().equals("en");
+        Calendar now = Calendar.getInstance();
+        Models.MonthTotals mt = r.monthTotals(now);
+        double budget = p.monthlyBudget();
+        if (budget > 0) {
+            if (mt.expense > budget) {
+                out.add(new Insight(2, "alert",
+                        ar ? "تجاوزت ميزانية الشهر!" : "Monthly budget exceeded!",
+                        ar ? "صار صرفك " + Fmt.money(c, mt.expense) + " من سقف " + Fmt.money(c, budget)
+                           + ". أوقف الصرف غير الضروري اليوم، وراجع خطتك في خانة تعلّم."
+                           : "Spent " + Fmt.money(c, mt.expense) + " of a " + Fmt.money(c, budget)
+                           + " cap. Pause non-essentials today.",
+                        ar ? "عرض الخطة" : "See plan", TAB_GUIDE));
+            } else if (mt.expense >= budget * 0.8) {
+                out.add(new Insight(1, "trend_down",
+                        ar ? "اقتربت من سقف الميزانية" : "Approaching budget cap",
+                        ar ? "استهلكت " + Fmt.percent(c, mt.expense / budget * 100) + " من ميزانيتك، والمتبقي "
+                           + Fmt.money(c, budget - mt.expense) + " — وزّعها بحذر على الأيام الباقية."
+                           : "Used " + Fmt.percent(c, mt.expense / budget * 100) + " of budget; spend the rest carefully.",
+                        null, TAB_DASH));
+            }
+            if (t.amount > budget * 0.25) {
+                out.add(new Insight(2, "pie",
+                        ar ? "مصروف ضخم دفعة واحدة" : "Large single expense",
+                        ar ? "هذه العملية وحدها " + Fmt.percent(c, t.amount / budget * 100)
+                           + " من ميزانية شهر كامل. إن لم تكن ضرورة قصوى، قسّطها أو أجّلها."
+                           : "This single entry is " + Fmt.percent(c, t.amount / budget * 100)
+                           + " of a whole month's budget.",
+                        null, TAB_TX));
+            }
+        }
+        int day = now.get(Calendar.DAY_OF_MONTH);
+        double avgDay = day > 1 ? mt.expense / day : mt.expense;
+        if (avgDay > 0 && mt.expense - t.amount > 0 && t.amount > avgDay * 3) {
+            out.add(new Insight(2, "trend_down",
+                    ar ? "مصروف شاذ عن نمطك" : "Anomaly vs your pattern",
+                    ar ? "متوسط صرفك اليومي هذا الشهر " + Fmt.money(c, avgDay) + "، وهذه العملية تعادل "
+                       + Fmt.digits(c, String.valueOf((int) Math.round(t.amount / avgDay))) + " أضعافه."
+                       : "Your daily average is " + Fmt.money(c, avgDay) + "; this entry is several times that.",
+                    null, TAB_TX));
+        }
+        if (out.size() > 2) out = new ArrayList<>(out.subList(0, 2));
+        return out;
+    }
+
     /** فحص شامل يولّد قائمة التنبيهات مرتبة بالأهمية. */
     public static List<Insight> scan(Context c) {
         List<Insight> out = new ArrayList<>();

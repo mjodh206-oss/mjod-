@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.amjad.mahloula.R;
 import com.amjad.mahloula.data.Models;
 import com.amjad.mahloula.data.Repo;
+import com.amjad.mahloula.ui.MainActivity;
 import com.amjad.mahloula.ui.kit.UiKit;
 import com.amjad.mahloula.util.Fmt;
 import com.amjad.mahloula.util.Prefs;
@@ -179,10 +180,40 @@ public final class Sheets {
             }
             t.note = note.getText().toString().trim();
             t.ts = ts[0];
-            if (edit == null) r.addTx(t);
-            else r.updateTx(t);
-            sh.dismiss();
-            UiKit.snack(a, ar ? "تم الحفظ في سجلّك ✔" : "Saved to your log ✔", null, null);
+            final Runnable doSave = () -> {
+                if (edit == null) r.addTx(t);
+                else r.updateTx(t);
+                sh.dismiss();
+                java.util.List<com.amjad.mahloula.brain.Advisor.Insight> g =
+                        com.amjad.mahloula.brain.Advisor.guardTx(a, t);
+                if (!g.isEmpty()) {
+                    com.amjad.mahloula.brain.Advisor.Insight first = g.get(0);
+                    com.amjad.mahloula.notify.Notifier.show(a, "⚠️ " + first.title, first.body);
+                    UiKit.snack(a, "⚠️ " + first.title, ar ? "عرض التنبيه" : "View",
+                            () -> { if (a instanceof MainActivity) ((MainActivity) a).jump(0); });
+                } else {
+                    UiKit.snack(a, ar ? "تم الحفظ في سجلّك ✔" : "Saved to your log ✔", null, null);
+                }
+            };
+            if (edit == null && t.isExpense()) {
+                java.util.Calendar c0 = java.util.Calendar.getInstance();
+                c0.setTimeInMillis(ts[0]);
+                c0.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                c0.set(java.util.Calendar.MINUTE, 0);
+                c0.set(java.util.Calendar.SECOND, 0);
+                boolean dup = false;
+                for (Models.Tx x : r.txRange(c0.getTimeInMillis(), ts[0] + 60000L, 0, t.cat, null)) {
+                    if (Math.abs(x.amount - t.amount) < 0.001 && Math.abs(x.ts - ts[0]) < 600000L) { dup = true; break; }
+                }
+                if (dup) {
+                    confirm(a, ar ? "عملية مكررة؟" : "Duplicate entry?",
+                            ar ? "يوجد مصروف بنفس المبلغ والتصنيف خلال آخر 10 دقائق. حفظ على أي حال؟"
+                               : "Same amount & category within 10 minutes. Save anyway?",
+                            doSave);
+                    return;
+                }
+            }
+            doSave.run();
         });
 
         if (edit != null) {

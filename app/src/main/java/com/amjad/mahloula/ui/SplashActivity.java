@@ -41,13 +41,29 @@ public class SplashActivity extends BaseActivity {
         tag.setGravity(Gravity.CENTER);
         root.addView(tag);
 
+        // شارة الاعتماد: حركة نبض مميزة سريعة
+        final android.widget.TextView pill = Ui.txt(this,
+                "تنفيذ وتطوير: أمجد حبيب", 14, R.color.on_brand, Typeface.BOLD);
+        pill.setPadding(Ui.dp(this, 22), Ui.dp(this, 10), Ui.dp(this, 22), Ui.dp(this, 10));
+        pill.setBackground(Ui.round(Ui.color(this, R.color.brand_600), 16, this));
+        LinearLayout.LayoutParams plp2 = new LinearLayout.LayoutParams(-2, -2);
+        plp2.topMargin = Ui.dp(this, 20);
+        pill.setLayoutParams(plp2);
+        root.addView(pill);
+        pill.setScaleX(0.4f); pill.setScaleY(0.4f); pill.setAlpha(0f); pill.setRotation(-8f);
+        pill.animate().scaleX(1f).scaleY(1f).alpha(1f).rotation(0f)
+                .setStartDelay(700).setDuration(480)
+                .setInterpolator(new android.view.animation.OvershootInterpolator(2.4f)).start();
+        pill.postDelayed(() -> pill.animate().scaleX(1.07f).scaleY(1.07f).setDuration(160)
+                .withEndAction(() -> pill.animate().scaleX(1f).scaleY(1f).setDuration(160).start()).start(), 1250);
+
         android.view.View space = new android.view.View(this);
         root.addView(space, new LinearLayout.LayoutParams(0, 0, 1f));
 
         android.widget.TextView credit = Ui.txt(this, "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب", 12.5f, R.color.brand_200);
         credit.setGravity(Gravity.CENTER);
         root.addView(credit);
-        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.2.1", 11, R.color.brand_300);
+        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.3.0", 11, R.color.brand_300);
         ver.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams vlp = new LinearLayout.LayoutParams(-2, -2);
         vlp.topMargin = Ui.dp(this, 4);
@@ -63,7 +79,7 @@ public class SplashActivity extends BaseActivity {
         tag.setAlpha(0f);
         tag.animate().alpha(1f).setStartDelay(450).setDuration(500).start();
 
-        new Handler(Looper.getMainLooper()).postDelayed(this::route, 1400);
+        new Handler(Looper.getMainLooper()).postDelayed(this::route, 1750);
     }
 
     private void route() {

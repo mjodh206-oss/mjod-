@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- الهوية: برتقالي نقي + أبيض فقط -->
-    <color name="brand_900">#FF5C1E05</color>
-    <color name="brand_800">#FF8A2E08</color>
-    <color name="brand_700">#FFBF360C</color>
-    <color name="brand_600">#FFE65100</color>
-    <color name="brand_500">#FFF57C00</color>
-    <color name="brand_400">#FFFF9426</color>
-    <color name="brand_300">#FFFFB25C</color>
-    <color name="brand_200">#FFFFD199</color>
-    <color name="brand_100">#FFFFE8CC</color>
-    <color name="brand_50">#FFFFF6EB</color>
+    <!-- هوية مَحلولة: كريمي دافئ + برتقالي حي + بني عميق -->
+    <color name="brand_900">#FF6E2600</color>
+    <color name="brand_800">#FFA83A00</color>
+    <color name="brand_700">#FFD64A00</color>
+    <color name="brand_600">#FFF25C05</color>
+    <color name="brand_500">#FFFF7A1A</color>
+    <color name="brand_400">#FFFF9440</color>
+    <color name="brand_300">#FFFFB77A</color>
+    <color name="brand_200">#FFFFD9B3</color>
+    <color name="brand_100">#FFFFEAD6</color>
+    <color name="brand_50">#FFFFF6EC</color>
 
-    <color name="gold_600">#FF994300</color>
-    <color name="gold_500">#FFE65100</color>
-    <color name="gold_400">#FFFFB25C</color>
-    <color name="gold_100">#FFFFF0DC</color>
+    <color name="gold_600">#FF9C5A18</color>
+    <color name="gold_500">#FFC77800</color>
+    <color name="gold_400">#FFFFB77A</color>
+    <color name="gold_100">#FFFCEBD8</color>
 
-    <color name="income">#FF7A3200</color>
-    <color name="income_soft">#FFFFE8CC</color>
-    <color name="expense">#FFE65100</color>
-    <color name="expense_soft">#FFFFEBDD</color>
-    <color name="debt">#FFBF360C</color>
-    <color name="debt_soft">#FFFFE0D6</color>
-    <color name="info">#FF994300</color>
-    <color name="info_soft">#FFFFEAD9</color>
-    <color name="warn">#FFA64700</color>
-    <color name="warn_soft">#FFFFE9C9</color>
+    <color name="income">#FF6D4C41</color>
+    <color name="income_soft">#FFEFE2D8</color>
+    <color name="expense">#FFF25C05</color>
+    <color name="expense_soft">#FFFFE3D0</color>
+    <color name="debt">#FFB34700</color>
+    <color name="debt_soft">#FFF6DFCB</color>
+    <color name="info">#FF795548</color>
+    <color name="info_soft">#FFEADFD4</color>
+    <color name="warn">#FFC77800</color>
+    <color name="warn_soft">#FFFBEBCE</color>
 
-    <color name="bg">#FFFFFFFF</color>
+    <color name="bg">#FFF7EFE4</color>
     <color name="surface">#FFFFFFFF</color>
-    <color name="surface_2">#FFFFF6EB</color>
-    <color name="surface_3">#FFFFE8CC</color>
-    <color name="text_primary">#FF2B1503</color>
-    <color name="text_secondary">#FF6B4423</color>
-    <color name="text_tertiary">#FF977050</color>
-    <color name="outline">#FFF0DCC3</color>
-    <color name="outline_strong">#FFDDB88F</color>
+    <color name="surface_2">#FFFBF3E9</color>
+    <color name="surface_3">#FFF2E5D4</color>
+    <color name="text_primary">#FF3B2A22</color>
+    <color name="text_secondary">#FF6E594B</color>
+    <color name="text_tertiary">#FF9C8778</color>
+    <color name="outline">#FFEBDCC6</color>
+    <color name="outline_strong">#FFD9C1A3</color>
     <color name="scrim">#66000000</color>
     <color name="on_brand">#FFFFFFFF</color>
     <color name="nav_bar">#FFFFFFFF</color>
-    <color name="status_bar">#FFFFFFFF</color>
-    <color name="status_bar_icons">#FF2B1503</color>
+    <color name="status_bar">#FFF7EFE4</color>
+    <color name="status_bar_icons">#FF3B2A22</color>
 
-    <!-- تصنيفات: تدرجات البرتقالي -->
-    <color name="cat_food">#FFE65100</color>
-    <color name="cat_transport">#FFF57C00</color>
-    <color name="cat_home">#FFBF360C</color>
-    <color name="cat_bills">#FFEF6C00</color>
-    <color name="cat_health">#FFD84315</color>
-    <color name="cat_edu">#FFFF8F00</color>
-    <color name="cat_shop">#FFB34700</color>
-    <color name="cat_fun">#FFFFA000</color>
-    <color name="cat_family">#FF994300</color>
-    <color name="cat_save">#FF7A3200</color>
-    <color name="cat_debt">#FFFF6D00</color>
-    <color name="cat_other">#FF7A4A1F</color>
+    <!-- تصنيفات: برتقالي وبني متناسق -->
+    <color name="cat_food">#FFF25C05</color>
+    <color name="cat_transport">#FFFF7A1A</color>
+    <color name="cat_home">#FFD64A00</color>
+    <color name="cat_bills">#FFE4581F</color>
+    <color name="cat_health">#FFB34700</color>
+    <color name="cat_edu">#FFFF9440</color>
+    <color name="cat_shop">#FFA83A00</color>
+    <color name="cat_fun">#FFFF5A00</color>
+    <color name="cat_family">#FF8A5A2B</color>
+    <color name="cat_save">#FF6D4C41</color>
+    <color name="cat_debt">#FFBF360C</color>
+    <color name="cat_other">#FF795548</color>
 </resources>

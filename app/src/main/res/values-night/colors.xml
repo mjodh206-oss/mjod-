@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ليلي: برتقالي دافئ على بني عميق -->
-    <color name="bg">#FF170C02</color>
-    <color name="surface">#FF221204</color>
-    <color name="surface_2">#FF2C1806</color>
-    <color name="surface_3">#FF3A2008</color>
-    <color name="text_primary">#FFFFF3E6</color>
-    <color name="text_secondary">#FFE8C9A8</color>
-    <color name="text_tertiary">#FFC09A73</color>
-    <color name="outline">#FF4A2C10</color>
-    <color name="outline_strong">#FF6B4423</color>
+    <!-- ليلي: بني كاكاوي عميق + برتقالي مضيء -->
+    <color name="bg">#FF17100A</color>
+    <color name="surface">#FF221810</color>
+    <color name="surface_2">#FF2B1E14</color>
+    <color name="surface_3">#FF382818</color>
+    <color name="text_primary">#FFF7EFE4</color>
+    <color name="text_secondary">#FFD9C4B0</color>
+    <color name="text_tertiary">#FFAC9684</color>
+    <color name="outline">#FF453322</color>
+    <color name="outline_strong">#FF5E4732</color>
     <color name="scrim">#99000000</color>
-    <color name="nav_bar">#FF1C0E03</color>
-    <color name="status_bar">#FF170C02</color>
-    <color name="status_bar_icons">#FFFFF3E6</color>
+    <color name="nav_bar">#FF1B120B</color>
+    <color name="status_bar">#FF17100A</color>
+    <color name="status_bar_icons">#FFF7EFE4</color>
 
-    <color name="brand_50">#FF2C1806</color>
-    <color name="brand_100">#FF3A2008</color>
-    <color name="brand_200">#FF5C3208</color>
-    <color name="brand_300">#FFFF9426</color>
-    <color name="brand_400">#FFFFB25C</color>
-    <color name="brand_500">#FFFFC078</color>
-    <color name="brand_600">#FFFFD199</color>
+    <color name="brand_50">#FF2B1E14</color>
+    <color name="brand_100">#FF382818</color>
+    <color name="brand_200">#FF55351A</color>
+    <color name="brand_300">#FFFF9440</color>
+    <color name="brand_400">#FFFFB77A</color>
+    <color name="brand_500">#FFFFC894</color>
+    <color name="brand_600">#FFFFD9B3</color>
 
-    <color name="gold_100">#FF3A2008</color>
-    <color name="gold_400">#FFFFB25C</color>
-    <color name="gold_500">#FFFF9426</color>
-    <color name="gold_600">#FFFFC078</color>
+    <color name="gold_100">#FF382818</color>
+    <color name="gold_400">#FFFFB77A</color>
+    <color name="gold_500">#FFFF9440</color>
+    <color name="gold_600">#FFFFC894</color>
 
-    <color name="income">#FFFFB25C</color>
-    <color name="income_soft">#FF33200A</color>
+    <color name="income">#FFCBA88F</color>
+    <color name="income_soft">#FF33261C</color>
     <color name="expense">#FFFF7A1A</color>
-    <color name="expense_soft">#FF38180A</color>
-    <color name="debt">#FFFF9465</color>
-    <color name="debt_soft">#FF351508</color>
-    <color name="info">#FFE8C9A8</color>
-    <color name="info_soft">#FF2C1806</color>
-    <color name="warn">#FFFFC078</color>
-    <color name="warn_soft">#FF33230A</color>
+    <color name="expense_soft">#FF3A2010</color>
+    <color name="debt">#FFFF9E5E</color>
+    <color name="debt_soft">#FF361D0C</color>
+    <color name="info">#FFCBA88F</color>
+    <color name="info_soft">#FF2B1E14</color>
+    <color name="warn">#FFFFC894</color>
+    <color name="warn_soft">#FF33250F</color>
 </resources>
