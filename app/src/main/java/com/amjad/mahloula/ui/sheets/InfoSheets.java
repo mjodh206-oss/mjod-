@@ -39,11 +39,7 @@ public final class InfoSheets {
 
         sh.content.addView(UiKit.sectionTitleIn(a, ar ? "💰 المال" : "💰 Money"));
 
-        sh.content.addView(UiKit.label(a, ar ? "العملة" : "Currency"));
-        String[] curs = {"ل.س", "$", "ر.س", "د.إ", "ج.م", "د.أ", "€", "£", "د.م", "د.ج", "د.ت", "د.ك", "ر.ق", "د.ب", "ر.ع", "د.ع", "₺", "ر.ي", "₹"};
-        int sel = 0;
-        for (int i = 0; i < curs.length; i++) if (curs[i].equals(p.currency())) sel = i;
-        sh.content.addView(UiKit.chipRow(a, curs, sel, i -> p.currency(curs[i])));
+        sh.content.addView(UiKit.label(a, ar ? "العملة: الليرة السورية (ل.س) — مثبتة" : "Currency: Syrian pound (fixed)"));
 
         sh.content.addView(UiKit.label(a, ar ? "الميزانية الشهرية (سقف الصرف)" : "Monthly budget (spending cap)"));
         TextView budget = UiKit.field(a, "0", true);
@@ -303,7 +299,7 @@ public final class InfoSheets {
         llp.gravity = Gravity.CENTER_HORIZONTAL;
         logo.setLayoutParams(llp);
         sh.content.addView(logo);
-        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.3.1", 18, R.color.text_primary, Typeface.BOLD);
+        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.4.0", 18, R.color.text_primary, Typeface.BOLD);
         name.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(a, 8);
@@ -325,7 +321,7 @@ public final class InfoSheets {
         dev.setLayoutParams(dlp);
         credit.addView(dev);
         TextView line = Ui.txt(a, ar
-                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.3.1"
+                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.4.0"
                 : "Authored & developed by Amjad Habib — version 1.1.0", 12.5f, R.color.text_tertiary);
         line.setGravity(Gravity.CENTER);
         credit.addView(line);

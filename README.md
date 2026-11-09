@@ -45,8 +45,8 @@
 
 ## 📦 التحميل
 - رابط مباشر دائم من المستودع:
-  https://github.com/mjodh206-oss/mjod-/raw/arena/a897e007-mjod/release/Mahloula-v1.3.1.apk
-- الملف موجود أيضًا في `release/Mahloula-v1.3.1.apk` داخل الفرع.
+  https://github.com/mjodh206-oss/mjod-/raw/arena/a897e007-mjod/release/Mahloula-v1.4.0.apk
+- الملف موجود أيضًا في `release/Mahloula-v1.4.0.apk` داخل الفرع.
 - المتطلبات: أندرويد 7.0 (API 24) فأحدث. الحجم ≈ 700KB فقط.
 - عند التثبيت لأول مرة فعّل «مصادر غير معروفة» للمتصفح/مدير الملفات.
 

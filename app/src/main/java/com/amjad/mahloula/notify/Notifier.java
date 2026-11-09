@@ -25,19 +25,24 @@ public final class Notifier {
 
     private Notifier() {}
 
-    public static final String CHANNEL = "mahloula_daily_v2";
+    public static final String CHANNEL = "mahloula_v3";
 
     public static void ensureChannel(Context c) {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm == null || nm.getNotificationChannel(CHANNEL) != null) return;
         NotificationChannel ch = new NotificationChannel(CHANNEL,
-                Prefs.get(c).language().equals("en") ? "Daily money reminder" : "تذكير المصاريف اليومي",
-                NotificationManager.IMPORTANCE_DEFAULT);
+                Prefs.get(c).language().equals("en") ? "Mahloula alerts & reminders" : "تنبيهات مَحلولة وتذكيراتها",
+                NotificationManager.IMPORTANCE_HIGH);
         ch.setDescription(Prefs.get(c).language().equals("en")
                 ? "A gentle daily nudge to log your spending"
                 : "تنبيه يومي لطيف لتسجيل مصاريفك ومتابعة ميزانيتك");
         ch.enableVibration(true);
+        ch.setVibrationPattern(new long[]{0, 320, 140, 320, 140, 520});
+        ch.setBypassDnd(true);
+        ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        ch.enableLights(true);
+        ch.setLightColor(0xFFF25C05);
         if (Prefs.get(c).soundOn()) {
             android.media.AudioAttributes aa = new android.media.AudioAttributes.Builder()
                     .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
@@ -111,6 +116,12 @@ public final class Notifier {
                 break;
             }
         }
+        if (now.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+            double week = 0;
+            for (Models.Tx t : r.txRange(now.getTimeInMillis() - 7L * 86400000L, now.getTimeInMillis(), 0, null, null))
+                week += t.amount;
+            body = (ar ? "📅 ملخص الأسبوع: صرفت " + Fmt.money(c, week) + ". " : "📅 Week: " + Fmt.money(c, week) + ". ") + body;
+        }
         show(c, title, body);
     }
 
@@ -126,6 +137,9 @@ public final class Notifier {
                 ? new Notification.Builder(c, CHANNEL)
                 : new Notification.Builder(c);
         b.setSmallIcon(R.drawable.ic_piggy)
+                .setCategory(Notification.CATEGORY_REMINDER)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setStyle(new Notification.BigTextStyle().bigText(body))

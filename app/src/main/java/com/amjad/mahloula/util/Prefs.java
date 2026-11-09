@@ -24,8 +24,8 @@ public final class Prefs {
     public void firstRunDone() { sp.edit().putBoolean("first_run", false).apply(); }
 
     // ---------- العملة والأرقام ----------
-    public String currency() { return sp.getString("currency", null) == null ? defaultCurrency() : sp.getString("currency", "$"); }
-    public void currency(String v) { sp.edit().putString("currency", v).apply(); }
+    public String currency() { return "ل.س"; }  // مثبّتة: الليرة السورية فقط
+    public void currency(String v) { /* مثبّتة على ل.س */ }
 
     public boolean easternDigits() { return sp.getBoolean("eastern_digits", true); }
     public void easternDigits(boolean v) { sp.edit().putBoolean("eastern_digits", v).apply(); }

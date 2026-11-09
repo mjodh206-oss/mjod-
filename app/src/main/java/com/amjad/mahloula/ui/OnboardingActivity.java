@@ -142,10 +142,8 @@ public class OnboardingActivity extends BaseActivity {
         moneyCard.setLayoutParams(mlp);
         moneyCard.addView(Ui.txt(this, ar ? "💰 إعدادات سريعة (اختيارية)" : "💰 Quick settings (optional)", 16, R.color.text_primary, Typeface.BOLD));
 
-        moneyCard.addView(UiKit.label(this, ar ? "العملة" : "Currency"));
-        String[] curLabels = {"ل.س", "$", "ر.س", "د.إ", "ج.م", "د.أ", "€", "د.م", "د.ج", "د.ك", "ر.ق"};
-        UiKit.HorizontalScroll curRow = UiKit.chipRow(this, curLabels, 0, i -> currencyIdx = i);
-        moneyCard.addView(curRow);
+        moneyCard.addView(Ui.txt(this, ar ? "💵 العملة المثبتة: الليرة السورية (ل.س)" : "💵 Fixed currency: Syrian pound",
+                13.5f, R.color.text_secondary, android.graphics.Typeface.BOLD));
 
         moneyCard.addView(UiKit.label(this, ar ? "ميزانيتك الشهرية (سقف الصرف)" : "Monthly budget (spending cap)"));
         budgetField = UiKit.field(this, ar ? "مثال: 1500" : "e.g. 1500", true);
@@ -249,8 +247,7 @@ public class OnboardingActivity extends BaseActivity {
         if (bioOn && bioOnlySwitch.isChecked() && !p.hasPin()) {
             // بصمة فقط: لا رمز
         }
-        String[] curValues = {"ل.س", "$", "ر.س", "د.إ", "ج.م", "د.أ", "€", "د.م", "د.ج", "د.ك", "ر.ق"};
-        p.currency(curValues[currencyIdx]);
+        p.currency("ل.س");
         try {
             double budget = Double.parseDouble(budgetField.getText().toString().trim());
             p.monthlyBudget(budget);
