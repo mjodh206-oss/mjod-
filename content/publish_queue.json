@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "note": "Drop queue for automation/run_channel.py. Add a rendered 9:16 mp4 URL (or a local video_path), set enabled=true, and the next scheduled run publishes it. Nothing here is a credential. Never commit video binaries — see .gitignore.",
+  "items": [],
+  "_example": {
+    "episode_id": "ep-001",
+    "video_url": "https://your-storage.example/ep-001.mp4",
+    "thumbnail_url": null,
+    "video_path": null,
+    "publish_at": null,
+    "enabled": true
+  }
+}

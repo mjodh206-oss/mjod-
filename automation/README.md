@@ -32,11 +32,24 @@ Never paste either value into a chat, an issue, or a commit.
 ### Quota note
 Default quota is **10,000 units/day**: an upload costs 1,600, each comment reply 50,
 a thumbnail 50, list calls ~1. A 6-Shorts/week channel with 30 replies/day uses
-roughly 2,000–3,000 units/day — comfortably inside the limit.
+roughly 2,000–3,000 units/day — comfortably inside the limit (~6 uploads/day max).
+
+### Two Google-side blockers before anything is really public
+- Uploads from a **new, unverified** API project are forced to **private** until the project
+  passes YouTube's compliance audit (policy since 28 July 2020). Request the audit early.
+- While the OAuth consent screen is in **Testing**, the grant **expires after 7 days**. An
+  always-on channel needs a published/verified OAuth app or a weekly re-auth.
+Both apply to every tool, including the external GitHub agent — details in `docs/ACTIVATION.md`.
 
 ---
 
 ## 2. The daily loop
+
+**One command does all of it** — `python automation/run_channel.py` (dry run) or
+`python automation/run_channel.py --send --yes` (live). It runs the steps below in order,
+reads `content/publish_queue.json`, caps uploads at 2 per run, and checks the live channel for
+duplicate titles so a fresh CI runner can never double-upload. Add an enabled item to the queue
+first; an empty queue publishes nothing.
 
 ```bash
 # 1. Write the next script (fills the 8-beat timeline for you)
@@ -76,6 +89,7 @@ scheduled publishing workflow, provide a downloadable `video_url`; nothing large
 | Workflow | Trigger | What it does | Needs secrets |
 |---|---|---|---|
 | `validate-content.yml` | push / PR | runs unit tests + content validator | none |
+| `channel-loop.yml` | **daily 17:25 UTC** + manual | the whole loop: validate → sheets → queued uploads → replies → scorecard | same two secrets |
 | `reply-to-comments.yml` | every 6 h + manual | posts up to 30 safe replies | `YT_CLIENT_SECRET_JSON`, `YT_TOKEN_JSON` |
 | `publish-short.yml` | manual `workflow_dispatch` | downloads a rendered mp4 from a URL and uploads it | same two secrets |
 | `weekly-report.yml` | Mondays 09:00 UTC | writes `reports/latest.md` as a downloadable artifact | same two secrets |
@@ -100,3 +114,23 @@ are safe even with a fresh runner.
 
 If a gate blocks you, fix the input — don't delete the gate. Educational channels live or die
 on trust, and one confident wrong fact costs more than a missed upload.
+
+---
+
+## 5. Optional: the external GitHub agent
+
+`docs/GITHUB_TOOLS.md` compares the real options. If you run
+[darkzOGx/youtube-automation-agent](https://github.com/darkzOGx/youtube-automation-agent)
+on your machine (Node ≥18.17, `npm start` → `http://localhost:3456`), this repo can talk to it:
+
+```bash
+python integrations/agent_bridge.py strategy              # build a valid draft strategy offline
+python integrations/agent_bridge.py manifest             # 5 episodes for its Evidence desk
+python integrations/agent_bridge.py readiness            # GET /api/readiness
+AGENT_BASE_URL=http://localhost:3456 AGENT_API_KEY=... \
+  python integrations/agent_bridge.py strategy --send --yes   # PUT as DRAFT only
+```
+
+The bridge never calls `/api/operator/start` and never approves a video or a reply. Its agent
+requires human approval before publishing too — which is why it's the one worth recommending.
+Comparison, star counts, licenses and caveats: `docs/GITHUB_TOOLS.md`.

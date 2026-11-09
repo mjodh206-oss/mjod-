@@ -20,6 +20,8 @@ assets/renders/
 state/
 reports/
 content/SCRIPTS.md
+integrations/out/
+content/videos/*.part
 
 # --- Python ---
 __pycache__/
