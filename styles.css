@@ -11,3 +11,5 @@
 .transaction-value.withdraw,#expenseAmount,.modal-kicker.withdraw{color:#d94f4f}
 .submit-button{background:#21864d;color:#fff}
 .submit-button.withdraw{background:#d94f4f;color:#fff}
+
+.confirm-dialog{width:min(100%,370px);padding:25px 23px 20px;border-radius:19px;background:#fff;box-shadow:0 20px 70px #0003;text-align:center;animation:appear .18s ease}.confirm-mark{width:43px;height:43px;margin:0 auto 12px;border-radius:14px;display:grid;place-items:center;background:#fff0ef;color:#d94f4f;font-size:22px;font-weight:700}.confirm-dialog h2{margin:0;font-size:18px;color:#101828}.confirm-dialog p{margin:8px 0 20px;color:#667085;font-size:12px;line-height:1.9}.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.confirm-actions button{min-height:42px;border-radius:10px;font:inherit;font-size:12px;font-weight:600}.cancel-delete{border:1px solid #e1e8f0;background:#fff;color:#344054}.confirm-delete{border:1px solid #d94f4f;background:#d94f4f;color:#fff}.cancel-delete:focus-visible,.confirm-delete:focus-visible{outline:3px solid #2563eb55;outline-offset:2px}

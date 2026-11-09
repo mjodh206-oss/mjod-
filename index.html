@@ -65,6 +65,14 @@
       </form>
     </section>
   </div>
+  <div class="modal-backdrop" id="deleteConfirmBackdrop" hidden>
+    <section class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-describedby="deleteConfirmMessage">
+      <div class="confirm-mark" aria-hidden="true">!</div>
+      <h2 id="deleteConfirmTitle">تأكيد الحذف</h2>
+      <p id="deleteConfirmMessage">متأكد بدك تحذف هالحركة؟ رح يتحدّث رصيدك ومجموع الحركات، وما في تراجع عن الحذف.</p>
+      <div class="confirm-actions"><button class="cancel-delete" id="cancelDelete" type="button">إلغاء</button><button class="confirm-delete" id="confirmDelete" type="button">إيه، احذفها</button></div>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>
