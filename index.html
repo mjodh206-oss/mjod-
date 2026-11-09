@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f7f5" />
+  <meta name="description" content="محفظة شخصية بسيطة لتسجيل المصاري ومتابعة الرصيد بالليرة السورية." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>مصروفي — محفظتك اليومية</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="مصروفي، الصفحة الرئيسية">
+        <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H20v14H6.5A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 8h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4M15.5 12h.01"/></svg></span>
+        <span><strong>مصروفي</strong><small>محفظتك اليومية</small></span>
+      </a>
+      <button id="installButton" class="install-button" hidden><span>＋</span> ثبّت التطبيق</button>
+    </header>
+
+    <section class="welcome-row">
+      <div><p class="eyebrow" id="todayLabel">محفظتك الشخصية</p><h1>أهلاً فيك 👋</h1><p class="welcome-sub">كل مصرياتك بمكان واحد، بكل بساطة.</p></div>
+      <div class="privacy-badge"><span class="privacy-dot"></span> بياناتك على جهازك</div>
+    </section>
+
+    <section class="balance-card" aria-label="ملخص المحفظة">
+      <div class="balance-top"><span class="balance-label"><span class="balance-icon">↗</span> الرصيد الحالي</span><span class="currency-pill">ليرة سورية <span>ل.س</span></span></div>
+      <div class="balance-amount" id="balanceAmount">٠ <span>ل.س</span></div>
+      <div class="balance-footer"><span class="balance-caption">هذا اللي صافي معك هلأ</span><span class="balance-decoration" aria-hidden="true">ل.س</span></div>
+    </section>
+
+    <section class="stats-grid" aria-label="إجمالي الحركات">
+      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol in">↓</span><span>مجموع اللي حطيته</span></div><strong id="incomeAmount">٠ <small>ل.س</small></strong><span class="stat-note">كل الإيداعات</span></article>
+      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol out">↑</span><span>مجموع اللي سحبته</span></div><strong id="expenseAmount">٠ <small>ل.س</small></strong><span class="stat-note">كل المسحوبات</span></article>
+    </section>
+
+    <section class="actions" aria-label="إضافة حركة">
+      <button class="action-button deposit-button" id="depositButton"><span class="action-icon">＋</span><span><strong>حط مصاري</strong><small>سجّل إيداع جديد</small></span></button>
+      <button class="action-button withdraw-button" id="withdrawButton"><span class="action-icon">−</span><span><strong>اسحب دفعة</strong><small>سجّل مبلغ مسحوب</small></span></button>
+    </section>
+
+    <section class="transactions-section">
+      <div class="section-heading"><div><h2>آخر الحركات</h2><p id="transactionCount">سجّل أول حركة بمحفظتك</p></div><button class="filter-button" id="filterButton" aria-label="تصفية الحركات" title="تصفية">☷</button></div>
+      <div class="filter-tabs" id="filterTabs" hidden>
+        <button class="filter-tab active" data-filter="all">الكل</button><button class="filter-tab" data-filter="deposit">الإيداعات</button><button class="filter-tab" data-filter="withdraw">المسحوبات</button>
+      </div>
+      <div class="transaction-list" id="transactionList"></div>
+      <div class="empty-state" id="emptyState"><span class="empty-icon">✦</span><strong>محفظتك جاهزة!</strong><p>ضيف أول إيداع، وخلي مصروفي يحسبلك قديش صار معك.</p><button id="emptyDepositButton">＋ حط أول مصاري</button></div>
+    </section>
+    <footer>مصروفي <span>•</span> مصرياتك محفوظة بأمان على جهازك</footer>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="closeModal" aria-label="إغلاق">×</button>
+      <div class="modal-mark" id="modalMark">＋</div><p class="modal-kicker" id="modalKicker">إيداع جديد</p><h2 id="modalTitle">حط مصاري</h2><p class="modal-subtitle" id="modalSubtitle">قديش حابب تضيف على محفظتك؟</p>
+      <form id="transactionForm">
+        <label for="amountInput">المبلغ <span>(ليرة سورية)</span></label>
+        <div class="amount-field"><input id="amountInput" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="مثلاً ٥٠٬٠٠٠" required /><span>ل.س</span></div>
+        <label for="noteInput">ملاحظة <span>(اختياري)</span></label><input class="note-field" id="noteInput" name="note" type="text" maxlength="80" placeholder="مثلاً: راتب، مشتريات..." />
+        <p class="form-error" id="formError" role="alert"></p>
+        <button class="submit-button" id="submitButton" type="submit">تأكيد الإيداع</button>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
