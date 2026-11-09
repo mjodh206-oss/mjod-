@@ -64,7 +64,7 @@ public class SplashActivity extends BaseActivity {
         android.widget.TextView credit = Ui.txt(this, "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب", 12.5f, R.color.text_tertiary);
         credit.setGravity(Gravity.CENTER);
         root.addView(credit);
-        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.7.0", 11, R.color.text_tertiary);
+        android.widget.TextView ver = Ui.txt(this, "الإصدار 1.8.0", 11, R.color.text_tertiary);
         ver.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams vlp = new LinearLayout.LayoutParams(-2, -2);
         vlp.topMargin = Ui.dp(this, 4);

@@ -526,6 +526,36 @@ public final class Advisor {
                     null, TAB_GUIDE));
         }
 
+
+        // ================= الدفعة الرابعة: احتفالات المدرّب =================
+        for (Models.Debt d : r.debts()) {
+            if (d.kind == 0 && d.total > 0 && r.debtPaid(d.id) >= d.total) {
+                out.add(new Insight(0, "check_circle",
+                        ar ? "🏆 دين مُسدد بالكامل" : "🏆 Debt fully paid",
+                        ar ? "«" + (d.title.isEmpty() ? d.person : d.title) + "» أُغلق نهائيًا. حوّل مبلغ تسديده الشهري للادخار الآن — لا تدعه يتبخر."
+                           : "'" + (d.title.isEmpty() ? d.person : d.title) + "' closed. Redirect its payment to savings.",
+                        ar ? "حوّله للادخار" : "Redirect it", TAB_GUIDE));
+                break;
+            }
+        }
+        for (Models.Goal g : r.goals()) {
+            if (g.target > 0 && g.saved >= g.target) {
+                out.add(new Insight(0, "target",
+                        ar ? "🎉 هدف مكتمل: " + g.title : "🎉 Goal complete: " + g.title,
+                        ar ? "بلغت " + Fmt.money(c, g.target) + ". احتفل بلا صرف، وافتح هدفًا أكبر — الزخم وقود الانضباط."
+                           : "Reached " + Fmt.money(c, g.target) + ". Open a bigger goal.",
+                        ar ? "هدف جديد" : "New goal", TAB_DASH));
+                break;
+            }
+        }
+        if (budget > 0 && dayOfMonth >= 25 && mt.expense <= budget * 0.9) {
+            out.add(new Insight(0, "shield",
+                    ar ? "🏆 شهر تحت السيطرة" : "🏆 Month under control",
+                    ar ? "مصروفك " + Fmt.percent(c, mt.expense / budget * 100) + " من السقف مع يوم " + Fmt.digits(c, String.valueOf(dayOfMonth)) + ". هذا أداء أفضل من 80٪ من الناس."
+                       : "Spend at " + Fmt.percent(c, mt.expense / budget * 100) + " of cap.",
+                    null, -1));
+        }
+
 return out;
     }
 
@@ -752,6 +782,197 @@ return out;
         }
         java.util.Collections.sort(out, (a, b) -> Double.compare(b.cap, a.cap));
         if (out.size() > 5) out = new ArrayList<>(out.subList(0, 5));
+        return out;
+    }
+
+    // ================= المدرّب الشخصي: مستويات ورسائل وإجابات خبير =================
+
+    /** مستوى المتدرب الحالي. */
+    public static String levelTitle(Context c, int score) {
+        boolean ar = !Prefs.get(c).language().equals("en");
+        if (score >= 90) return ar ? "حكيم مالي 🧙" : "Money sage 🧙";
+        if (score >= 75) return ar ? "محترف منضبط 💎" : "Disciplined pro 💎";
+        if (score >= 60) return ar ? "ملتزم صاعد 💪" : "Rising committed 💪";
+        if (score >= 40) return ar ? "متدرب جاد 🌱" : "Serious trainee 🌱";
+        return ar ? "بداية الطريق 🚶" : "Starting out 🚶";
+    }
+
+    /** ما ينقصك للمستوى التالي. */
+    public static String levelGap(Context c, int score) {
+        boolean ar = !Prefs.get(c).language().equals("en");
+        int next = score >= 90 ? 100 : score >= 75 ? 90 : score >= 60 ? 75 : score >= 40 ? 60 : 40;
+        if (next == 100 && score >= 90) return ar ? "بلغت القمة — حافظ عليها." : "At the peak — hold it.";
+        int streak = loggingStreak(c);
+        return ar ? "يفصلك عن المستوى التالي " + (next - score) + " نقطة: ارفع معدل ادخارك، أو سجّل "
+                    + Math.max(1, 7 - streak) + " أيام متتالية، أو اخفض عبء ديونك."
+                  : (next - score) + " points to next level.";
+    }
+
+    /** رسالة المدرّب اليومية: تُنتقى من أقوى إشارة حالية في بياناتك. */
+    public static final class CoachMsg {
+        public String title; public String body; public int lessonIdx = -1; public int ruleIdx = -1;
+    }
+
+    public static CoachMsg dailyCoach(Context c) {
+        CoachMsg m = new CoachMsg();
+        boolean ar = !Prefs.get(c).language().equals("en");
+        Repo r = Repo.get(c);
+        Prefs p = Prefs.get(c);
+        Calendar now = Calendar.getInstance();
+        Models.MonthTotals mt = r.monthTotals(now);
+        double budget = p.monthlyBudget();
+        List<Insight> ins = scan(c);
+        Insight top = ins.isEmpty() ? null : ins.get(0);
+        if (top != null && top.level == 2) {
+            m.title = ar ? "🎓 درس اليوم: المظروف الأسبوعي" : "🎓 Today: the weekly envelope";
+            m.body = ar ? "وضعك الحالي يحتاج انضباطًا فوريًا: " + top.title + ". قسّم سقف شهرك على 4 أسابيع والتزم بمظروف أسبوعك فقط."
+                        : "Urgent: " + top.title + ". Split your month into 4 weekly envelopes.";
+            m.lessonIdx = 12;
+            return m;
+        }
+        if (!detectSubscriptions(c).isEmpty()) {
+            m.title = ar ? "🎓 قاعدة اليوم: اشتراكات تنتظر 48 ساعة" : "🎓 Rule: 48-hour subscriptions";
+            m.body = ar ? "رصدنا دفعات متكررة في سجلّك. كل اشتراك جديد ينتظر 48 ساعة، ويُقيَّم الموجود كل 3 أشهر بالاستخدام لا بالنوايا."
+                        : "Recurring payments detected. Audit quarterly by actual use.";
+            m.ruleIdx = 23;
+            return m;
+        }
+        double avg90 = r.avgDaily(now.getTimeInMillis() - 90L * 86400000L, now.getTimeInMillis());
+        if (avg90 > 0 && r.totalBalance() / avg90 < 7) {
+            m.title = ar ? "🎓 درس اليوم: وسادة الطوارئ أولًا" : "🎓 Today: cushion first";
+            m.body = ar ? "وسادتك دون 7 أيام. قبل أي ترقية أسلوب حياة: حوّل مبلغًا ثابتًا يوم الراتب حتى تبلغ 90 يومًا."
+                        : "Cushion under 7 days. Pay yourself first until 90 days.";
+            m.lessonIdx = 12;
+            return m;
+        }
+        if (budget > 0 && mt.expense / budget > 0.8) {
+            m.title = ar ? "🎓 قاعدة اليوم: هامش 10٪ داخل الميزانية" : "🎓 Rule: 10% buffer";
+            m.body = ar ? "أنت قرب السقف. الميزانية بلا هامش تنكسر أول أسبوع — أضف 10٪ هامشًا داخل سقفك الشهر القادم."
+                        : "Near cap. Build a 10% buffer inside next month's cap.";
+            m.ruleIdx = 21;
+            return m;
+        }
+        int doy = now.get(Calendar.DAY_OF_YEAR);
+        m.title = ar ? "🎓 رسالة المدرّب اليومية" : "🎓 Daily coach note";
+        m.body = ar ? Content.LESSONS.get(doy % Content.LESSONS.size()).titleAr + ": " + Content.LESSONS.get(doy % Content.LESSONS.size()).introAr
+                    : Content.LESSONS.get(doy % Content.LESSONS.size()).titleEn;
+        m.lessonIdx = doy % Content.LESSONS.size();
+        return m;
+    }
+
+    /** إجابات الخبير الستة — مبنية على أرقامك الحقيقية. */
+    public static String coachAnswer(Context c, int topic, double amount) {
+        boolean ar = !Prefs.get(c).language().equals("en");
+        Repo r = Repo.get(c);
+        Prefs p = Prefs.get(c);
+        Calendar now = Calendar.getInstance();
+        Models.MonthTotals mt = r.monthTotals(now);
+        double incRef = mt.income > 0 ? mt.income : p.monthlyIncome();
+        double budget = p.monthlyBudget();
+        StringBuilder sb = new StringBuilder();
+        switch (topic) {
+            case 0: { // كيف أوفر أكثر؟
+                double sr = incRef > 0 ? mt.saved / incRef * 100 : 0;
+                sb.append(ar ? "معدل ادخارك الآن " + Fmt.percent(c, sr) + ".\n" : "Savings rate now " + Fmt.percent(c, sr) + ".\n");
+                if (incRef > 0) sb.append(ar ? "1) حوّل " + Fmt.money(c, incRef * 0.1) + " (10٪) يوم الراتب قبل أي صرف.\n"
+                                             : "1) Move 10% on payday.\n");
+                List<CatSpend> tops = topCats(c, 3);
+                if (!tops.isEmpty()) {
+                    CatSpend t0 = tops.get(0);
+                    sb.append(ar ? "2) اخفض «" + Models.cat(t0.cat).ar + "» 20٪ = توفير " + Fmt.money(c, t0.total * 0.2) + " شهريًا.\n"
+                                 : "2) Cut top category 20%.\n");
+                }
+                List<String[]> subs = detectSubscriptions(c);
+                if (!subs.isEmpty()) sb.append(ar ? "3) راجع " + subs.size() + " دفعات متكررة رصدناها — الإلغاء توفير فوري.\n" : "3) Audit recurring payments.\n");
+                sb.append(ar ? "4) كل فائض أسبوعي يرحّل للادخار تلقائيًا، لا للأسبوع التالي." : "4) Weekly surplus rolls to savings.");
+                break;
+            }
+            case 1: { // ديون: من أين أبدأ؟
+                double owed = r.debtsOwedByMe();
+                sb.append(ar ? "إجمالي ما عليك: " + Fmt.money(c, owed) + ".\n" : "Owed: " + Fmt.money(c, owed) + ".\n");
+                sb.append(ar ? "طريقة كرة الثلج بالترتيب:\n" : "Snowball order:\n");
+                int n = 0;
+                for (Models.Debt d : snowball(c)) {
+                    n++;
+                    sb.append(n).append(") ").append(d.title.isEmpty() ? d.person : d.title).append(" — ").append(Fmt.money(c, d.total - r.debtPaid(d.id))).append('\n');
+                    if (n >= 3) break;
+                }
+                sb.append(ar ? "ادفع الحد الأدنى للبقية، وكل فائض يذهب للأول حتى يُغلق، ثم ينتقل تدفقه للذي بعده."
+                             : "Minimums elsewhere; every surplus at #1 until closed.");
+                break;
+            }
+            case 2: { // راتبي قليل
+                sb.append(ar ? "الدخل المنخفض مشكلة تدفق لا إنفاق — نعالجهما معًا:\n" : "Low income is a flow problem:\n");
+                sb.append(ar ? "1) دخل جانبي آمن: مهارة تملكها + ساعتان مساءً، وبِع خدمة لا منتجًا (بلا مخزون).\n" : "1) Safe side income: service first.\n");
+                sb.append(ar ? "2) قاعدة التكلفة/استخدام لكل شراء: السعر ÷ الاستخدامات — أقل من وحدة = صفقة.\n" : "2) Cost-per-use on every buy.\n");
+                sb.append(ar ? "3) يوم التفاوض السنوي: إنترنت/تأمين/اشتراكات — توفير نموذجي 15-30٪.\n" : "3) Annual negotiation day: 15-30%.\n");
+                if (incRef > 0) sb.append(ar ? "4) وجّه 50٪ من أي دخل إضافي للديون/الادخار حتى تكتمل وسادتك." : "4) Route 50% of side income to cushion.");
+                break;
+            }
+            case 3: { // هل أشتري شيء غالي؟
+                double amt = amount > 0 ? amount : 0;
+                sb.append(ar ? "بروتوكول الشراء الكبير (4 خطوات):\n" : "Big-purchase protocol:\n");
+                if (amt > 0) {
+                    double avg90 = r.avgDaily(now.getTimeInMillis() - 90L * 86400000L, now.getTimeInMillis());
+                    if (avg90 > 0) sb.append(ar ? "• يكلفك " + Fmt.digits(c, String.valueOf((int) (amt / avg90))) + " يومًا من وسادتك الحالية.\n" : "• Costs " + (int) (amt / avg90) + " cushion days.\n");
+                    if (incRef > 0) sb.append(ar ? "• يعادل " + Fmt.percent(c, amt / incRef * 100) + " من دخلك الشهري" + (amt / incRef > 0.1 ? " — فوق حد الـ10٪: انتظر 48 ساعة.\n" : " — ضمن الحد.\n")
+                                                 : "• " + Fmt.percent(c, amt / incRef * 100) + " of monthly income.\n");
+                    if (budget > 0) sb.append(ar ? "• بعد شرائه: مصروف الشهر يصبح " + Fmt.money(c, mt.expense + amt) + " مقابل سقف " + Fmt.money(c, budget) + (mt.expense + amt > budget ? " ⚠️ تجاوز." : ".\n")
+                                                 : "");
+                }
+                sb.append(ar ? "1) قاعدة 48 ساعة للاشتراكات والرغبات.\n2) احسب التكلفة/استخدام لسنة.\n3) قارن بديلين بنفس الغرض.\n4) إن بقيت الرغبة بعد كل هذا — اشترِ الأفضل بلا ذنب."
+                             : "1) 48h rule. 2) Cost/use. 3) Compare alternatives. 4) Then buy the best guilt-free.");
+                break;
+            }
+            case 4: { // أين يذهب مالي؟
+                List<CatSpend> tops = topCats(c, 3);
+                sb.append(ar ? "أكبر 3 مصارف هذا الشهر:\n" : "Top 3 this month:\n");
+                for (CatSpend t : tops) {
+                    sb.append("• ").append(Models.cat(t.cat).ar).append(": ").append(Fmt.money(c, t.total))
+                      .append(mt.expense > 0 ? " (" + Fmt.percent(c, t.total / mt.expense * 100) + ")" : "").append('\n');
+                }
+                double we = 0, night = 0;
+                for (Models.Tx t : r.txRange(Fmt.startOfMonth(now).getTimeInMillis(), Fmt.endOfMonth(now).getTimeInMillis(), 0, null, null)) {
+                    Calendar tc = Calendar.getInstance(); tc.setTimeInMillis(t.ts);
+                    int dw = tc.get(Calendar.DAY_OF_WEEK);
+                    if (dw == Calendar.FRIDAY || dw == Calendar.SATURDAY) we += t.amount;
+                    if (tc.get(Calendar.HOUR_OF_DAY) < 5) night += t.amount;
+                }
+                if (mt.expense > 0) {
+                    sb.append(ar ? "نهاية الأسبوع: " + Fmt.percent(c, we / mt.expense * 100) + " — الليل: " + Fmt.percent(c, night / mt.expense * 100) + ".\n"
+                                 : "Weekend share " + Fmt.percent(c, we / mt.expense * 100) + ".\n");
+                }
+                sb.append(ar ? "افتح بطاقة المغلفات في تعلّم لترى سقف كل فئة مقابل صرفك." : "See envelopes in the academy tab.");
+                break;
+            }
+            default: { // عادة التسجيل
+                int streak = loggingStreak(c);
+                sb.append(ar ? "سلسلتك الحالية: " + Fmt.digits(c, String.valueOf(streak)) + " يوم.\n" : "Streak: " + streak + " days.\n");
+                sb.append(ar ? "1) ثبّت تذكيرك اليومي من الإعدادات على وقت قهوتك.\n2) سجّل خلال 24 ساعة كحد أقصى — الذاكرة تخون.\n3) قاعدة 21 يومًا: بعد 3 أسابيع يصبح التسجيل تلقائيًا كغسل اليدين.\n4) كل سلسلة ≥7 أيام ترفع مؤشرك الصحي 10 نقاط."
+                             : "1) Fix reminder time. 2) Log within 24h. 3) 21-day rule. 4) Streaks boost your score.");
+                break;
+            }
+        }
+        return sb.toString();
+    }
+
+    /** فئة + مجموعها. */
+    public static final class CatSpend { public int cat; public double total; }
+
+    public static List<CatSpend> topCats(Context c, int n) {
+        Calendar now = Calendar.getInstance();
+        List<Models.CatTotal> ct = Repo.get(c).catTotals(Fmt.startOfMonth(now).getTimeInMillis(), Fmt.endOfMonth(now).getTimeInMillis(), 0);
+        List<CatSpend> out = new ArrayList<>();
+        for (int i = 0; i < ct.size() && i < n; i++) { CatSpend x = new CatSpend(); x.cat = ct.get(i).cat; x.total = ct.get(i).total; out.add(x); }
+        return out;
+    }
+
+    /** ترتيب كرة الثلج: الأصغر مبلغًا أولًا. */
+    public static List<Models.Debt> snowball(Context c) {
+        Repo r = Repo.get(c);
+        List<Models.Debt> out = new ArrayList<>();
+        for (Models.Debt d : r.debts()) if (d.kind == 0 && d.total - r.debtPaid(d.id) > 0) out.add(d);
+        java.util.Collections.sort(out, (a, b) -> Double.compare(a.total - r.debtPaid(a.id), b.total - r.debtPaid(b.id)));
         return out;
     }
 }

@@ -288,7 +288,7 @@ public final class InfoSheets {
         llp.gravity = Gravity.CENTER_HORIZONTAL;
         logo.setLayoutParams(llp);
         sh.content.addView(logo);
-        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.7.0", 18, R.color.text_primary, Typeface.BOLD);
+        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.8.0", 18, R.color.text_primary, Typeface.BOLD);
         name.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(a, 8);
@@ -310,7 +310,7 @@ public final class InfoSheets {
         dev.setLayoutParams(dlp);
         credit.addView(dev);
         TextView line = Ui.txt(a, ar
-                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.7.0"
+                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.8.0"
                 : "Authored & developed by Amjad Habib — version 1.1.0", 12.5f, R.color.text_tertiary);
         line.setGravity(Gravity.CENTER);
         credit.addView(line);
@@ -343,6 +343,45 @@ public final class InfoSheets {
         sh.show();
     }
 
+
+
+    // ---------------- مساعد: اسأل المستشار ----------------
+    public static void simulatorCoach(Activity a) {
+        final boolean ar = ar(a);
+        UiKit.Sheet sh = UiKit.sheet(a, ar ? "💬 اسأل المستشار" : "Ask the advisor");
+        sh.content.addView(Ui.txt(a, ar
+                ? "اختر سؤالك — يجيبك المدرّب بأرقامك الحقيقية لا بنصائح عامة."
+                : "Pick a question — answered with your real numbers.", 13, R.color.text_secondary));
+        final int[] topic = {0};
+        final TextView amount = UiKit.field(a, ar ? "مبلغ اختياري (لسؤال الشراء)" : "Optional amount (buy question)", true);
+        final TextView ans = Ui.txt(a, "", 13.5f, R.color.text_primary);
+        ans.setLineSpacing(0, 1.45f);
+        ans.setBackground(Ui.round(Ui.color(a, R.color.surface_3), 14, a));
+        ans.setPadding(Ui.dp(a, 14), Ui.dp(a, 12), Ui.dp(a, 14), Ui.dp(a, 12));
+        final Runnable[] rec = new Runnable[1];
+        String[] qs = ar ? new String[]{"أوفر أكثر؟", "ديوني: أبدأ؟", "راتبي قليل", "أشتري غالي؟", "أين مالي؟", "عادة التسجيل"}
+                         : new String[]{"Save more?", "Debts: start?", "Low income", "Big buy?", "Where's money?", "Logging habit"};
+        UiKit.HorizontalScroll qrow = UiKit.chipRow(a, qs, 0, i -> { topic[0] = i; rec[0].run(); });
+        LinearLayout.LayoutParams qlp = new LinearLayout.LayoutParams(-1, -2);
+        qlp.topMargin = Ui.dp(a, 10);
+        qrow.setLayoutParams(qlp);
+        sh.content.addView(qrow);
+        LinearLayout.LayoutParams alp = new LinearLayout.LayoutParams(-1, -2);
+        alp.topMargin = Ui.dp(a, 10);
+        amount.setLayoutParams(alp);
+        sh.content.addView(amount);
+        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
+        rlp.topMargin = Ui.dp(a, 10);
+        ans.setLayoutParams(rlp);
+        sh.content.addView(ans);
+        rec[0] = () -> {
+            double amt = 0;
+            try { amt = Double.parseDouble(amount.getText().toString().trim()); } catch (Exception ignored) {}
+            ans.setText(com.amjad.mahloula.brain.Advisor.coachAnswer(a, topic[0], amt));
+        };
+        rec[0].run();
+        sh.show();
+    }
 
     // ---------------- سيموليتر التوفير ----------------
     public static void simulator(Activity a) {

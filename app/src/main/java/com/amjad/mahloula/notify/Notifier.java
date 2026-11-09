@@ -173,6 +173,7 @@ public final class Notifier {
             for (Models.Tx t : r.txRange(now.getTimeInMillis() - 7L * 86400000L, now.getTimeInMillis(), 0, null, null))
                 week += t.amount;
             body = (ar ? "📅 ملخص الأسبوع: صرفت " + Fmt.money(c, week) + ". " : "📅 Week: " + Fmt.money(c, week) + ". ") + body;
+            body = body + (ar ? "\n🎯 مهمة أسبوعك: " + Advisor.dailyCoach(c).title : "\n🎯 Weekly mission: " + Advisor.dailyCoach(c).title);
         }
         show(c, title, body);
     }

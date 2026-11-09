@@ -94,6 +94,13 @@ public class GuidePanel implements Panel {
         bar.setLayoutParams(blp);
         bar.set((float) done / Content.LESSONS.size(), R.color.on_panel);
         card.addView(bar);
+        int sc = Advisor.healthScore(a);
+        TextView lvl = Ui.txt(a, (ar() ? "مستواك: " : "Level: ") + Advisor.levelTitle(a, sc) + "  •  " + Advisor.levelGap(a, sc),
+                12.5f, R.color.on_panel_2, Typeface.BOLD);
+        LinearLayout.LayoutParams llp2 = new LinearLayout.LayoutParams(-2, -2);
+        llp2.topMargin = Ui.dp(a, 10);
+        lvl.setLayoutParams(llp2);
+        card.addView(lvl);
         return card;
     }
 

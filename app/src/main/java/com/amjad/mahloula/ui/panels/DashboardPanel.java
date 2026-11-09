@@ -61,6 +61,7 @@ public class DashboardPanel implements Panel {
         Models.MonthTotals mt = r.monthTotals(month);
 
         col.addView(header(r));
+        col.addView(mentorCard());
         col.addView(summaryCard(r, mt, month));
         col.addView(budgetCard(mt));
         col.addView(topCatsCard(r, month));
@@ -121,6 +122,53 @@ public class DashboardPanel implements Panel {
         balRow.addView(ring);
         card.addView(balRow);
         card.addView(Ui.txt(a, Advisor.healthLabel(a, score), 13, R.color.on_panel_2, Typeface.BOLD));
+        return card;
+    }
+
+    // ---------- بطاقة المدرّب الشخصي ----------
+    private View mentorCard() {
+        int score = Advisor.healthScore(a);
+        Advisor.CoachMsg m = Advisor.dailyCoach(a);
+        LinearLayout card = UiKit.card(a, 18);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        LinearLayout head = Ui.h(a);
+        TextView lvl = Ui.txt(a, Advisor.levelTitle(a, score), 14.5f, R.color.on_dark, Typeface.BOLD);
+        lvl.setBackground(Ui.round(Ui.color(a, R.color.text_primary), 12, a));
+        lvl.setPadding(Ui.dp(a, 12), Ui.dp(a, 6), Ui.dp(a, 12), Ui.dp(a, 6));
+        head.addView(lvl);
+        head.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
+        TextView ask = Ui.txt(a, ar() ? "💬 اسأل المستشار" : "💬 Ask advisor", 13.5f, R.color.on_panel, Typeface.BOLD);
+        ask.setOnClickListener(v -> InfoSheets.simulatorCoach(a));
+        head.addView(ask);
+        card.addView(head);
+        TextView gap = Ui.txt(a, Advisor.levelGap(a, score), 12, R.color.text_tertiary);
+        LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(-2, -2);
+        glp.topMargin = Ui.dp(a, 8);
+        gap.setLayoutParams(glp);
+        card.addView(gap);
+        TextView t = Ui.txt(a, m.title, 15, R.color.text_primary, Typeface.BOLD);
+        LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(-2, -2);
+        tlp.topMargin = Ui.dp(a, 12);
+        t.setLayoutParams(tlp);
+        card.addView(t);
+        TextView b = Ui.txt(a, m.body, 13, R.color.text_secondary);
+        b.setLineSpacing(0, 1.35f);
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-2, -2);
+        blp.topMargin = Ui.dp(a, 5);
+        b.setLayoutParams(blp);
+        card.addView(b);
+        TextView open = Ui.txt(a, ar() ? "افتح الدرس ←" : "Open lesson ←", 13, R.color.brand_700, Typeface.BOLD);
+        LinearLayout.LayoutParams olp = new LinearLayout.LayoutParams(-2, -2);
+        olp.topMargin = Ui.dp(a, 8);
+        open.setLayoutParams(olp);
+        final int li = m.lessonIdx, ri = m.ruleIdx;
+        open.setOnClickListener(v -> {
+            if (li >= 0) InfoSheets.lesson(a, li);
+            else if (ri >= 0) InfoSheets.rule(a, ri);
+        });
+        card.addView(open);
         return card;
     }
 
