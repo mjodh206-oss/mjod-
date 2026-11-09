@@ -1,8 +1,8 @@
 const STORAGE_KEY='masroofi-transactions-v1';
 const $=s=>document.querySelector(s);
 const state={transactions:[],type:'deposit',filter:'all',installPrompt:null};
-const formatNumber=new Intl.NumberFormat('ar-SY',{maximumFractionDigits:0});
-const formatDate=new Intl.DateTimeFormat('ar-SY',{day:'numeric',month:'long',year:'numeric'});
+const formatNumber=new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
+const formatDate=new Intl.DateTimeFormat('ar-SY-u-nu-latn',{day:'numeric',month:'long',year:'numeric'});
 function load(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');state.transactions=Array.isArray(raw)?raw.filter(x=>x&&Number.isFinite(x.amount)&&x.amount>0&&['deposit','withdraw'].includes(x.type)):[]}catch{state.transactions=[]}}
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state.transactions))}
 function totals(){return state.transactions.reduce((t,x)=>{t[x.type==='deposit'?'income':'expense']+=x.amount;return t},{income:0,expense:0})}
@@ -20,5 +20,5 @@ $('#depositButton').addEventListener('click',()=>openModal('deposit'));$('#withd
 $('#transactionForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('#amountInput').value),note=$('#noteInput').value.trim(),error=$('#formError');if(!Number.isSafeInteger(amount)||amount<=0){error.textContent='اكتب مبلغ صحيح بالأرقام الصحيحة.';return}const t=totals(),balance=t.income-t.expense;if(state.type==='withdraw'&&amount>balance){error.textContent=`المبلغ أكبر من رصيدك. صافي اللي معك ${formatNumber.format(balance)} ل.س.`;return}state.transactions.push({id:crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random()}`,type:state.type,amount,note,createdAt:Date.now()});save();render();playTransactionSound(state.type);closeModal();showToast(state.type==='deposit'?'انضاف المبلغ على محفظتك':'تم تسجيل السحب، وصار رصيدك محدّث')});
 $('#filterButton').addEventListener('click',()=>{$('#filterTabs').hidden=!$('#filterTabs').hidden});document.querySelectorAll('.filter-tab').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.filter;render()}));
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.installPrompt=e;$('#installButton').hidden=false});$('#installButton').addEventListener('click',async()=>{if(!state.installPrompt){showToast('من قائمة المتصفح اختار «إضافة إلى الشاشة الرئيسية»');return}state.installPrompt.prompt();await state.installPrompt.userChoice;state.installPrompt=null;$('#installButton').hidden=true});
-const today=new Intl.DateTimeFormat('ar-SY',{weekday:'long',day:'numeric',month:'long'}).format(new Date());$('#todayLabel').textContent=today;load();render();
+const today=new Intl.DateTimeFormat('ar-SY-u-nu-latn',{weekday:'long',day:'numeric',month:'long'}).format(new Date());$('#todayLabel').textContent=today;load();render();
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
