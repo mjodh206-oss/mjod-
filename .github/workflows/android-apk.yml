@@ -1,6 +1,9 @@
 name: Build Android APK
 
 on:
+  push:
+    branches:
+      - arena/df433a5c-mjod
   workflow_dispatch:
 
 permissions:
