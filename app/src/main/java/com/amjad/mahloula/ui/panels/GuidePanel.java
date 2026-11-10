@@ -37,6 +37,8 @@ public class GuidePanel implements Panel {
 
     private final Activity a;
     private LinearLayout col;
+    private long openMask;
+    private int envCount, benchOk, benchTotal, chDone, chTotal;
 
     public GuidePanel(Activity a) { this.a = a; }
 
@@ -55,20 +57,101 @@ public class GuidePanel implements Panel {
     @Override
     public void refresh() {
         if (col == null) return;
+        openMask = Prefs.get(a).guideOpenMask();
         col.removeAllViews();
         col.addView(header());
-        col.addView(myNumbers());
-        col.addView(scorecard());
-        col.addView(envelopesCard());
-        col.addView(benchCard());
-        col.addView(personaCard());
-        col.addView(challengesCard());
-        col.addView(badgesCard());
-        col.addView(planCard());
-        col.addView(alertsCard());
-        col.addView(lessonsCard());
-        col.addView(mistakesCard());
-        col.addView(rulesCard());
+        col.addView(fold(myNumbers(), 1, 0, ""));
+        col.addView(fold(scorecard(), 1, 1, ""));
+        col.addView(fold(envelopesCard(), 2, 2,
+                envCount > 0 ? (ar() ? Fmt.digits(a, String.valueOf(envCount)) + " مغلفات" : envCount + " envelopes") : ""));
+        col.addView(fold(benchCard(), 2, 3,
+                benchTotal > 0 ? (Fmt.digits(a, String.valueOf(benchOk)) + "/" + Fmt.digits(a, String.valueOf(benchTotal))
+                        + (ar() ? " ضمن المعيار" : " on bench")) : ""));
+        col.addView(fold(personaCard(), 2, 11, ""));
+        col.addView(fold(challengesCard(), 1, 4,
+                ar() ? Fmt.digits(a, String.valueOf(chDone)) + "/" + Fmt.digits(a, String.valueOf(chTotal)) + " منجزة"
+                     : chDone + "/" + chTotal + " done"));
+        col.addView(fold(badgesCard(), 1, 5, ""));
+        col.addView(fold(planCard(), 1, 6,
+                ar() ? Fmt.digits(a, String.valueOf(Advisor.personalPlan(a).size())) + " خطوات"
+                     : Advisor.personalPlan(a).size() + " steps"));
+        col.addView(fold(alertsCard(), 1, 7,
+                ar() ? Fmt.digits(a, String.valueOf(Advisor.scan(a).size())) + " تنبيهات"
+                     : Advisor.scan(a).size() + " alerts"));
+        long lmask = Prefs.get(a).lessonsDoneMask();
+        col.addView(fold(lessonsCard(), 2, 8,
+                Fmt.digits(a, String.valueOf(Long.bitCount(lmask))) + "/" + Fmt.digits(a, String.valueOf(Content.LESSONS.size()))));
+        col.addView(fold(mistakesCard(), 1, 9, Fmt.digits(a, String.valueOf(Content.MISTAKES.size()))));
+        col.addView(fold(rulesCard(), 2, 10, Fmt.digits(a, String.valueOf(Content.RULES.size()))));
+    }
+
+    /**
+     * يحوّل أي بطاقة إلى قسم قابل للطي: ضغطة على عنوانه تفتح قائمته أو تطويها،
+     * مع الاحتفاظ بكل المحتوى وحالة الفتح محفوظة بين الجلسات.
+     */
+    private View fold(View card, int keep, final int idx, String count) {
+        if (!(card instanceof LinearLayout)) return card;
+        final LinearLayout c = (LinearLayout) card;
+        if (c.getChildCount() <= keep) return card;
+        final boolean open = (openMask & (1L << idx)) != 0;
+
+        java.util.List<View> headKids = new java.util.ArrayList<>();
+        java.util.List<View> bodyKids = new java.util.ArrayList<>();
+        for (int i = 0; i < c.getChildCount(); i++)
+            (i < keep ? headKids : bodyKids).add(c.getChildAt(i));
+        c.removeAllViews();
+
+        LinearLayout header = Ui.h(a);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+
+        LinearLayout texts = Ui.v(a);
+        texts.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
+        for (View k : headKids) texts.addView(k);
+        header.addView(texts);
+
+        if (count != null && !count.isEmpty()) {
+            TextView cnt = Ui.txt(a, count, 11.5f, R.color.brand_700, Typeface.BOLD);
+            cnt.setBackground(Ui.round(Ui.color(a, R.color.brand_50), 10, a));
+            cnt.setPadding(Ui.dp(a, 9), Ui.dp(a, 4), Ui.dp(a, 9), Ui.dp(a, 4));
+            LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(-2, -2);
+            clp.setMarginStart(Ui.dp(a, 8));
+            cnt.setLayoutParams(clp);
+            header.addView(cnt);
+        }
+
+        final TextView chev = Ui.txt(a, "▼", 11, R.color.text_secondary, Typeface.BOLD);
+        LinearLayout.LayoutParams vlp = new LinearLayout.LayoutParams(-2, -2);
+        vlp.setMarginStart(Ui.dp(a, 9));
+        chev.setLayoutParams(vlp);
+        chev.setRotation(open ? 0f : -90f);
+        header.addView(chev);
+
+        Ui.clickable(a, header, Ui.color(a, R.color.surface_3));
+
+        final LinearLayout body = Ui.v(a);
+        body.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+        for (View k : bodyKids) body.addView(k);
+        body.setVisibility(open ? View.VISIBLE : View.GONE);
+
+        header.setOnClickListener(v -> {
+            boolean nowOpen = body.getVisibility() != View.VISIBLE;
+            body.setVisibility(nowOpen ? View.VISIBLE : View.GONE);
+            chev.setRotation(nowOpen ? 0f : -90f);
+            openMask = nowOpen ? (openMask | (1L << idx)) : (openMask & ~(1L << idx));
+            Prefs.get(a).guideOpenMask(openMask);
+        });
+
+        c.addView(header);
+        c.addView(body);
+        return c;
+    }
+
+    /** يطوي أو يفتح كل الأقسام دفعة واحدة. */
+    private void setAllOpen(boolean open) {
+        openMask = open ? 0xFFFL : 0L;
+        Prefs.get(a).guideOpenMask(openMask);
+        refresh();
     }
 
     // ---------- ترويسة الأكاديمية ----------
@@ -110,6 +193,25 @@ public class GuidePanel implements Panel {
         llp2.topMargin = Ui.dp(a, 10);
         lvl.setLayoutParams(llp2);
         card.addView(lvl);
+        LinearLayout toggles = Ui.h(a);
+        LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(-1, -2);
+        glp.topMargin = Ui.dp(a, 12);
+        toggles.setLayoutParams(glp);
+        TextView allBtn = Ui.txt(a, ar() ? "⌄ فتح الكل" : "Expand all", 12.5f, R.color.on_panel, Typeface.BOLD);
+        allBtn.setBackground(Ui.ripple(a, Ui.round(Color.argb(40, 255, 255, 255), 12, a), Color.argb(60, 255, 255, 255)));
+        allBtn.setPadding(Ui.dp(a, 13), Ui.dp(a, 7), Ui.dp(a, 13), Ui.dp(a, 7));
+        allBtn.setOnClickListener(v -> setAllOpen(true));
+        toggles.addView(allBtn);
+        TextView noneBtn = Ui.txt(a, ar() ? "⌃ إغلاق الكل" : "Collapse all", 12.5f, R.color.on_panel, Typeface.BOLD);
+        noneBtn.setBackground(Ui.ripple(a, Ui.round(Color.argb(40, 255, 255, 255), 12, a), Color.argb(60, 255, 255, 255)));
+        noneBtn.setPadding(Ui.dp(a, 13), Ui.dp(a, 7), Ui.dp(a, 13), Ui.dp(a, 7));
+        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
+        nlp.setMarginStart(Ui.dp(a, 10));
+        noneBtn.setLayoutParams(nlp);
+        noneBtn.setOnClickListener(v -> setAllOpen(false));
+        toggles.addView(noneBtn);
+        toggles.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
+        card.addView(toggles);
         return card;
     }
 
@@ -148,6 +250,7 @@ public class GuidePanel implements Panel {
         card.setLayoutParams(lp);
         card.addView(Ui.txt(a, ar() ? "تحدياتك هذا الأسبوع 🏅" : "Your challenges 🏅", 16, R.color.text_primary, Typeface.BOLD));
 
+        chDone = 0; chTotal = 0;
         int nss = com.amjad.mahloula.brain.Advisor.noSpendStreak(a);
         card.addView(chRow(ar() ? "يوم بلا صرف" : "No-spend day",
                 ar() ? "سلسلتك: " + Fmt.digits(a, String.valueOf(nss)) + " يوم (هدف 3)" : "Streak " + nss + "d (goal 3)", nss >= 3));
@@ -174,6 +277,8 @@ public class GuidePanel implements Panel {
     }
 
     private View chRow(String title, String status, boolean done) {
+        chTotal++;
+        if (done) chDone++;
         LinearLayout row = Ui.h(a);
         row.setBackground(Ui.round(Ui.color(a, done ? R.color.income_soft : R.color.surface_2), 13, a));
         row.setPadding(Ui.dp(a, 12), Ui.dp(a, 10), Ui.dp(a, 12), Ui.dp(a, 10));
@@ -386,6 +491,7 @@ public class GuidePanel implements Panel {
         card.setLayoutParams(lp);
         card.addView(Ui.txt(a, ar() ? "مغلفاتك المقترحة (من نمط 90 يومًا)" : "Your suggested envelopes", 16, R.color.text_primary, Typeface.BOLD));
         card.addView(Ui.txt(a, ar() ? "سقف مقترح لكل فئة = متوسطك × 0.9" : "Suggested cap per category = your average × 0.9", 12, R.color.text_tertiary));
+        envCount = envs.size();
         for (com.amjad.mahloula.brain.Advisor.Env e : envs) {
             LinearLayout item = Ui.v(a);
             item.setBackground(Ui.round(Ui.color(a, R.color.surface_2), 13, a));
@@ -524,6 +630,7 @@ public class GuidePanel implements Panel {
         if (inc <= 0) inc = Prefs.get(a).monthlyIncome();
         if (inc <= 0) return new View(a);
         java.util.List<com.amjad.mahloula.brain.Advisor.Bench> bs = com.amjad.mahloula.brain.Advisor.benchmarks(a);
+        benchOk = 0; benchTotal = bs.size();
         if (bs.isEmpty()) return new View(a);
         LinearLayout card = UiKit.card(a, 18);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
@@ -555,6 +662,7 @@ public class GuidePanel implements Panel {
             chip.setLayoutParams(clp);
             row.addView(chip);
             card.addView(row);
+            if (!(over || underSave)) benchOk++;
         }
         return card;
     }

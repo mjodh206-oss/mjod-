@@ -98,6 +98,10 @@ public final class Prefs {
     public int lessonProgress() { return sp.getInt("lessons_done", 0); }
     public void lessonProgress(int v) { sp.edit().putInt("lessons_done", v).apply(); }
 
+    /** قناع الأقسام المفتوحة في الأكاديمية (كل قسم = بت). */
+    public long guideOpenMask() { return sp.getLong("guide_open_mask", 0L); }
+    public void guideOpenMask(long v) { sp.edit().putLong("guide_open_mask", v).apply(); }
+
     public long lessonsDoneMask() { return sp.getLong("lessons_mask", 0L); }
     public void lessonsDoneMask(long v) { sp.edit().putLong("lessons_mask", v).apply(); }
 
