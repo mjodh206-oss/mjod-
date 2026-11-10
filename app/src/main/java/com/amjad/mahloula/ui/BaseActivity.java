@@ -37,6 +37,8 @@ public abstract class BaseActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         applyThemeMode(this);
+        getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE,
+                android.view.WindowManager.LayoutParams.FLAG_SECURE);
         super.onCreate(savedInstanceState);
         appliedLang = Prefs.get(this).language();
         appliedNight = nightValue(this);

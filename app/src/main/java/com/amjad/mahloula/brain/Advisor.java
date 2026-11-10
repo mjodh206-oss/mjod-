@@ -89,8 +89,16 @@ public final class Advisor {
         return out;
     }
 
-    /** فحص شامل يولّد قائمة التنبيهات مرتبة بالأهمية. */
+    private static long sCacheVersion = -1;
+    private static long sCacheTs = 0;
+    private static List<Insight> sCache;
+
+    /** فحص شامل يولّد قائمة التنبيهات مرتبة بالأهمية (مخزّن 20 ثانية ويبطل عند كل تعديل). */
     public static List<Insight> scan(Context c) {
+        long dv = Repo.dataVersion;
+        long nowMs = System.currentTimeMillis();
+        if (sCache != null && dv == sCacheVersion && nowMs - sCacheTs < 20000)
+            return new ArrayList<>(sCache);
         List<Insight> out = new ArrayList<>();
         Repo r = Repo.get(c);
         Prefs p = Prefs.get(c);
@@ -602,7 +610,10 @@ public final class Advisor {
                     null, TAB_GUIDE));
         }
 
-return out;
+sCache = new ArrayList<>(out);
+        sCacheVersion = dv;
+        sCacheTs = nowMs;
+        return out;
     }
 
     // ---------------- مؤشر الصحة المالية ----------------
@@ -782,7 +793,15 @@ return out;
     }
 
     /** يكتشف المدفوعات الشهرية المتكررة (تكراران بفواصل ~30 يومًا). */
+    private static long sSubVersion = -1;
+    private static long sSubTs = 0;
+    private static List<String[]> sSub;
+
     public static List<String[]> detectSubscriptions(Context c) {
+        long dv = Repo.dataVersion;
+        long nowMs = System.currentTimeMillis();
+        if (sSub != null && dv == sSubVersion && nowMs - sSubTs < 30000)
+            return new ArrayList<>(sSub);
         List<String[]> out = new ArrayList<>();
         List<Models.Tx> all = Repo.get(c).allTx();
         for (int i = 0; i < all.size() && out.size() < 3; i++) {
@@ -802,6 +821,9 @@ return out;
                 if (!dup) out.add(new String[]{label, Fmt.money(c, sum / hits)});
             }
         }
+        sSub = new ArrayList<>(out);
+        sSubVersion = dv;
+        sSubTs = nowMs;
         return out;
     }
 
@@ -830,8 +852,12 @@ return out;
         List<Models.CatTotal> base = r.catTotals(from, to, 0);
         List<Models.CatTotal> cur = r.catTotals(Fmt.startOfMonth(now).getTimeInMillis(), Fmt.endOfMonth(now).getTimeInMillis(), 0);
         List<Env> out = new ArrayList<>();
+        long first = Long.MAX_VALUE;
+        for (Models.Tx t0 : r.allTx()) first = Math.min(first, t0.ts);
+        double months = first == Long.MAX_VALUE ? 1
+                : Math.min(3, Math.max(1, (to - first) / (30.44 * 86400000.0)));
         for (Models.CatTotal ct : base) {
-            double cap = ct.total / 3.0 * 0.9;
+            double cap = ct.total / months * 0.9;
             if (cap <= 0) continue;
             double spent = 0;
             for (Models.CatTotal q : cur) if (q.cat == ct.cat) spent = q.total;

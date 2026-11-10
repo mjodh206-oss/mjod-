@@ -106,7 +106,7 @@ public final class InfoSheets {
                 : "Fixed: official Mahloula colors (white/black/orange); language follows your system automatically."));
 
         Switch sound = switchRow(a, ar ? "صوت التنبيهات والإشعارات" : "Alert & notification sounds", p.soundOn());
-        sound.setOnCheckedChangeListener((v, on) -> p.soundOn(on));
+        sound.setOnCheckedChangeListener((v, on) -> { p.soundOn(on); Notifier.recreateChannels(a); });
         sh.content.addView(sound);
 
         sh.content.addView(UiKit.sectionTitleIn(a, ar ? "👛 المحافظ والحسابات" : "👛 Wallets & accounts"));
@@ -288,7 +288,7 @@ public final class InfoSheets {
         llp.gravity = Gravity.CENTER_HORIZONTAL;
         logo.setLayoutParams(llp);
         sh.content.addView(logo);
-        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.9.0", 18, R.color.text_primary, Typeface.BOLD);
+        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.9.1", 18, R.color.text_primary, Typeface.BOLD);
         name.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(a, 8);
@@ -310,7 +310,7 @@ public final class InfoSheets {
         dev.setLayoutParams(dlp);
         credit.addView(dev);
         TextView line = Ui.txt(a, ar
-                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.9.0"
+                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.9.1"
                 : "Authored & developed by Amjad Habib — version 1.1.0", 12.5f, R.color.text_tertiary);
         line.setGravity(Gravity.CENTER);
         credit.addView(line);

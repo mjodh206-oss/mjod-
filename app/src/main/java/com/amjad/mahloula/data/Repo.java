@@ -34,7 +34,10 @@ public final class Repo {
 
     public void unlisten(OnChange l) { listeners.remove(l); }
 
+    public static long dataVersion = 0;
+
     public void notifyChanged() {
+        dataVersion++;
         for (int i = listeners.size() - 1; i >= 0; i--) listeners.get(i).onChanged();
     }
 

@@ -106,6 +106,18 @@ public final class Notifier {
         nm.notify(778, b.build());
     }
 
+    /** يعيد بناء القنوات لتطبيق تغيير الصوت فورًا. */
+    public static void recreateChannels(Context c) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm != null) {
+                nm.deleteNotificationChannel(CHANNEL);
+                nm.deleteNotificationChannel(CHANNEL_ALARM);
+            }
+        }
+        ensureChannel(c);
+    }
+
     public static void scheduleDaily(Context c) {
         AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
@@ -134,6 +146,7 @@ public final class Notifier {
     /** يبني نص التذكير اليومي الذكي من بياناتك الحقيقية. */
     public static void postDaily(Context c) {
         if (!Prefs.get(c).remindersOn()) return;
+        ensureChannel(c);
         boolean ar = !Prefs.get(c).language().equals("en");
         Repo r = Repo.get(c);
         Calendar now = Calendar.getInstance();
