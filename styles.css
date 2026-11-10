@@ -21,3 +21,21 @@
 .balance-top{gap:10px}.balance-label{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#f8fbff}.balance-icon{width:29px;height:29px;margin:0;border-radius:10px;background:#ffffff20;font-size:15px;color:#fff}.currency-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #ffffff35;background:#ffffff12;border-radius:30px;color:#f8fbff;font-size:10px;white-space:nowrap;backdrop-filter:blur(8px)}.currency-pill b{font-size:9px;color:#dbeafe;font-weight:500}.currency-dot{width:6px;height:6px;border-radius:50%;background:#a5d8ff;box-shadow:0 0 8px #bfdbfe}
 .balance-amount{font-size:clamp(39px,8vw,48px);font-weight:700;line-height:1.25;margin:16px 0 13px;letter-spacing:-.6px;font-variant-numeric:tabular-nums;text-shadow:0 2px 15px #0b1b4030}.balance-footer{padding-top:11px;border-top:1px solid #ffffff25}.balance-caption{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:#e7efff}.balance-dot{width:7px;height:7px;border-radius:50%;background:#86efac;box-shadow:0 0 9px #86efacaa}.balance-decoration{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:20px;border:1px solid #ffffff22;background:#ffffff10;color:#dbeafe;font-size:9px;letter-spacing:.6px}.balance-decoration span{color:#fff;font-size:10px}
 @media(max-width:430px){.balance-card{min-height:174px;padding:19px 18px 16px;border-radius:22px}.balance-amount{font-size:37px;margin:14px 0 12px}.balance-label{font-size:12px}.currency-pill{padding:5px 7px;font-size:9px}}
+
+/* High-readability typography for Arabic on small phone screens. */
+:root{font-family:"Noto Sans Arabic","Noto Naskh Arabic UI",system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:#101828}
+body,button,input{font-family:inherit;line-height:1.55}
+.brand strong{font-size:20px}.brand small{font-size:13px;color:#475467}
+.eyebrow{font-size:13px}.welcome-row h1{font-size:29px}.welcome-sub{font-size:15px;color:#475467}
+.privacy-badge{font-size:12px;color:#475467}
+.balance-label{font-size:15px}.currency-pill{font-size:12px}.currency-pill b{font-size:11px}.balance-amount{font-size:clamp(42px,8vw,58px);line-height:1.35}.balance-amount span{font-size:15px}.balance-caption{font-size:13px}.balance-decoration{font-size:11px}
+.stat-heading{font-size:13px}.stat-symbol{font-size:15px}.stat-card>strong{font-size:25px}.stat-card>strong small{font-size:12px}.stat-note{font-size:12px;color:#536171}
+.action-button strong{font-size:15px}.action-button small{font-size:12px;color:#536171}.action-icon{font-size:24px}
+.section-heading h2{font-size:19px}.section-heading p{font-size:12px;color:#536171}.filter-button{font-size:21px}.filter-tab{font-size:13px}
+.transaction-title{font-size:15px}.transaction-date{font-size:12px;color:#536171}.transaction-value{font-size:14px}.delete-transaction{font-size:21px}
+.empty-state strong{font-size:15px}.empty-state p{font-size:14px;color:#536171}.empty-state button{font-size:14px}
+footer{font-size:11px;color:#536171}
+.install-button{font-size:14px}
+.modal-kicker{font-size:13px}.modal h2{font-size:23px}.modal-subtitle{font-size:14px}.modal form label{font-size:14px}.amount-field input{font-size:23px}.amount-field>span{font-size:12px}.note-field{font-size:14px}.note-field::placeholder,.amount-field input::placeholder{color:#667085}.form-error{font-size:13px}.submit-button{height:48px;font-size:15px}.modal-close{font-size:24px}.toast{font-size:14px}
+.confirm-dialog h2{font-size:21px}.confirm-dialog p{font-size:14px}.confirm-actions button{font-size:14px}
+@media(max-width:430px){.app-shell{padding-right:16px;padding-left:16px}.balance-amount{font-size:44px}.stat-card>strong{font-size:22px}.welcome-row h1{font-size:27px}.action-button{gap:8px;padding:11px 9px}.action-button strong{font-size:14px}}
