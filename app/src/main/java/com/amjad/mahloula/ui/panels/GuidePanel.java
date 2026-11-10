@@ -60,6 +60,7 @@ public class GuidePanel implements Panel {
         col.addView(myNumbers());
         col.addView(scorecard());
         col.addView(envelopesCard());
+        col.addView(benchCard());
         col.addView(planCard());
         col.addView(alertsCard());
         col.addView(lessonsCard());
@@ -138,6 +139,12 @@ public class GuidePanel implements Panel {
         stats.addView(statLine(ar() ? "معدل الادخار" : "Savings rate", Fmt.percent(a, sr), sr >= 10 ? R.color.income : R.color.warn));
         stats.addView(statLine(ar() ? "المصروف من الدخل" : "Spend of income", Fmt.percent(a, er), er <= 80 ? R.color.income : R.color.expense));
         stats.addView(statLine(ar() ? "صافي ثروتك" : "Net worth", Fmt.money(a, netWorth), netWorth >= 0 ? R.color.brand_600 : R.color.expense));
+        double incF = incomeRef;
+        if (incF > 0 && mt.saved > 0) {
+            int fy = com.amjad.mahloula.brain.Advisor.fiYears(mt.saved / incF);
+            if (fy > 0) stats.addView(statLine(ar() ? "الاستقلال المالي 🕊" : "Financial freedom 🕊",
+                    ar() ? "~" + Fmt.digits(a, String.valueOf(fy)) + " سنة" : "~" + fy + "y", R.color.brand_700));
+        }
         row.addView(stats);
         card.addView(row);
         TextView lbl = Ui.txt(a, Advisor.healthLabel(a, score), 13, R.color.text_secondary, Typeface.BOLD);
@@ -344,6 +351,47 @@ public class GuidePanel implements Panel {
         rlp.topMargin = Ui.dp(a, 9);
         row.setLayoutParams(rlp);
         return row;
+    }
+
+    // ---------- المعايير العالمية للفئات ----------
+    private View benchCard() {
+        double inc = Repo.get(a).monthTotals(java.util.Calendar.getInstance()).income;
+        if (inc <= 0) inc = Prefs.get(a).monthlyIncome();
+        if (inc <= 0) return new View(a);
+        java.util.List<com.amjad.mahloula.brain.Advisor.Bench> bs = com.amjad.mahloula.brain.Advisor.benchmarks(a);
+        if (bs.isEmpty()) return new View(a);
+        LinearLayout card = UiKit.card(a, 18);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        card.addView(Ui.txt(a, ar() ? "فئاتك مقابل المعايير العالمية" : "Your categories vs global benchmarks", 16, R.color.text_primary, Typeface.BOLD));
+        card.addView(Ui.txt(a, ar() ? "النسب من دخلك — مصادر: أدلة الميزنة المفتوحة 2026" : "Shares of income — open budgeting guides", 12, R.color.text_tertiary));
+        for (com.amjad.mahloula.brain.Advisor.Bench b : bs) {
+            boolean over = b.cat != 9 && b.share > b.max * 1.15;
+            boolean underSave = b.cat == 9 && b.share < b.min;
+            LinearLayout row = Ui.h(a);
+            row.setBackground(Ui.round(Ui.color(a, R.color.surface_2), 12, a));
+            row.setPadding(Ui.dp(a, 12), Ui.dp(a, 9), Ui.dp(a, 12), Ui.dp(a, 9));
+            LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
+            rlp.topMargin = Ui.dp(a, 7);
+            row.setLayoutParams(rlp);
+            LinearLayout mid = Ui.v(a);
+            mid.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
+            mid.addView(Ui.txt(a, Models.cat(b.cat).ar, 13.5f, R.color.text_primary, Typeface.BOLD));
+            mid.addView(Ui.txt(a, (ar() ? "المعيار: " : "Bench: ") + Fmt.digits(a, String.valueOf((int) b.min)) + "-" + Fmt.digits(a, String.valueOf((int) b.max)) + "٪", 11.5f, R.color.text_tertiary));
+            row.addView(mid);
+            TextView val = Ui.txt(a, Fmt.percent(a, b.share), 14,
+                    (over || underSave) ? R.color.expense : R.color.text_primary, Typeface.BOLD);
+            row.addView(val);
+            TextView chip = Ui.txt(a, over ? (ar() ? "فوق" : "over") : underSave ? (ar() ? "تحت" : "under") : (ar() ? "ضمن ✔" : "ok ✔"),
+                    11.5f, (over || underSave) ? R.color.expense : R.color.text_primary, Typeface.BOLD);
+            LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(-2, -2);
+            clp.setMarginStart(Ui.dp(a, 8));
+            chip.setLayoutParams(clp);
+            row.addView(chip);
+            card.addView(row);
+        }
+        return card;
     }
 
     // ---------- الدروس المرقّمة ----------

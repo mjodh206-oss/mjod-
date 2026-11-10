@@ -286,6 +286,7 @@ public final class Advisor {
         
         // ================= الدفعة المدرّبة: تحليل أنماط عميق =================
         double incRef = mt.income > 0 ? mt.income : p.monthlyIncome();
+        Models.MonthTotals pvM = r.monthTotals(prevMB());
 
         // 1) توقع وتيرة نهاية الشهر
         if (budget > 0 && mt.expense > 0 && dayOfMonth >= 3) {
@@ -556,6 +557,51 @@ public final class Advisor {
                     null, -1));
         }
 
+
+        // ================= الدفعة الخامسة: دقة المعايير العالمية وFIRE =================
+        double incRef2 = incRef;
+        if (incRef2 > 0) {
+            for (Bench b : benchmarks(c)) {
+                if (b.cat == 9) { // ادخار: تحت الحد
+                    if (b.share < b.min && dayOfMonth >= 10) out.add(new Insight(1, "piggy",
+                            ar ? "ادخارك تحت المعيار العالمي" : "Savings below global benchmark",
+                            ar ? "تدّخر " + Fmt.percent(c, b.share) + " من دخلك مقابل معيار 10-20٪. ابدأ بـ10٪ وزد 1٪ كل شهرين."
+                               : "Saving " + Fmt.percent(c, b.share) + " vs 10-20% benchmark.",
+                            ar ? "خطة الادخار" : "Savings plan", TAB_GUIDE));
+                } else if (b.share > b.max * 1.15) {
+                    out.add(new Insight(1, "pie",
+                            ar ? "«" + Models.cat(b.cat).ar + "» فوق المعيار العالمي" : "'" + Models.cat(b.cat).en + "' over benchmark",
+                            ar ? "تستهلك " + Fmt.percent(c, b.share) + " من دخلك مقابل معيار عالمي "
+                               + Fmt.digits(c, String.valueOf((int) b.min)) + "-" + Fmt.digits(c, String.valueOf((int) b.max)) + "٪. الفجوة: "
+                               + Fmt.money(c, incRef2 * (b.share - b.max) / 100.0) + " شهريًا."
+                               : b.share + "% of income vs " + (int) b.min + "-" + (int) b.max + "% benchmark.",
+                            ar ? "المعايير" : "Benchmarks", TAB_GUIDE));
+                }
+            }
+        }
+
+        // تضخم أسلوب الحياة
+        if (pvM.income > 0 && mt.income > 0 && pvM.expense > 0) {
+            double incUp = (mt.income - pvM.income) / pvM.income;
+            double expUp = (mt.expense - pvM.expense) / pvM.expense;
+            if (incUp > 0.1 && expUp > 0.1) out.add(new Insight(1, "trend_up",
+                    ar ? "تضخم أسلوب الحياة" : "Lifestyle inflation",
+                    ar ? "دخلك ارتفع " + Fmt.percent(c, incUp * 100) + " فارتفع صرفك " + Fmt.percent(c, expUp * 100)
+                       + ". القاعدة: جمّد خط الأساس وحوّل الزيادة كلها للادخار شهرين على الأقل."
+                       : "Income up " + Fmt.percent(c, incUp * 100) + ", spend up " + Fmt.percent(c, expUp * 100) + ". Freeze the baseline.",
+                    null, TAB_GUIDE));
+        }
+
+        // أفق الاستقلال المالي (FIRE)
+        if (incRef2 > 0 && mt.saved > 0) {
+            int yrs = fiYears(mt.saved / incRef2);
+            if (yrs > 0 && mt.saved / incRef2 >= 0.25) out.add(new Insight(0, "sparkle",
+                    ar ? " طريقك للاستقلال المالي: ~" + Fmt.digits(c, String.valueOf(yrs)) + " سنة" : "🕊 FI horizon: ~" + yrs + "y",
+                    ar ? "بمعدل ادخارك " + Fmt.percent(c, mt.saved / incRef2 * 100) + " وباستثمار بعائد حقيقي 5٪ وسحب 4٪ — كل +1٪ ادخار تختصر شهورًا."
+                       : "At " + Fmt.percent(c, mt.saved / incRef2 * 100) + " savings rate.",
+                    null, TAB_GUIDE));
+        }
+
 return out;
     }
 
@@ -596,6 +642,12 @@ return out;
         int streak = loggingStreak(c);
         if (streak >= 7) score += 10;
         else if (streak >= 3) score += 5;
+        // الالتزام بالمعايير العالمية
+        int over = 0;
+        double incB = mt.income > 0 ? mt.income : p.monthlyIncome();
+        if (incB > 0) for (Bench b : benchmarks(c)) if (b.cat != 9 && b.share > b.max * 1.15) over++;
+        if (over == 0) score += 6;
+        else if (over == 1) score += 3;
         // عبء الديون الشهري
         double paidM = monthDebtPays(c, now);
         if (incomeRef > 0 && paidM > 0) {
@@ -690,6 +742,12 @@ return out;
                 ar ? "راجع لوحة التحكم والفئات والديون، واكتب 3 قرارات فقط للشهر القادم في الملاحظات. القرارات القليلة تُنفَّذ."
                    : "Review dashboard, categories, debts; write exactly 3 decisions for next month in Notes."));
         return plan;
+    }
+
+    private static Calendar prevMB() {
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MONTH, -1);
+        return c;
     }
 
     /** سلسلة الأيام المتتالية المسجلة حتى اليوم. */
@@ -884,7 +942,8 @@ return out;
                 }
                 List<String[]> subs = detectSubscriptions(c);
                 if (!subs.isEmpty()) sb.append(ar ? "3) راجع " + subs.size() + " دفعات متكررة رصدناها — الإلغاء توفير فوري.\n" : "3) Audit recurring payments.\n");
-                sb.append(ar ? "4) كل فائض أسبوعي يرحّل للادخار تلقائيًا، لا للأسبوع التالي." : "4) Weekly surplus rolls to savings.");
+                sb.append(ar ? "4) كل فائض أسبوعي يرحّل للادخار تلقائيًا، لا للأسبوع التالي.\n" : "4) Weekly surplus rolls to savings.\n");
+                if (incRef > 0 && mt.saved > 0) sb.append(ar ? "🕊 بمعدلك الحالي: الاستقلال المالي بعد ~" + fiYears(mt.saved / incRef) + " سنة (عائد حقيقي 5٪، سحب 4٪)." : "🕊 FI in ~" + fiYears(mt.saved / incRef) + "y.");
                 break;
             }
             case 1: { // ديون: من أين أبدأ؟
@@ -942,7 +1001,7 @@ return out;
                     sb.append(ar ? "نهاية الأسبوع: " + Fmt.percent(c, we / mt.expense * 100) + " — الليل: " + Fmt.percent(c, night / mt.expense * 100) + ".\n"
                                  : "Weekend share " + Fmt.percent(c, we / mt.expense * 100) + ".\n");
                 }
-                sb.append(ar ? "افتح بطاقة المغلفات في تعلّم لترى سقف كل فئة مقابل صرفك." : "See envelopes in the academy tab.");
+                sb.append(ar ? "افتح بطاقة المعايير العالمية في تعلّم: لكل فئة نطاقها العالمي (سكن 25-35٪، طعام 10-15٪، نقل 10-15٪، ادخار 10-20٪…) وحالتك مقابلها." : "See the global benchmarks card in the academy.");
                 break;
             }
             default: { // عادة التسجيل
@@ -974,5 +1033,55 @@ return out;
         for (Models.Debt d : r.debts()) if (d.kind == 0 && d.total - r.debtPaid(d.id) > 0) out.add(d);
         java.util.Collections.sort(out, (a, b) -> Double.compare(a.total - r.debtPaid(a.id), b.total - r.debtPaid(b.id)));
         return out;
+    }
+
+    // ================= معايير الفئات العالمية (نسبة من الدخل الصافي) =================
+    public static final class Bench {
+        public int cat; public double share; public double min; public double max;
+    }
+
+    /** مصادر: إجماع أدلة الميزنة المفتوحة (25-35 سكن، 10-15 طعام/نقل، 10-20 ادخار، 5-15 دين…). */
+    public static List<Bench> benchmarks(Context c) {
+        Repo r = Repo.get(c);
+        Calendar now = Calendar.getInstance();
+        Models.MonthTotals mt = r.monthTotals(now);
+        double inc = mt.income > 0 ? mt.income : Prefs.get(c).monthlyIncome();
+        List<Bench> out = new ArrayList<>();
+        if (inc <= 0) return out;
+        int[][] spec = {
+                {0, 10, 15},   // طعام
+                {1, 10, 15},   // نقل
+                {2, 25, 35},   // سكن
+                {3, 5, 10},    // فواتير
+                {4, 5, 10},    // صحة
+                {5, 2, 8},     // تعليم
+                {6, 5, 10},    // تسوق
+                {7, 5, 10},    // ترفيه
+                {8, 5, 10},    // عائلة
+                {9, 10, 20},   // ادخار
+                {10, 5, 15},   // ديون
+                {11, 2, 5},    // أخرى
+        };
+        List<Models.CatTotal> cur = r.catTotals(Fmt.startOfMonth(now).getTimeInMillis(), Fmt.endOfMonth(now).getTimeInMillis(), 0);
+        for (int[] sp : spec) {
+            double tot = 0;
+            for (Models.CatTotal q : cur) if (q.cat == sp[0]) tot = q.total;
+            if (tot <= 0 && sp[0] != 9) continue;
+            Bench b = new Bench();
+            b.cat = sp[0];
+            b.share = tot / inc * 100.0;
+            b.min = sp[1];
+            b.max = sp[2];
+            out.add(b);
+        }
+        return out;
+    }
+
+    /** سنوات الاستقلال المالي بمعادلة FIRE: t = ln(1 + r/(w·s)) / ln(1+r). */
+    public static int fiYears(double savingsRate) {
+        if (savingsRate <= 0) return 0;
+        double r = 0.05, w = 0.04;
+        double t = Math.log(1 + r / (w * savingsRate)) / Math.log(1 + r);
+        return (int) Math.ceil(t);
     }
 }
