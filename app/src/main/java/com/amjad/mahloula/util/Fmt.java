@@ -71,6 +71,16 @@ public final class Fmt {
         return cal;
     }
 
+    public static Calendar startOfWeek(Calendar c) {
+        Calendar w = (Calendar) c.clone();
+        w.set(Calendar.DAY_OF_WEEK, w.getFirstDayOfWeek());
+        w.set(Calendar.HOUR_OF_DAY, 0);
+        w.set(Calendar.MINUTE, 0);
+        w.set(Calendar.SECOND, 0);
+        w.set(Calendar.MILLISECOND, 0);
+        return w;
+    }
+
     public static Calendar startOfDay(Calendar any) {
         Calendar cal = (Calendar) any.clone();
         cal.set(Calendar.HOUR_OF_DAY, 0);

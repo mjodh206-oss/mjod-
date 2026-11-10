@@ -142,6 +142,12 @@ public class DashboardPanel implements Panel {
         TextView ask = Ui.txt(a, ar() ? "💬 اسأل المستشار" : "💬 Ask advisor", 13.5f, R.color.on_panel, Typeface.BOLD);
         ask.setOnClickListener(v -> InfoSheets.simulatorCoach(a));
         head.addView(ask);
+        TextView comp = Ui.txt(a, ar() ? "📈 النمو" : "📈 Growth", 13.5f, R.color.on_panel, Typeface.BOLD);
+        LinearLayout.LayoutParams clpm = new LinearLayout.LayoutParams(-2, -2);
+        clpm.setMarginStart(Ui.dp(a, 12));
+        comp.setLayoutParams(clpm);
+        comp.setOnClickListener(v -> InfoSheets.compound(a));
+        head.addView(comp);
         card.addView(head);
         TextView gap = Ui.txt(a, Advisor.levelGap(a, score), 12, R.color.text_tertiary);
         LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(-2, -2);

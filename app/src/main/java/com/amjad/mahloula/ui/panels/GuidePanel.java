@@ -61,6 +61,9 @@ public class GuidePanel implements Panel {
         col.addView(scorecard());
         col.addView(envelopesCard());
         col.addView(benchCard());
+        col.addView(personaCard());
+        col.addView(challengesCard());
+        col.addView(badgesCard());
         col.addView(planCard());
         col.addView(alertsCard());
         col.addView(lessonsCard());
@@ -88,6 +91,11 @@ public class GuidePanel implements Panel {
                 : done + "/" + Content.LESSONS.size() + " lessons • " + Content.RULES.size() + " global rules",
                 13, R.color.on_panel_2));
         head.addView(tx);
+        ImageView share = Ui.iconSized(a, R.drawable.ic_share, Ui.color(a, R.color.on_brand), 22);
+        share.setPadding(Ui.dp(a, 6), Ui.dp(a, 6), Ui.dp(a, 6), Ui.dp(a, 6));
+        share.setBackground(Ui.ripple(a, Ui.round(Color.argb(35, 255, 255, 255), 12, a), Color.argb(45, 255, 255, 255)));
+        share.setOnClickListener(v -> shareReport());
+        head.addView(share);
         card.addView(head);
         Charts.HBar bar = new Charts.HBar(a);
         LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-1, -2);
@@ -103,6 +111,163 @@ public class GuidePanel implements Panel {
         lvl.setLayoutParams(llp2);
         card.addView(lvl);
         return card;
+    }
+
+    // ---------- بطاقة الشخصية المالية ----------
+    private View personaCard() {
+        String[] per = com.amjad.mahloula.brain.Advisor.persona(a);
+        LinearLayout card = UiKit.card(a, 18);
+        card.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.panel), Ui.color(a, R.color.on_dark), 1.6f, 22));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        card.addView(Ui.txt(a, ar() ? "شخصيتك المالية" : "Your money persona", 16, R.color.text_primary, Typeface.BOLD));
+        TextView t = Ui.txt(a, per[0], 21, R.color.text_primary, Typeface.BOLD);
+        LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(-2, -2);
+        tlp.topMargin = Ui.dp(a, 6);
+        t.setLayoutParams(tlp);
+        card.addView(t);
+        TextView b = Ui.txt(a, per[1], 13, R.color.on_panel_2);
+        b.setLineSpacing(0, 1.35f);
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-2, -2);
+        blp.topMargin = Ui.dp(a, 6);
+        b.setLayoutParams(blp);
+        card.addView(b);
+        return card;
+    }
+
+    // ---------- بطاقة التحديات ----------
+    private View challengesCard() {
+        com.amjad.mahloula.brain.Advisor adv = null;
+        Repo r = Repo.get(a);
+        Prefs p = Prefs.get(a);
+        Calendar now = Calendar.getInstance();
+        LinearLayout card = UiKit.card(a, 18);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        card.addView(Ui.txt(a, ar() ? "تحدياتك هذا الأسبوع 🏅" : "Your challenges 🏅", 16, R.color.text_primary, Typeface.BOLD));
+
+        int nss = com.amjad.mahloula.brain.Advisor.noSpendStreak(a);
+        card.addView(chRow(ar() ? "يوم بلا صرف" : "No-spend day",
+                ar() ? "سلسلتك: " + Fmt.digits(a, String.valueOf(nss)) + " يوم (هدف 3)" : "Streak " + nss + "d (goal 3)", nss >= 3));
+
+        int week = now.get(Calendar.WEEK_OF_YEAR);
+        double need = week * 100.0;
+        long ws = Fmt.startOfWeek(now).getTimeInMillis();
+        double savedW = 0;
+        for (Models.Tx t : r.txRange(ws, System.currentTimeMillis(), 0, 9, null)) savedW += t.amount;
+        card.addView(chRow(ar() ? "سلّم الـ52 أسبوعًا" : "52-week ladder",
+                ar() ? "أسبوع " + Fmt.digits(a, String.valueOf(week)) + ": المطلوب " + Fmt.amount(a, need) + " — ادخرت " + Fmt.amount(a, savedW)
+                       : "Week " + week + ": need " + Fmt.amount(a, need), savedW >= need));
+
+        double budget = p.monthlyBudget();
+        if (budget > 0) {
+            double cap = budget / 4.3;
+            double spentW = 0;
+            for (Models.Tx t : r.txRange(ws, System.currentTimeMillis(), 0, null, null)) spentW += t.amount;
+            card.addView(chRow(ar() ? "مظروف الأسبوع" : "Weekly envelope",
+                    ar() ? "صرفك " + Fmt.amount(a, spentW) + " من " + Fmt.amount(a, cap) : "Spent " + Fmt.amount(a, spentW) + "/" + Fmt.amount(a, cap),
+                    spentW <= cap));
+        }
+        return card;
+    }
+
+    private View chRow(String title, String status, boolean done) {
+        LinearLayout row = Ui.h(a);
+        row.setBackground(Ui.round(Ui.color(a, done ? R.color.income_soft : R.color.surface_2), 13, a));
+        row.setPadding(Ui.dp(a, 12), Ui.dp(a, 10), Ui.dp(a, 12), Ui.dp(a, 10));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 8);
+        row.setLayoutParams(lp);
+        LinearLayout mid = Ui.v(a);
+        mid.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
+        mid.addView(Ui.txt(a, title, 14, R.color.text_primary, Typeface.BOLD));
+        TextView st = Ui.txt(a, status, 12, R.color.text_secondary);
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(-2, -2);
+        slp.topMargin = Ui.dp(a, 3);
+        st.setLayoutParams(slp);
+        mid.addView(st);
+        row.addView(mid);
+        row.addView(Ui.txt(a, done ? "✔" : "…", 17, done ? R.color.income : R.color.text_tertiary, Typeface.BOLD));
+        return row;
+    }
+
+    // ---------- بطاقة الشارات ----------
+    private View badgesCard() {
+        java.util.List<com.amjad.mahloula.brain.Advisor.Badge> bs = com.amjad.mahloula.brain.Advisor.badges(a);
+        LinearLayout card = UiKit.card(a, 18);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.topMargin = Ui.dp(a, 14);
+        card.setLayoutParams(lp);
+        int done = 0;
+        for (com.amjad.mahloula.brain.Advisor.Badge b : bs) if (b.done) done++;
+        LinearLayout head = Ui.h(a);
+        head.addView(Ui.txt(a, ar() ? "شارات الإنجاز" : "Achievement badges", 16, R.color.text_primary, Typeface.BOLD));
+        head.addView(new View(a), new LinearLayout.LayoutParams(0, 0, 1f));
+        head.addView(Ui.txt(a, Fmt.digits(a, String.valueOf(done)) + "/" + Fmt.digits(a, String.valueOf(bs.size())), 14, R.color.brand_700, Typeface.BOLD));
+        card.addView(head);
+        UiKit.HorizontalScroll hs = UiKit.chipRow(a,
+                toLabels(bs), 0, i -> { });
+        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(-1, -2);
+        hlp.topMargin = Ui.dp(a, 10);
+        hs.setLayoutParams(hlp);
+        card.addView(hs);
+        styleBadges(hs, bs);
+        return card;
+    }
+
+    private String[] toLabels(java.util.List<com.amjad.mahloula.brain.Advisor.Badge> bs) {
+        String[] l = new String[bs.size()];
+        for (int i = 0; i < bs.size(); i++) l[i] = (bs.get(i).done ? "✔ " : "🔒 ") + bs.get(i).title;
+        return l;
+    }
+
+    private void styleBadges(UiKit.HorizontalScroll hs, java.util.List<com.amjad.mahloula.brain.Advisor.Badge> bs) {
+        LinearLayout row = (LinearLayout) hs.getChildAt(0);
+        for (int i = 0; i < row.getChildCount() && i < bs.size(); i++) {
+            TextView ch = (TextView) row.getChildAt(i);
+            if (bs.get(i).done) {
+                ch.setBackground(Ui.round(Ui.color(a, R.color.text_primary), 12, a));
+                ch.setTextColor(Ui.color(a, R.color.on_dark));
+            } else {
+                ch.setBackground(Ui.roundStroke(a, Ui.color(a, R.color.surface_3), Ui.color(a, R.color.outline_strong), 1, 12));
+                ch.setTextColor(Ui.color(a, R.color.text_tertiary));
+            }
+        }
+    }
+
+    // ---------- تقرير شهري قابل للمشاركة ----------
+    private void shareReport() {
+        Repo r = Repo.get(a);
+        Calendar now = Calendar.getInstance();
+        int sc = com.amjad.mahloula.brain.Advisor.healthScore(a);
+        String[] per = com.amjad.mahloula.brain.Advisor.persona(a);
+        Models.MonthTotals mt = r.monthTotals(now);
+        StringBuilder sb = new StringBuilder();
+        sb.append(ar() ? "🧡 تقريري المالي من مَحلولة — " : "🧡 My Mahloula report — ").append(Fmt.monthName(a, now)).append('\n');
+        sb.append(ar() ? "المستوى: " : "Level: ").append(com.amjad.mahloula.brain.Advisor.levelTitle(a, sc))
+          .append(" (").append(Fmt.digits(a, String.valueOf(sc))).append("/100)\n");
+        sb.append(ar() ? "شخصيتي: " : "Persona: ").append(per[0]).append('\n');
+        sb.append(ar() ? "سلسلة التسجيل: " : "Streak: ").append(Fmt.digits(a, String.valueOf(com.amjad.mahloula.brain.Advisor.loggingStreak(a))))
+          .append(ar() ? " يومًا\n" : " days\n");
+        sb.append(ar() ? "مصروف الشهر: " : "Spent: ").append(Fmt.money(a, mt.expense))
+          .append(ar() ? " — ادخار: " : " — saved: ").append(Fmt.money(a, mt.saved)).append('\n');
+        java.util.List<Models.CatTotal> tops = r.catTotals(Fmt.startOfMonth(now).getTimeInMillis(), Fmt.endOfMonth(now).getTimeInMillis(), 0);
+        for (int i = 0; i < tops.size() && i < 3; i++) {
+            sb.append("• ").append(Models.cat(tops.get(i).cat).ar).append(": ").append(Fmt.money(a, tops.get(i).total)).append('\n');
+        }
+        double inc = mt.income > 0 ? mt.income : Prefs.get(a).monthlyIncome();
+        if (inc > 0 && mt.saved > 0) {
+            sb.append(ar() ? "🕊 الاستقلال المالي بعد ~" : "🕊 FI in ~")
+              .append(Fmt.digits(a, String.valueOf(com.amjad.mahloula.brain.Advisor.fiYears(mt.saved / inc))))
+              .append(ar() ? " سنة بمعدلي الحالي\n" : "y at my rate\n");
+        }
+        sb.append(ar() ? "تم تطوير هذا التطبيق بواسطة أمجد حبيب" : "App by Amjad Habib");
+        android.content.Intent i = new android.content.Intent(android.content.Intent.ACTION_SEND);
+        i.setType("text/plain");
+        i.putExtra(android.content.Intent.EXTRA_TEXT, sb.toString());
+        a.startActivity(android.content.Intent.createChooser(i, ar() ? "مشاركة تقريري" : "Share my report"));
     }
 
     // ---------- أرقامك ----------

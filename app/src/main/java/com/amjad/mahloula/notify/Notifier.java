@@ -211,6 +211,16 @@ public final class Notifier {
                 .setStyle(new Notification.BigTextStyle().bigText(body))
                 .setContentIntent(pi)
                 .setAutoCancel(true);
+        if (Build.VERSION.SDK_INT >= 23) {
+            android.content.Intent q = new android.content.Intent(c, MainActivity.class);
+            q.putExtra("quick", 1);
+            q.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent pq = PendingIntent.getActivity(c, 2005, q,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            b.addAction(new Notification.Action.Builder(
+                    android.graphics.drawable.Icon.createWithResource(c, R.drawable.ic_edit),
+                    Prefs.get(c).language().equals("en") ? "Quick log ✍️" : "تسجيل سريع ✍️", pq).build());
+        }
         if (Prefs.get(c).soundOn()) {
             if (Build.VERSION.SDK_INT < 26) {
                 b.setSound(android.net.Uri.parse(android.content.ContentResolver.SCHEME_ANDROID_RESOURCE

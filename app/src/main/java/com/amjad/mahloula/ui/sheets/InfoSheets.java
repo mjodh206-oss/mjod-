@@ -288,7 +288,7 @@ public final class InfoSheets {
         llp.gravity = Gravity.CENTER_HORIZONTAL;
         logo.setLayoutParams(llp);
         sh.content.addView(logo);
-        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v1.9.1", 18, R.color.text_primary, Typeface.BOLD);
+        TextView name = Ui.txt(a, a.getString(R.string.app_name) + "  •  v2.0.0", 18, R.color.text_primary, Typeface.BOLD);
         name.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(-2, -2);
         nlp.topMargin = Ui.dp(a, 8);
@@ -310,7 +310,7 @@ public final class InfoSheets {
         dev.setLayoutParams(dlp);
         credit.addView(dev);
         TextView line = Ui.txt(a, ar
-                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 1.9.1"
+                ? "تم تأليف وتطوير هذا التطبيق بواسطة أمجد حبيب — إصدار 2.0.0"
                 : "Authored & developed by Amjad Habib — version 1.1.0", 12.5f, R.color.text_tertiary);
         line.setGravity(Gravity.CENTER);
         credit.addView(line);
@@ -344,6 +344,51 @@ public final class InfoSheets {
     }
 
 
+
+
+    // ---------------- حاسبة النمو المركّب ----------------
+    public static void compound(Activity a) {
+        final boolean ar = ar(a);
+        UiKit.Sheet sh = UiKit.sheet(a, ar ? "📈 حاسبة النمو المركّب" : "Compound growth calculator");
+        sh.content.addView(Ui.txt(a, ar
+                ? "لو ادخرت مبلغًا ثابتًا شهريًا بعائد سنوي مركّب — كم يصبح؟"
+                : "Fixed monthly saving at compound annual return — what does it become?", 13, R.color.text_secondary));
+        final TextView amt = UiKit.field(a, ar ? "المبلغ الشهري (ل.س)" : "Monthly amount", true);
+        amt.setText("10000");
+        LinearLayout.LayoutParams alp = new LinearLayout.LayoutParams(-1, -2);
+        alp.topMargin = Ui.dp(a, 10);
+        amt.setLayoutParams(alp);
+        sh.content.addView(amt);
+        final int[] years = {5};
+        final int[] rate = {7};
+        final TextView res = Ui.txt(a, "", 14, R.color.text_primary, Typeface.BOLD);
+        res.setLineSpacing(0, 1.4f);
+        res.setBackground(Ui.round(Ui.color(a, R.color.surface_3), 14, a));
+        res.setPadding(Ui.dp(a, 14), Ui.dp(a, 12), Ui.dp(a, 14), Ui.dp(a, 12));
+        final Runnable[] rec = new Runnable[1];
+        sh.content.addView(UiKit.label(a, ar ? "المدة" : "Years"));
+        UiKit.HorizontalScroll yrow = UiKit.chipRow(a, new String[]{"1", "3", "5", "10", "20"}, 2, i -> { years[0] = new int[]{1, 3, 5, 10, 20}[i]; rec[0].run(); });
+        sh.content.addView(yrow);
+        sh.content.addView(UiKit.label(a, ar ? "العائد السنوي" : "Annual return"));
+        UiKit.HorizontalScroll rrow = UiKit.chipRow(a, new String[]{"5%", "7%", "10%"}, 1, i -> { rate[0] = new int[]{5, 7, 10}[i]; rec[0].run(); });
+        sh.content.addView(rrow);
+        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(-1, -2);
+        rlp.topMargin = Ui.dp(a, 12);
+        res.setLayoutParams(rlp);
+        sh.content.addView(res);
+        rec[0] = () -> {
+            double m = 0;
+            try { m = Double.parseDouble(amt.getText().toString().trim()); } catch (Exception ignored) {}
+            double fv = com.amjad.mahloula.brain.Advisor.compoundFV(m, years[0], rate[0]);
+            double contributed = m * years[0] * 12;
+            res.setText((ar ? "بعد " : "After ") + years[0] + (ar ? " سنة:\n" : " years:\n")
+                    + (ar ? "• ما ستودعه: " : "• Contributed: ") + Fmt.money(a, contributed) + "\n"
+                    + (ar ? "• القيمة المركّبة: " : "• Compound value: ") + Fmt.money(a, fv) + "\n"
+                    + (ar ? "• نماء المال وحده: " : "• Growth alone: ") + Fmt.money(a, fv - contributed));
+        };
+        rec[0].run();
+        sh.show();
+    }
 
     // ---------------- مساعد: اسأل المستشار ----------------
     public static void simulatorCoach(Activity a) {

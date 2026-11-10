@@ -1110,4 +1110,116 @@ sCache = new ArrayList<>(out);
         double t = Math.log(1 + r / (w * savingsRate)) / Math.log(1 + r);
         return (int) Math.ceil(t);
     }
+
+    // ================= دفعة المليون: شارات، تحديات، شخصية، نمو مركّب =================
+
+    public static final class Badge { public String title; public boolean done; }
+
+    private static void addBadge(List<Badge> l, boolean done, String t) {
+        Badge b = new Badge(); b.done = done; b.title = t; l.add(b);
+    }
+
+    /** 10 شارات إنجاز محسوبة من بياناتك الحقيقية. */
+    public static List<Badge> badges(Context c) {
+        List<Badge> out = new ArrayList<>();
+        boolean ar = !Prefs.get(c).language().equals("en");
+        Repo r = Repo.get(c);
+        Prefs p = Prefs.get(c);
+        Calendar now = Calendar.getInstance();
+        Models.MonthTotals mt = r.monthTotals(now);
+        double inc = mt.income > 0 ? mt.income : p.monthlyIncome();
+        addBadge(out, r.hasAnyData(), ar ? "أول تسجيل ✍️" : "First log ✍️");
+        int st = loggingStreak(c);
+        addBadge(out, st >= 7, ar ? "سلسلة 7 أيام 🔥" : "7-day streak 🔥");
+        addBadge(out, st >= 30, ar ? "سلسلة 30 يومًا ☄️" : "30-day streak ☄️");
+        boolean debtClosed = false;
+        for (Models.Debt d : r.debts()) if (d.kind == 0 && d.total > 0 && r.debtPaid(d.id) >= d.total) debtClosed = true;
+        addBadge(out, debtClosed, ar ? "دين مغلق 🔓" : "Debt closed 🔓");
+        boolean goalDone = false;
+        for (Models.Goal g : r.goals()) if (g.target > 0 && g.saved >= g.target) goalDone = true;
+        addBadge(out, goalDone, ar ? "هدف مكتمل 🎯" : "Goal done 🎯");
+        addBadge(out, inc > 0 && mt.saved / inc >= 0.10, ar ? "موفّر 10٪ 💰" : "10% saver 💰");
+        double avg90 = r.avgDaily(now.getTimeInMillis() - 90L * 86400000L, now.getTimeInMillis());
+        addBadge(out, avg90 > 0 && r.totalBalance() / avg90 >= 30, ar ? "وسادة 30 يومًا 🛡" : "30-day cushion 🛡");
+        double budget = p.monthlyBudget();
+        addBadge(out, budget > 0 && mt.expense <= budget * 0.9 && now.get(Calendar.DAY_OF_MONTH) >= 25,
+                ar ? "شهر مسيطر 🏆" : "Controlled month 🏆");
+        addBadge(out, Long.bitCount(p.lessonsDoneMask()) >= 5, ar ? "خمسة دروس 🎓" : "5 lessons 🎓");
+        addBadge(out, noSpendStreak(c) >= 3, ar ? "3 أيام بلا صرف 🧘" : "3 no-spend days 🧘");
+        return out;
+    }
+
+    /** سلسلة الأيام بلا صرف (محسوبة من أول عملية لك فقط). */
+    public static int noSpendStreak(Context c) {
+        java.util.HashSet<Long> spend = new java.util.HashSet<>();
+        long first = Long.MAX_VALUE;
+        for (Models.Tx t : Repo.get(c).allTx()) {
+            first = Math.min(first, t.ts);
+            if (t.isExpense()) spend.add(Fmt.dayKey(t.ts));
+        }
+        if (first == Long.MAX_VALUE) return 0;
+        int streak = 0;
+        Calendar d = Calendar.getInstance();
+        while (!spend.contains(Fmt.dayKey(d.getTimeInMillis()))
+                && Fmt.dayKey(d.getTimeInMillis()) >= Fmt.dayKey(first)) {
+            streak++;
+            d.add(Calendar.DAY_OF_MONTH, -1);
+            if (streak > 3650) break;
+        }
+        return streak;
+    }
+
+    /** شخصية الصرف الرقمية: [العنوان، الوصف+نصائح]. */
+    public static String[] persona(Context c) {
+        boolean ar = !Prefs.get(c).language().equals("en");
+        Repo r = Repo.get(c);
+        Calendar now = Calendar.getInstance();
+        long s0 = Fmt.startOfMonth(now).getTimeInMillis(), e0 = Fmt.endOfMonth(now).getTimeInMillis();
+        Models.MonthTotals mt = r.monthTotals(now);
+        double night = 0, we = 0, save = 0;
+        for (Models.Tx t : r.txRange(s0, e0, 0, null, null)) {
+            Calendar tc = Calendar.getInstance(); tc.setTimeInMillis(t.ts);
+            if (tc.get(Calendar.HOUR_OF_DAY) < 5) night += t.amount;
+            int dw = tc.get(Calendar.DAY_OF_WEEK);
+            if (dw == Calendar.FRIDAY || dw == Calendar.SATURDAY) we += t.amount;
+        }
+        for (Models.Tx t : r.txRange(s0, e0, 0, 9, null)) save += t.amount;
+        int subs = detectSubscriptions(c).size();
+        if (mt.expense <= 0) return new String[]{
+                ar ? "البداية البيضاء ⚪" : "Blank start ⚪",
+                ar ? "لا بيانات بعد — أول أسبوع تسجيل يكشف شخصيتك المالية ويفعّل كل أدوات الدقة."
+                   : "Log your first week to unlock your money persona."};
+        if (night / mt.expense > 0.2) return new String[]{
+                ar ? "الاندفاعي الليلي 🌙" : "Night impulse 🌙",
+                ar ? "فوق 20٪ من صرفك يُقرر بعد منتصف الليل حيث تضعف المقاومة. علاجك: قاعدة 48 ساعة، وأزل بطاقات الدفع من هاتفك ليلًا."
+                   : "20%+ of spend decided after midnight. Use the 48h rule; remove cards at night."};
+        if (we / mt.expense > 0.4) return new String[]{
+                ar ? "الاجتماعي الكريم 🎉" : "Social spender 🎉",
+                ar ? "نهايتك الأسبوعية تستهلك 40٪+ من مصروفك. خطّط متعة مجانية واحدة أسبوعيًا، وميزانية خروج ثابتة لا تتجاوزها."
+                   : "Weekends take 40%+. Plan one free fun weekly and a fixed outing budget."};
+        if (subs >= 2) return new String[]{
+                ar ? "المشترك المزمن 📺" : "Serial subscriber 📺",
+                ar ? "لديك " + subs + " دفعات متكررة رصدناها. دقّقها ربع سنويًا بالاستخدام الفعلي — التسريبات الصغيرة تغرق السفن."
+                   : subs + " recurring payments detected. Audit quarterly by actual use."};
+        if (mt.expense > 0 && save / mt.expense >= 0.15) return new String[]{
+                ar ? "الموفّر المنضبط 🛡" : "Disciplined saver 🛡",
+                ar ? "تدّخر 15٪+ من تدفقك — سلوك أقل من 10٪ من الناس. خطوتك التالية: رفع الوسادة إلى 90 يومًا ثم استثمار الفائض."
+                   : "Saving 15%+ — top 10% behavior. Next: 90-day cushion then invest surplus."};
+        if (loggingStreak(c) >= 7) return new String[]{
+                ar ? "المنظّم الصاعد 📈" : "Rising organizer 📈",
+                ar ? "سلسلتك تثبت انضباطك. حوّل الانضباط إلى أرقام: مظروف أسبوعي + تحويل يوم الراتب يصنعان الفرق المركّب."
+                   : "Streak proves discipline. Add weekly envelope + payday transfer."};
+        return new String[]{
+                ar ? "المتوازن الحذر ⚖️" : "Cautious balancer ⚖️",
+                ar ? "نمطك متوازن بلا تطرف — الفرصة الأكبر لك في رفع معدل الادخار 1٪ كل شهرين دون ألم ملموس."
+                   : "Balanced pattern. Raise savings 1% every two months painlessly."};
+    }
+
+    /** القيمة المستقبلية لادخار شهري مركّب. */
+    public static double compoundFV(double monthly, int years, double annualPct) {
+        double i = annualPct / 100.0 / 12.0;
+        int n = years * 12;
+        if (i <= 0) return monthly * n;
+        return monthly * ((Math.pow(1 + i, n) - 1) / i);
+    }
 }

@@ -38,6 +38,7 @@ public class MainActivity extends BaseActivity implements Repo.OnChange {
         super.onCreate(b);
         setContentView(buildRoot());
         Repo.get(this).listen(this);
+        handleQuick(getIntent());
         if (Build.VERSION.SDK_INT >= 33
                 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 501);
@@ -81,6 +82,19 @@ public class MainActivity extends BaseActivity implements Repo.OnChange {
         safeRefresh(p);
         p.onShow();
         Ui.fadeSlideIn(v, 0);
+    }
+
+    private void handleQuick(android.content.Intent i) {
+        if (i != null && i.getIntExtra("quick", 0) == 1) {
+            i.removeExtra("quick");
+            container.post(() -> com.amjad.mahloula.ui.sheets.Sheets.tx(this, null, 0));
+        }
+    }
+
+    @Override
+    protected void onNewIntent(android.content.Intent i) {
+        super.onNewIntent(i);
+        handleQuick(i);
     }
 
     public void jump(int tab) {
