@@ -1,5 +1,10 @@
-# Local, one-time OAuth setup + all automation scripts.
+# Core: YouTube Data API / YouTube Analytics API automation.
 # Install:  python3 -m pip install -r requirements.txt
 google-api-python-client>=2.100.0,<3
 google-auth>=2.25.0,<3
 google-auth-oauthlib>=1.2.0,<2
+
+# Optional: render finished 9:16 MP4s with tools/build_short.py.
+# imageio-ffmpeg bundles a static ffmpeg binary when the system has none.
+Pillow>=10.0,<14
+imageio-ffmpeg>=0.4.9,<1

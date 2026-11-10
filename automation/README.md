@@ -49,6 +49,10 @@ Both apply to every tool, including the external GitHub agent — details in `do
 
 ## 2. The daily loop
 
+**Week 1 already has five rendered MP4s** in `content/videos/` (gitignored). Rebuild them any
+time with `python tools/build_short.py --all` — it needs `Pillow` + `imageio-ffmpeg` from
+`requirements.txt`. See `docs/READY_ASSETS.md` and `assets/ASSETS.md`.
+
 **One command does all of it** — `python automation/run_channel.py` (dry run) or
 `python automation/run_channel.py --send --yes` (live). It runs the steps below in order,
 reads `content/publish_queue.json`, caps uploads at 2 per run, and checks the live channel for

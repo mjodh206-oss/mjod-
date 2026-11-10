@@ -15,6 +15,10 @@ content/videos/
 *.mp3
 *.m4a
 assets/renders/
+assets/backgrounds/
+assets/audio/
+assets/thumbnails/
+assets/previews/
 
 # --- Runtime state / generated reports ---
 state/

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "note": "READY-TO-PASTE queue for the five rendered Shorts. Copy items into content/publish_queue.json and set enabled=true AFTER OAuth + fact-checking. For GitHub Actions, replace video_path with a direct https video_url (media is gitignored).",
+  "items": [
+    {
+      "episode_id": "ep-001",
+      "video_path": "content/videos/ep-001.mp4",
+      "thumbnail_path": null,
+      "video_url": null,
+      "thumbnail_url": null,
+      "publish_at": "2026-11-10T17:30:00Z",
+      "enabled": false
+    },
+    {
+      "episode_id": "ep-002",
+      "video_path": "content/videos/ep-002.mp4",
+      "thumbnail_path": null,
+      "video_url": null,
+      "thumbnail_url": null,
+      "publish_at": "2026-11-11T17:30:00Z",
+      "enabled": false
+    },
+    {
+      "episode_id": "ep-003",
+      "video_path": "content/videos/ep-003.mp4",
+      "thumbnail_path": null,
+      "video_url": null,
+      "thumbnail_url": null,
+      "publish_at": "2026-11-12T17:30:00Z",
+      "enabled": false
+    },
+    {
+      "episode_id": "ep-004",
+      "video_path": "content/videos/ep-004.mp4",
+      "thumbnail_path": null,
+      "video_url": null,
+      "thumbnail_url": null,
+      "publish_at": "2026-11-13T17:30:00Z",
+      "enabled": false
+    },
+    {
+      "episode_id": "ep-005",
+      "video_path": "content/videos/ep-005.mp4",
+      "thumbnail_path": null,
+      "video_url": null,
+      "thumbnail_url": null,
+      "publish_at": "2026-11-16T17:30:00Z",
+      "enabled": false
+    }
+  ]
+}
