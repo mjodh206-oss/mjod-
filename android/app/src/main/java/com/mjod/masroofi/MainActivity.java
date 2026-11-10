@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(true);
         settings.setGeolocationEnabled(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        webView.addJavascriptInterface(new QNCStorage(this), "QNCStorage");
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient());
         setContentView(webView);

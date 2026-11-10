@@ -44,7 +44,7 @@ jobs:
       - name: Publish APK download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: android-v1.0.6
-          name: QNC للأندرويد — 1.0.6
+          tag_name: android-v1.0.7
+          name: QNC للأندرويد — 1.0.7
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/app-debug.apk

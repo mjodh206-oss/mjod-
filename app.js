@@ -3,8 +3,8 @@ const $=s=>document.querySelector(s);
 const state={transactions:[],type:'deposit',filter:'all',installPrompt:null,pendingDelete:null};
 const formatNumber=new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
 const formatDate=new Intl.DateTimeFormat('ar-SY-u-nu-latn',{day:'numeric',month:'long',year:'numeric'});
-function load(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');state.transactions=Array.isArray(raw)?raw.filter(x=>x&&Number.isFinite(x.amount)&&x.amount>0&&['deposit','withdraw'].includes(x.type)):[]}catch{state.transactions=[]}}
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state.transactions))}
+function load(){let nativeBackup=null;try{nativeBackup=window.QNCStorage?.load?.()||null}catch{}try{const raw=JSON.parse(nativeBackup||localStorage.getItem(STORAGE_KEY)||'[]');state.transactions=Array.isArray(raw)?raw.filter(x=>x&&Number.isFinite(x.amount)&&x.amount>0&&['deposit','withdraw'].includes(x.type)):[]}catch{state.transactions=[]}try{save()}catch(error){console.warn('Could not sync wallet backup',error)}}
+function save(){const serialized=JSON.stringify(state.transactions);try{window.QNCStorage?.save?.(serialized)}catch(error){console.warn('Could not save native wallet backup',error)}localStorage.setItem(STORAGE_KEY,serialized)}
 function totals(){return state.transactions.reduce((t,x)=>{t[x.type==='deposit'?'income':'expense']+=x.amount;return t},{income:0,expense:0})}
 function render(){const t=totals(),balance=t.income-t.expense;$('#balanceAmount').innerHTML=`${formatNumber.format(balance)} <span>ل.س</span>`;$('#incomeAmount').innerHTML=`${formatNumber.format(t.income)} <small>ل.س</small>`;$('#expenseAmount').innerHTML=`${formatNumber.format(t.expense)} <small>ل.س</small>`;
  const list=$('#transactionList'),filtered=state.transactions.filter(x=>state.filter==='all'||x.type===state.filter).sort((a,b)=>b.createdAt-a.createdAt);list.innerHTML='';$('#emptyState').hidden=filtered.length>0;$('#transactionCount').textContent=state.transactions.length?`${formatNumber.format(state.transactions.length)} ${state.transactions.length===1?'حركة مسجّلة':'حركات مسجّلة'}`:'سجّل أول حركة بمحفظتك';
