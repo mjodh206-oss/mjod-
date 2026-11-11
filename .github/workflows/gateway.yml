@@ -18,4 +18,4 @@ jobs:
         with:
           node-version: 22
       - name: Run gateway unit tests
-        run: node --test gateway/test/
+        run: node --test gateway/test/*.test.mjs
