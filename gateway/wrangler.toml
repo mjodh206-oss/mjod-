@@ -1,0 +1,25 @@
+name = "majwuda-gateway"
+main = "src/index.js"
+compatibility_date = "2025-11-01"
+workers_dev = true
+
+# Provider selection. Defaults to Google AI Studio's free tier (Gemini Flash).
+# Change PROVIDER_BASE_URL and PROVIDER_MODEL to use another OpenAI-compatible provider:
+#
+#   Google AI Studio (free, recommended):
+#     PROVIDER_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
+#     PROVIDER_MODEL    = "gemini-2.5-flash"
+#   Groq (free):
+#     PROVIDER_BASE_URL = "https://api.groq.com/openai/v1"
+#     PROVIDER_MODEL    = "llama-3.3-70b-versatile"
+#   OpenRouter (free tier models):
+#     PROVIDER_BASE_URL = "https://openrouter.ai/api/v1"
+#     PROVIDER_MODEL    = "meta-llama/llama-3.3-70b-instruct:free"
+#
+# Secrets (never commit these):
+#   npx wrangler secret put PROVIDER_API_KEY   # your provider's API key
+#   npx wrangler secret put APP_TOKEN          # optional shared secret the app must send as x-api-key
+
+[vars]
+PROVIDER_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
+PROVIDER_MODEL = "gemini-2.5-flash"

@@ -39,6 +39,12 @@
 
 توقيع الـrelease: القيم الافتراضية في `signing/keystore.properties` (شهادة مجتمعية موثقة) — يمكن استبدالها عبر متغيرات البيئة `MAJWUDA_KEYSTORE_FILE/PASSWORD/ALIAS/KEY_PASSWORD`. CI يبني ويوقّع تلقائياً عند الدفع إلى `arena/**` وينشر tag `majwuda-v*` كإصدار GitHub مرفق به الـAPK والبصمة.
 
+## العمل بدون مفتاح مدفوع — مجودة Gateway
+
+يوجد في المجلد `gateway/` بوابة جاهزة للنشر على **Cloudflare Workers** (خطة مجانية) تجعل مجودة تشتغل بمزود مجاني (افتراضيًا **Google AI Studio / Gemini Flash**) بدل مفتاح Claude المدفوع — مع دعم الأدوات والبث. التفاصيل والنشر خطوة بخطوة: [`gateway/README.md`](gateway/README.md) · اختباراتها: `node --test gateway/test/`.
+
+> البوابة ليست Claude — إن أردت كلود الحقيقي كما هو، ضع مفتاح Anthropic في الإعدادات.
+
 ## البنية
 
 ```
