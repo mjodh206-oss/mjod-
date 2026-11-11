@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The whole UI is Jetpack Compose; these window themes only style what shows before first frame. -->
+    <style name="Theme.Majwuda" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/majwuda_bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:colorAccent">@color/majwuda_primary</item>
+        <item name="android:windowContentTransitions">false</item>
+    </style>
+
+    <style name="Theme.Majwuda.Overlay" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:colorAccent">@color/majwuda_primary</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Majwuda.Overlay</item>
+    </style>
+
+    <style name="Animation.Majwuda.Overlay" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+</resources>

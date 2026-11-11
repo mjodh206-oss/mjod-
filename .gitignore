@@ -1,0 +1,32 @@
+# Gradle / Android
+.gradle/
+build/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Private signing material (the shared community keystore in /signing is intentionally tracked)
+*.jks
+/signing/private/
+
+# Gateway
+gateway/node_modules/
+gateway/.wrangler/
+gateway/.dev.vars
+gateway/.env
+
+# Logs
+*.log

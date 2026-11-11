@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- مجودة assistant mark (ASSIST hint icon): the same orb-and-spark, bolder for small sizes. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M12,2.4 Q12.85,6.95 17.4,7.8 Q12.85,8.65 12,13.2 Q11.15,8.65 6.6,7.8 Q11.15,6.95 12,2.4 Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M12,14.6m-5.4,0a5.4,5.4 0,1 1,10.8 0a5.4,5.4 0,1 1,-10.8 0" />
+</vector>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="majwuda_bg">#FF070B14</color>
+    <color name="majwuda_surface">#FF101727</color>
+    <color name="majwuda_primary">#FF5EEAD4</color>
+    <color name="majwuda_violet">#FF8B5CF6</color>
+    <color name="majwuda_pink">#FFF472B6</color>
+    <color name="majwuda_text">#FFF1F5F9</color>
+    <color name="majwuda_text_dim">#FF94A3B8</color>
+    <color name="widget_bg">#F2101727</color>
+</resources>

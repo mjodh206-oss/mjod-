@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_mic"
+        android:shortcutId="talk"
+        android:shortcutLongLabel="@string/shortcut_talk_long"
+        android:shortcutShortLabel="@string/shortcut_talk_short">
+        <intent
+            android:action="app.majwuda.action.TALK"
+            android:targetClass="app.majwuda.ui.AssistActivity"
+            android:targetPackage="app.majwuda" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_camera"
+        android:shortcutId="camera"
+        android:shortcutLongLabel="@string/shortcut_camera_long"
+        android:shortcutShortLabel="@string/shortcut_camera_short">
+        <intent
+            android:action="app.majwuda.action.CAMERA"
+            android:targetClass="app.majwuda.ui.MainActivity"
+            android:targetPackage="app.majwuda" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_new"
+        android:shortcutId="new_chat"
+        android:shortcutLongLabel="@string/shortcut_new_long"
+        android:shortcutShortLabel="@string/shortcut_new_short">
+        <intent
+            android:action="app.majwuda.action.NEW_CHAT"
+            android:targetClass="app.majwuda.ui.MainActivity"
+            android:targetPackage="app.majwuda" />
+    </shortcut>
+</shortcuts>

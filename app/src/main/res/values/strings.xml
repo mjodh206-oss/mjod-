@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مجودة</string>
+    <string name="app_tagline">مساعدك الذكي بالصوت والنص — بقلب كلود</string>
+    <string name="app_developer">أمجد حبيب</string>
+    <string name="app_credits">تنفيذ وتطوير أمجد حبيب</string>
+    <string name="app_copyright">© 2026 أمجد حبيب. جميع الحقوق محفوظة.</string>
+    <string name="assist_label">مجودة</string>
+    <string name="share_label">اسأل مجودة</string>
+
+    <!-- System surfaces -->
+    <string name="tile_label">اسأل مجودة</string>
+    <string name="widget_label">مجودة — مساعدتك الصوتية</string>
+    <string name="widget_hint">اضغط وتحدّث مع مجودة</string>
+    <string name="widget_description">اختصار سريع للتحدث مع مجودة من الشاشة الرئيسية</string>
+    <string name="shortcut_talk_short">تحدّث الآن</string>
+    <string name="shortcut_talk_long">تحدّث مع مجودة الآن</string>
+    <string name="shortcut_new_short">محادثة جديدة</string>
+    <string name="shortcut_new_long">ابدأ محادثة جديدة</string>
+    <string name="shortcut_camera_short">اسأل بالكاميرا</string>
+    <string name="shortcut_camera_long">صوّر واسأل مجودة</string>
+
+    <!-- Accessibility service -->
+    <string name="accessibility_service_label">مجودة — التحكم بالشاشة</string>
+    <string name="accessibility_service_summary">يسمح لمجودة بقراءة محتوى الشاشة وتنفيذ الأوامر داخل التطبيقات عندما تطلب ذلك.</string>
+    <string name="accessibility_service_description">عند تفعيل هذه الخدمة تستطيع مجودة — فقط عندما تطلب — أن تقرأ النص الظاهر على الشاشة، وتضغط الأزرار، وتكتب النصوص، وتنفّذ أوامر النظام مثل الرجوع والشاشة الرئيسية ولقطة الشاشة. لا يتم جمع أي بيانات في الخلفية، ولا تُرسل محتويات الشاشة إلا أثناء تنفيذ طلبك.</string>
+
+    <!-- Notification listener -->
+    <string name="notification_listener_label">مجودة — قراءة الإشعارات</string>
+
+    <!-- Notification channels -->
+    <string name="channel_reminders_name">التذكيرات</string>
+    <string name="channel_reminders_desc">تنبيهات التذكيرات التي تطلبها من مجودة</string>
+    <string name="channel_wake_name">الاستماع لكلمة التنبيه</string>
+    <string name="channel_wake_desc">إشعار دائم أثناء انتظار مجودة لكلمة التنبيه</string>
+    <string name="channel_status_name">حالة المساعد</string>
+    <string name="channel_status_desc">إشعارات عامة من مجودة</string>
+
+    <!-- Notifications -->
+    <string name="notif_reminder_title">تذكير من مجودة</string>
+    <string name="notif_reminder_done">تم</string>
+    <string name="notif_reminder_snooze">بعد ١٠ دقائق</string>
+    <string name="notif_wake_title">مجودة تستمع لكلمة التنبيه</string>
+    <string name="notif_wake_text">قل «يا مجودة» لبدء الحديث</string>
+    <string name="notif_wake_stop">إيقاف</string>
+    <string name="notif_wake_resume_title">الاستماع لكلمة التنبيه متوقف</string>
+    <string name="notif_wake_resume_text">اضغط لإعادة تفعيل «يا مجودة»</string>
+</resources>
