@@ -1,5 +1,6 @@
 package com.mjod.masroofi;
 
+import android.annotation.TargetApi;
 import android.app.backup.BackupManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -73,6 +74,7 @@ public final class QNCStorage {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.Q)
     private String readSharedCopy() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null;
         Uri uri = findSharedUri();
@@ -84,6 +86,7 @@ public final class QNCStorage {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.Q)
     private void writeSharedCopy(String json) {
         ContentResolver resolver = context.getContentResolver();
         Uri uri = findSharedUri();
@@ -117,6 +120,7 @@ public final class QNCStorage {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.Q)
     private Uri findSharedUri() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null;
         Uri collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);

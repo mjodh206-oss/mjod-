@@ -26,7 +26,7 @@ jobs:
           import xml.etree.ElementTree as ET
           from html.parser import HTMLParser
           json.load(open('manifest.webmanifest', encoding='utf-8'))
-          for path in ['android/app/src/main/AndroidManifest.xml', 'android/app/src/main/res/xml/backup_rules.xml', 'android/app/src/main/res/xml/data_extraction_rules.xml']:
+          for path in ['android/app/src/main/AndroidManifest.xml', 'android/app/src/main/res/xml/backup_rules.xml', 'android/app/src/main/res/xml/data_extraction_rules.xml', 'android/app/src/main/res/values/styles.xml', 'android/app/src/main/res/values-v27/styles.xml']:
               ET.parse(path)
           class CheckHTML(HTMLParser): pass
           CheckHTML().feed(open('index.html', encoding='utf-8').read())
