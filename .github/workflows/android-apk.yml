@@ -48,7 +48,7 @@ jobs:
       - name: Install Gradle
         uses: gradle/actions/setup-gradle@v6.4.1
         with:
-          gradle-version: '8.9'
+          gradle-version: '8.14.7'
 
       - name: Package web app into Android assets
         run: |
@@ -101,7 +101,7 @@ jobs:
         if: steps.lint.outcome == 'success'
         uses: softprops/action-gh-release@v3.0.4
         with:
-          tag_name: android-v1.0.10
-          name: QNC للأندرويد — 1.0.10
+          tag_name: android-v1.0.11
+          name: QNC للأندرويد — 1.0.11
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/app-debug.apk
