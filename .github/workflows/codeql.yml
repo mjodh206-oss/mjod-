@@ -25,11 +25,11 @@ jobs:
         language: [javascript-typescript, java-kotlin]
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Install Java
         if: matrix.language == 'java-kotlin'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6.2.0
         with:
           distribution: temurin
           java-version: '17'
@@ -43,12 +43,12 @@ jobs:
 
       - name: Install Gradle
         if: matrix.language == 'java-kotlin'
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6.4.1
         with:
           gradle-version: '8.9'
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4.39.3
         with:
           languages: ${{ matrix.language }}
 
@@ -57,4 +57,4 @@ jobs:
         run: gradle -p android assembleDebug --no-daemon
 
       - name: Upload CodeQL results
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4.39.3

@@ -2,6 +2,7 @@ package com.mjod.masroofi;
 
 import android.app.Activity;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -20,7 +21,11 @@ public class MainActivity extends Activity {
         Window window = getWindow();
         window.setStatusBarColor(0xFFF7F9FC);
         window.setNavigationBarColor(0xFFF7F9FC);
-        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        int systemUiFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            systemUiFlags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        }
+        window.getDecorView().setSystemUiVisibility(systemUiFlags);
 
         webView = new WebView(this);
         webView.setBackgroundColor(0xFFF7F9FC);
