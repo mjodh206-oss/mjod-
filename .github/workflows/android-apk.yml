@@ -16,6 +16,23 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Validate JavaScript, wallet logic, and Android metadata
+        run: |
+          node --check app.js
+          node --check wallet-core.js
+          node --test tests/*.test.js
+          python3 - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from html.parser import HTMLParser
+          json.load(open('manifest.webmanifest', encoding='utf-8'))
+          for path in ['android/app/src/main/AndroidManifest.xml', 'android/app/src/main/res/xml/backup_rules.xml', 'android/app/src/main/res/xml/data_extraction_rules.xml']:
+              ET.parse(path)
+          class CheckHTML(HTMLParser): pass
+          CheckHTML().feed(open('index.html', encoding='utf-8').read())
+          print('Metadata and markup validation passed')
+          PY
+
       - name: Install Java
         uses: actions/setup-java@v4
         with:
@@ -36,15 +53,15 @@ jobs:
       - name: Package web app into Android assets
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp index.html styles.css app.js manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png android/app/src/main/assets/www/
+          cp index.html styles.css wallet-core.js app.js manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png android/app/src/main/assets/www/
 
       - name: Build APK
-        run: gradle -p android assembleDebug --no-daemon
+        run: gradle -p android lintDebug testDebugUnitTest assembleDebug --no-daemon
 
       - name: Publish APK download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: android-v1.0.8
-          name: QNC للأندرويد — 1.0.8
+          tag_name: android-v1.0.9
+          name: QNC للأندرويد — 1.0.9
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/app-debug.apk
