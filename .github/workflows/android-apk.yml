@@ -59,12 +59,46 @@ jobs:
         run: gradle -p android testDebugUnitTest --no-daemon
 
       - name: Run Android Lint
+        id: lint
+        continue-on-error: true
         run: gradle -p android lintDebug --no-daemon
 
+      - name: Report Android Lint findings
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          report = Path('android/app/build/reports/lint-results-debug.xml')
+          if not report.exists():
+              print('Android Lint did not produce an XML report.')
+              raise SystemExit(0)
+          root = ET.parse(report).getroot()
+          issues = root.findall('issue')
+          summary = Path(os.environ['GITHUB_STEP_SUMMARY'])
+          lines = ['## Android Lint report', f'Found **{len(issues)}** issue(s).', '']
+          for issue in issues:
+              severity = issue.get('severity', 'Unknown')
+              issue_id = issue.get('id', 'Lint')
+              message = issue.get('message', '').replace('\n', ' ')
+              location = issue.find('location')
+              filename = location.get('file', '') if location is not None else ''
+              lines.append(f'- **{severity} / {issue_id}** `{filename}` — {message}')
+              if severity.lower() in ('error', 'fatal'):
+                  print(f'::error file={filename}::[{issue_id}] {message}')
+              elif severity.lower() == 'warning':
+                  print(f'::warning file={filename}::[{issue_id}] {message}')
+          summary.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          print('\n'.join(lines))
+          PY
+
       - name: Build APK
+        if: steps.lint.outcome == 'success'
         run: gradle -p android assembleDebug --no-daemon
 
       - name: Publish APK download
+        if: steps.lint.outcome == 'success'
         uses: softprops/action-gh-release@v3.0.4
         with:
           tag_name: android-v1.0.9
