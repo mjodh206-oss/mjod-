@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Insets;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -13,17 +14,21 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
+
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 
 public class MainActivity extends Activity {
+    private static final String APP_ASSET_HOST = "appassets.androidplatform.net";
     private WebView webView;
 
-    // JavaScript is needed by the bundled offline UI; external page navigation is blocked below.
+    // JavaScript is required by the bundled UI. WebViewAssetLoader serves only packaged assets.
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         Window window = getWindow();
         window.setStatusBarColor(0xFFF7F9FC);
         window.setNavigationBarColor(0xFFF7F9FC);
@@ -38,39 +43,58 @@ public class MainActivity extends Activity {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setAllowFileAccess(true);
-        settings.setAllowContentAccess(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
         settings.setGeolocationEnabled(false);
+        settings.setJavaScriptCanOpenWindowsAutomatically(false);
+        settings.setSupportMultipleWindows(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         webView.addJavascriptInterface(new QNCStorage(this), "QNCStorage");
         webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient() {
+
+        WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .build();
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override
+            public android.webkit.WebResourceResponse shouldInterceptRequest(
+                    WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return !isLocalAsset(request.getUrl().toString());
+                return !isTrustedAppUrl(request.getUrl());
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return !isLocalAsset(url);
+                return !isTrustedAppUrl(Uri.parse(url));
             }
         });
+
         setContentView(webView);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false);
             webView.setOnApplyWindowInsetsListener((view, insets) -> {
-                Insets safeArea = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                Insets safeArea = insets.getInsets(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
                 view.setPadding(safeArea.left, safeArea.top, safeArea.right, safeArea.bottom);
                 return insets;
             });
             webView.requestApplyInsets();
         }
-        webView.loadUrl("file:///android_asset/www/index.html");
+        webView.loadUrl("https://" + APP_ASSET_HOST + "/index.html");
     }
 
-    private static boolean isLocalAsset(String url) {
-        return url.startsWith("file:///android_asset/www/");
+    private static boolean isTrustedAppUrl(Uri uri) {
+        return "https".equals(uri.getScheme())
+                && APP_ASSET_HOST.equals(uri.getHost())
+                && (uri.getPort() == -1 || uri.getPort() == 443);
     }
 
     @Override

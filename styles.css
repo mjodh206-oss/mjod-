@@ -39,3 +39,5 @@ footer{font-size:11px;color:#536171}
 .modal-kicker{font-size:13px}.modal h2{font-size:23px}.modal-subtitle{font-size:14px}.modal form label{font-size:14px}.amount-field input{font-size:23px}.amount-field>span{font-size:12px}.note-field{font-size:14px}.note-field::placeholder,.amount-field input::placeholder{color:#667085}.form-error{font-size:13px}.submit-button{height:48px;font-size:15px}.modal-close{font-size:24px}.toast{font-size:14px}
 .confirm-dialog h2{font-size:21px}.confirm-dialog p{font-size:14px}.confirm-actions button{font-size:14px}
 @media(max-width:430px){.app-shell{padding-right:16px;padding-left:16px}.balance-amount{font-size:44px}.stat-card>strong{font-size:22px}.welcome-row h1{font-size:27px}.action-button{gap:8px;padding:11px 9px}.action-button strong{font-size:14px}}
+/* Prevent Android WebView from auto-magnifying small form controls. */
+.note-field{font-size:16px}
