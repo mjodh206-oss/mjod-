@@ -27,14 +27,14 @@
     </header>
 
     <section class="balance-card" aria-label="ملخص المحفظة">
-      <div class="balance-top"><span class="balance-label"><span class="balance-icon" aria-hidden="true">▣</span><span>الرصيد الحالي</span></span><span class="currency-pill"><span class="currency-dot"></span> ليرة سورية <b>ل.س</b></span></div>
+      <div class="balance-top"><span class="balance-label">الرصيد الحالي</span><span class="currency-pill"><span class="currency-dot"></span> ليرة سورية <b>ل.س</b></span></div>
       <div class="balance-amount" id="balanceAmount">0 <span>ل.س</span></div>
       <div class="balance-footer"><span class="balance-caption"><span class="balance-dot"></span> صافي الرصيد في محفظتك</span><span class="balance-decoration">QNC <span aria-hidden="true">✦</span></span></div>
     </section>
 
     <section class="stats-grid" aria-label="إجمالي الحركات">
-      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol in">↓</span><span>إجمالي الإيداعات</span></div><strong id="incomeAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المضافة</span></article>
-      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol out">↑</span><span>إجمالي السحوبات</span></div><strong id="expenseAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المسحوبة</span></article>
+      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol in">＋</span><span>إجمالي الإيداعات</span></div><strong id="incomeAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المضافة</span></article>
+      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol out">−</span><span>إجمالي السحوبات</span></div><strong id="expenseAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المسحوبة</span></article>
     </section>
 
     <section class="actions" aria-label="إدارة الرصيد">
@@ -43,7 +43,7 @@
     </section>
 
     <section class="transactions-section">
-      <div class="section-heading"><div><h2>سجل المعاملات</h2><p id="transactionCount">سجّل أول معاملة للبدء</p></div><button class="filter-button" id="filterButton" type="button" aria-label="تصفية المعاملات" title="تصفية">☷</button></div>
+      <div class="section-heading"><div><h2>سجل المعاملات</h2><p id="transactionCount">سجّل أول معاملة للبدء</p></div><button class="filter-button" id="filterButton" type="button" aria-label="تصفية المعاملات" title="تصفية"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button></div>
       <div class="filter-tabs" id="filterTabs" hidden>
         <button class="filter-tab active" data-filter="all" type="button">الكل</button><button class="filter-tab" data-filter="deposit" type="button">الإيداعات</button><button class="filter-tab" data-filter="withdraw" type="button">السحوبات</button>
       </div>
