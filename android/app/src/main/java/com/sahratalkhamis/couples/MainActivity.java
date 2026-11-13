@@ -18,7 +18,7 @@ import androidx.webkit.WebViewAssetLoader;
 public class MainActivity extends Activity {
  private WebView web; private ValueCallback<Uri[]> fileCallback;
  @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(0xff110814);getWindow().setNavigationBarColor(0xff110814);
-  web=new WebView(this);setContentView(web);WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(false);s.setAllowContentAccess(false);s.setMediaPlaybackRequiresUserGesture(true);
+  web=new WebView(this);setContentView(web);WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(false);s.setAllowContentAccess(true);s.setMediaPlaybackRequiresUserGesture(true);
   WebViewAssetLoader loader=new WebViewAssetLoader.Builder().addPathHandler("/assets/",new WebViewAssetLoader.AssetsPathHandler(this)).build();
   web.setWebViewClient(new WebViewClient(){@Override public WebResourceResponse shouldInterceptRequest(WebView view,WebResourceRequest req){return loader.shouldInterceptRequest(req.getUrl());}@Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest req){return !"appassets.androidplatform.net".equals(req.getUrl().getHost());}});
   web.setWebChromeClient(new WebChromeClient(){@Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> cb,FileChooserParams params){if(fileCallback!=null)fileCallback.onReceiveValue(null);fileCallback=cb;try{startActivityForResult(params.createIntent(),123);return true;}catch(Exception ex){fileCallback=null;return false;}}});
