@@ -6,7 +6,7 @@
 
 ## ⬇️ التحميل
 
-**[تحميل QnS.apk (آخر إصدار)](https://github.com/mjodh206-oss/mjod-/releases/latest/download/QnS.apk)**
+**[تحميل QnS.apk (الإصدار v1.0.1)](https://github.com/mjodh206-oss/mjod-/releases/download/v1.0.1/QnS.apk)** — كل الإصدارات في صفحة [Releases](https://github.com/mjodh206-oss/mjod-/releases).
 
 ## الميزات
 
