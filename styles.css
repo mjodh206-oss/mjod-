@@ -37,7 +37,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .brand small { margin-top: 3px; color: var(--muted); font-size: 12px; }
 .install-button { padding: 9px 13px; border: 1px solid #d7dfed; border-radius: 10px; background: var(--surface); color: var(--blue-dark); font-size: 13px; font-weight: 650; }
 .install-button span { margin-left: 4px; font-size: 17px; vertical-align: -1px; }
-.welcome-row { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin: 34px 0 19px; }
+.welcome-row { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin: 8px 0 19px; }
 .eyebrow { margin: 0 0 5px; color: var(--blue); font-size: 12px; font-weight: 700; }
 .welcome-row h1 { margin: 0; font-size: 27px; font-weight: 720; letter-spacing: -.4px; line-height: 1.35; }
 .welcome-sub { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
@@ -133,13 +133,12 @@ footer span { margin: 0 4px; color: #b5bfce; }
 .cancel-delete { border: 1px solid var(--line); background: #fff; color: #344054; }
 .confirm-delete { border: 1px solid var(--red); background: var(--red); color: #fff; }
 @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-@media (min-width: 700px) { .app-shell { padding-top: 36px; } .welcome-row { margin-top: 40px; } .balance-card { padding: 26px 29px 20px; } .stats-grid, .actions { gap: 14px; } .transactions-section { margin-top: 28px; } }
+@media (min-width: 700px) { .app-shell { padding-top: 36px; } .welcome-row { margin-top: 10px; } .balance-card { padding: 26px 29px 20px; } .stats-grid, .actions { gap: 14px; } .transactions-section { margin-top: 28px; } }
 @media (max-width: 430px) {
   .app-shell { padding: 20px 16px 14px; }
-  .welcome-row { margin-top: 26px; }
+  .welcome-row { margin-top: 8px; }
   .welcome-row h1 { font-size: 24px; }
   .welcome-sub { max-width: 245px; font-size: 12px; }
-  .privacy-badge { padding: 6px 8px; font-size: 9px; }
   .balance-card { min-height: 174px; padding: 19px 17px 16px; border-radius: 18px; }
   .balance-amount { margin: 14px 0 12px; font-size: 43px; }
   .currency-pill { gap: 4px; padding: 5px 7px; font-size: 9px; }
@@ -156,9 +155,16 @@ footer span { margin: 0 4px; color: #b5bfce; }
   .transaction-value { font-size: 11px; }
   .transaction-date { font-size: 9px; }
 }
-/* Subtle first-open motion: staged content, a quick brand reveal, and one balance-card sheen. */
-.topbar { animation: introRise .58s cubic-bezier(.2,.75,.25,1) both; }
-.brand-icon { animation: brandReveal .72s cubic-bezier(.18,.85,.24,1.25) both; }
+/* A short branded opening animation; it gets out of the way automatically. */
+.launch-splash { position: fixed; z-index: 20; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; overflow: hidden; background: radial-gradient(circle at 50% 43%, #2852a2 0, #18366f 34%, #101e3c 78%); color: #fff; pointer-events: none; animation: splashExit .42s 1.18s ease-in forwards; }
+.launch-splash::before { position: absolute; width: min(74vw, 340px); aspect-ratio: 1; border: 1px solid #ffffff12; border-radius: 50%; box-shadow: 0 0 0 22px #ffffff06, 0 0 80px #5d8cf333; content: ""; animation: haloIn 1.1s ease-out both; }
+.launch-mark { position: relative; display: grid; width: min(43vw, 190px); aspect-ratio: 1; place-items: center; border: 1px solid #ffffff26; border-radius: 50%; background: radial-gradient(circle at 36% 25%, #ffffff15, transparent 56%); box-shadow: 0 14px 52px #050d2040, inset 0 1px #ffffff18; animation: markPop .82s cubic-bezier(.2,.85,.25,1.2) both; }
+.launch-mark::before { position: absolute; inset: -9px; border: 1px solid transparent; border-top-color: #b9d0ff; border-right-color: #7299ec80; border-radius: 50%; content: ""; animation: orbitIn 1.35s .05s cubic-bezier(.3,.7,.3,1) both; }
+.launch-monogram { width: 76%; overflow: visible; filter: drop-shadow(0 2px 9px #a9c5ff30); }
+.launch-monogram path { stroke: #f9fbff; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: monogramDraw .78s ease-out forwards; }
+.launch-monogram path:nth-child(2) { animation-delay: .13s; }
+.launch-monogram path:nth-child(3) { animation-delay: .26s; }
+.launch-wordmark { position: relative; color: #f7f9ff; font-size: 19px; font-weight: 720; letter-spacing: .42em; text-indent: .42em; opacity: 0; animation: wordmarkIn .45s .48s ease-out forwards; }
 .welcome-row { animation: introRise .58s .06s cubic-bezier(.2,.75,.25,1) both; }
 .balance-card { isolation: isolate; animation: balanceReveal .78s .12s cubic-bezier(.2,.8,.2,1) both; }
 .balance-card::before { position: absolute; z-index: 0; top: -35%; bottom: -35%; left: -60%; width: 38%; transform: skewX(-18deg); background: linear-gradient(90deg, transparent, #ffffff22, transparent); content: ""; pointer-events: none; animation: cardSheen 1.35s .48s ease-out both; }
@@ -167,9 +173,14 @@ footer span { margin: 0 4px; color: #b5bfce; }
 .actions { animation: introRise .58s .3s cubic-bezier(.2,.75,.25,1) both; }
 .transactions-section { animation: introRise .58s .38s cubic-bezier(.2,.75,.25,1) both; }
 footer { animation: introRise .58s .46s cubic-bezier(.2,.75,.25,1) both; }
+@keyframes splashExit { to { visibility: hidden; opacity: 0; } }
+@keyframes haloIn { from { opacity: 0; transform: scale(.72); } to { opacity: 1; transform: scale(1); } }
+@keyframes markPop { 0% { opacity: 0; transform: scale(.68) rotate(-12deg); } 72% { opacity: 1; transform: scale(1.06) rotate(2deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes orbitIn { 0% { opacity: 0; transform: rotate(-70deg) scale(.76); } 100% { opacity: 1; transform: rotate(0) scale(1); } }
+@keyframes monogramDraw { to { stroke-dashoffset: 0; } }
+@keyframes wordmarkIn { from { opacity: 0; transform: translateY(8px); letter-spacing: .7em; } to { opacity: 1; transform: translateY(0); letter-spacing: .42em; } }
 @keyframes introRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes brandReveal { from { opacity: 0; transform: scale(.72) rotate(-9deg); } 75% { opacity: 1; transform: scale(1.07) rotate(2deg); } to { transform: scale(1) rotate(0); } }
 @keyframes balanceReveal { from { opacity: 0; transform: translateY(20px) scale(.975); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes cardSheen { from { left: -60%; opacity: 0; } 20% { opacity: 1; } to { left: 125%; opacity: 0; } }
 @keyframes haloDrift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-13px, 8px, 0); } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+@media (prefers-reduced-motion: reduce) { .launch-splash { display: none !important; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
