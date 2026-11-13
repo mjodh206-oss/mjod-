@@ -7,7 +7,7 @@ permissions:
   contents: write
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,7 +22,9 @@ jobs:
         with:
           gradle-version: '8.10.2'
       - run: npm ci && npm run build:assets && npm test
-      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0' 
       - name: Generate signing key for this build
         run: |
           keytool -genkeypair -keystore "$RUNNER_TEMP/sahra.p12" -storetype PKCS12 -storepass temporary-build-key -keypass temporary-build-key -alias sahra -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Sahrat Al Khamis, O=Sahra, C=NL"
