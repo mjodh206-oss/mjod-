@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 android {
     namespace 'com.sahratalkhamis.couples'
     compileSdk 35
-    defaultConfig { applicationId 'com.sahratalkhamis.couples'; minSdk 24; targetSdk 35; versionCode 1; versionName '1.0.0' }
+    defaultConfig { applicationId 'com.sahratalkhamis.couples.passion'; minSdk 24; targetSdk 35; versionCode 2; versionName '1.1.0' }
     signingConfigs { release { storeFile file(System.getenv('SAHRA_KEYSTORE') ?: 'release.p12'); storePassword System.getenv('SAHRA_STORE_PASSWORD'); keyAlias 'sahra'; keyPassword System.getenv('SAHRA_STORE_PASSWORD'); storeType 'pkcs12' } }
     buildTypes { release { minifyEnabled false; signingConfig signingConfigs.release } }
 }

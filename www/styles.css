@@ -1377,3 +1377,7 @@ input[type="range"] {
     grid-template-columns: 1fr;
   }
 }
+
+.passion-feature { grid-column: 1 / -1; background: radial-gradient(circle at 90% 0%, rgba(255,85,107,.26), transparent 55%), linear-gradient(120deg,#37132a,#211028); border-color: rgba(255,127,129,.5); }
+.passion-feature strong { color:#ffd4bb; font-size:1.08rem; }
+.passion-steps {display:flex; gap:7px; margin:14px 0; flex-wrap:wrap} .passion-steps span {border:1px solid var(--mood-border); border-radius:999px; padding:5px 10px; color:var(--gold-soft); font-size:.8rem} .passion-tip {border-right:3px solid #f5a58d; padding:10px 14px; background:rgba(255,255,255,.05); border-radius:10px; color:var(--text-secondary); font-size:.86rem; margin:14px 0} .round-controls {display:flex; gap:8px; flex-wrap:wrap; margin:12px 0} .round-controls .btn {flex:1; min-width:125px} 
