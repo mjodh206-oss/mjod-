@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-mood="warm">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#120914" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>سهرة الخميس — موعدكم الأسبوعي اللي بيرجّع الشرارة</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="fonts/fonts.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Animated Velvet & Candlelight Launch Splash -->
+  <div class="launch-splash" id="launchSplash" aria-hidden="true">
+    <div class="splash-emblem">
+      <svg viewBox="0 0 120 120" width="92" height="92" fill="none">
+        <defs>
+          <radialGradient id="splashGlow" cx="50%" cy="45%" r="50%">
+            <stop offset="0%" stop-color="#FFD996" stop-opacity="0.55" />
+            <stop offset="100%" stop-color="#FFD996" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="splashGold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFE2A8" />
+            <stop offset="100%" stop-color="#D98B38" />
+          </linearGradient>
+        </defs>
+        <circle cx="60" cy="56" r="48" fill="url(#splashGlow)" />
+        <path d="M74 24C56 26 42 41 42 60C42 79 56 94 75 96C53 99 33 82 33 60C33 38 53 21 74 24Z" fill="url(#splashGold)" />
+        <path class="splash-flame" d="M66 43C66 43 76 54 76 62C76 67.5 71.5 72 66 72C60.5 72 56 67.5 56 62C56 54 66 43 66 43Z" fill="#FFAE52" />
+        <path d="M66 51C66 51 71 57 71 62C71 64.8 68.8 67 66 67C63.2 67 61 64.8 61 62C61 57 66 51 66 51Z" fill="#FFF2D6" />
+      </svg>
+    </div>
+    <h1 class="splash-title">سهرة الخميس</h1>
+    <p class="splash-subtitle">موعدكم الأسبوعي اللي بيرجّع الشرارة</p>
+  </div>
+
+  <!-- Full-Screen "No Phone" 2-Hour Candlelight Sanctuary Overlay -->
+  <section class="sanctuary-overlay" id="sanctuaryOverlay" hidden>
+    <div class="sanctuary-stars"></div>
+    <div class="sanctuary-inner">
+      <span class="sanctuary-pill">📵 وضع «لا موبايل» مفعّل</span>
+      <div class="candle-stage" aria-hidden="true">
+        <div class="candle-halo"></div>
+        <div class="candle-flame-outer">
+          <div class="candle-flame-inner"></div>
+        </div>
+        <div class="candle-wick"></div>
+        <div class="candle-body"></div>
+      </div>
+      <div class="sanctuary-clock" id="sanctuaryClock">02:00:00</div>
+      <p class="sanctuary-whisper" id="sanctuaryWhisper">
+        الموبايلات مقفولة.. العيون لبعض، والليلة إلكم وحدكم 🕯️
+      </p>
+      <div class="sanctuary-actions">
+        <button type="button" class="btn btn-soft" id="sanctuaryMusicToggle">
+          🎶 موسيقى هادئة
+        </button>
+        <button type="button" class="btn btn-ghost" id="sanctuaryExitBtn">
+          إنهاء الوضع مبكراً
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main App Shell -->
+  <div class="app-shell" id="appShell">
+    <!-- Top Header -->
+    <header class="top-bar">
+      <button type="button" class="brand-cluster" id="coupleProfileQuickBtn" aria-label="تعديل أسماء الزوجين">
+        <span class="brand-moon" aria-hidden="true">🕯️</span>
+        <span class="brand-text">
+          <strong class="brand-name">سهرة الخميس</strong>
+          <small class="couple-names-label" id="headerCoupleLabel">حبيبي ♥ حبيبتي</small>
+        </span>
+      </button>
+
+      <div class="top-actions">
+        <button type="button" class="apk-top-btn" id="webApkDownloadBtn" hidden>
+          <span>📲 تحميل APK</span>
+        </button>
+        <button type="button" class="mood-chip" id="headerMoodChip" aria-label="تغيير مستوى الجرأة">
+          <span id="headerMoodEmoji">🕯️</span>
+          <span id="headerMoodName">دافي</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Main Viewport -->
+    <main class="main-content" id="mainContent">
+      <!-- TAB 1: الليلة (Home) -->
+      <section class="tab-panel is-active" data-tab-panel="home">
+        <!-- Hero Countdown & Evening Ambiance Card -->
+        <article class="hero-card">
+          <div class="hero-bg" style="background-image: url('img/hero-ambiance.jpg');"></div>
+          <div class="hero-scrim"></div>
+          <div class="hero-body">
+            <div class="hero-top-row">
+              <span class="hero-kicker" id="thursdayStatusTitle">العد التنازلي لسهرة الخميس</span>
+              <button type="button" class="reminder-mini-btn" data-open-feature="reminder">
+                ⏰ التذكير
+              </button>
+            </div>
+
+            <div class="countdown-grid" id="countdownGrid" aria-live="polite">
+              <div class="cd-box">
+                <strong id="cdDays">00</strong>
+                <span>يوم</span>
+              </div>
+              <div class="cd-sep">:</div>
+              <div class="cd-box">
+                <strong id="cdHours">00</strong>
+                <span>ساعة</span>
+              </div>
+              <div class="cd-sep">:</div>
+              <div class="cd-box">
+                <strong id="cdMinutes">00</strong>
+                <span>دقيقة</span>
+              </div>
+              <div class="cd-sep">:</div>
+              <div class="cd-box">
+                <strong id="cdSeconds">00</strong>
+                <span>ثانية</span>
+              </div>
+            </div>
+
+            <p class="hero-subtitle" id="thursdayStatusSubtitle">
+              موعدكم الأسبوعي اللي بيرجّع الشرارة ✨
+            </p>
+
+            <div class="hero-cta-row">
+              <button type="button" class="btn btn-primary" data-open-feature="mood-matcher">
+                🌡️ مقياس الأجواء
+              </button>
+              <button type="button" class="btn btn-glass" data-open-feature="no-phone">
+                📵 وضع «لا موبايل»
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Web Direct Download Banner (shown automatically on web preview) -->
+        <aside class="apk-banner" id="webApkBanner" hidden>
+          <div class="apk-banner-info">
+            <strong>📲 نسخة أندرويد الكاملة جاهزة للتحميل</strong>
+            <span>ثبّت تطبيق «سهرة الخميس» بصيغة APK مباشرة على هاتفك</span>
+          </div>
+          <button type="button" class="btn btn-gold-sm" id="bannerApkBtn">
+            تحميل مباشر
+          </button>
+        </aside>
+
+        <!-- 🔥 مستويات الجرأة (Interactive Mood Switcher) -->
+        <section class="mood-selector-card" aria-labelledby="moodSectionHeading">
+          <div class="section-head-inline">
+            <div>
+              <h2 id="moodSectionHeading">🔥 مستويات الجرأة</h2>
+              <p>اختاروا مزاج سهرتكم.. وكل التطبيق بيتكيّف معكم</p>
+            </div>
+            <button type="button" class="link-pill" data-open-feature="boldness">
+              تحديات المستوى ←
+            </button>
+          </div>
+
+          <div class="mood-segmented" role="radiogroup" aria-label="مستويات الجرأة">
+            <button type="button" class="mood-seg-btn" data-set-mood="calm">
+              <span class="seg-emoji">🌙</span>
+              <strong>هادي</strong>
+              <small>حنان وسكينة</small>
+            </button>
+            <button type="button" class="mood-seg-btn is-selected" data-set-mood="warm">
+              <span class="seg-emoji">🕯️</span>
+              <strong>دافي</strong>
+              <small>شموع وغزل</small>
+            </button>
+            <button type="button" class="mood-seg-btn" data-set-mood="fiery">
+              <span class="seg-emoji">🔥</span>
+              <strong>ناري</strong>
+              <small>جرأة وشغف</small>
+            </button>
+          </div>
+
+          <div class="mood-spark-box" id="homeMoodSparkBox">
+            <span class="spark-label">شرارة الليلة المقترحة:</span>
+            <p id="homeMoodSparkText">أشعلوا ٣ شموع بالغرفة، تعطّروا بعطركم المفضل، واسحبوا أول سؤال من حقيقة أو جرأة.</p>
+          </div>
+        </section>
+
+        <!-- Active Status Strip (Dress Code + Secret Notes) -->
+        <div class="tonight-strip">
+          <button type="button" class="strip-tile" data-open-feature="dress-code">
+            <span class="strip-icon" id="stripDressEmoji">👗</span>
+            <div class="strip-meta">
+              <small>كود السهرة المختار</small>
+              <strong id="stripDressTitle">اسحبوا لبسة هالخميس</strong>
+            </div>
+          </button>
+          <button type="button" class="strip-tile" data-open-feature="love-notes">
+            <span class="strip-icon">💌</span>
+            <div class="strip-meta">
+              <small>رسائل حب سرّية</small>
+              <strong id="stripNotesStatus">ابعت مفاجأة بتوقيتك</strong>
+            </div>
+          </button>
+        </div>
+
+        <!-- ✨ شو بيقدملكم؟ All Features Grid -->
+        <section class="features-section">
+          <div class="section-title-row">
+            <h2>✨ شو بيقدملكم هالخميس؟</h2>
+            <span>١٥ تجربة للأزواج</span>
+          </div>
+
+          <div class="feature-grid">
+            <button type="button" class="feature-card" data-open-feature="truth-dare">
+              <span class="fc-icon">🎭</span>
+              <strong>حقيقة أو جرأة</strong>
+              <p>أسئلة غزلية وتحديات ممتعة بتقرّبكم وبتفتح أحاديث جديدة</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="pamper">
+              <span class="fc-icon">💆</span>
+              <strong>جلسة تدليل</strong>
+              <p>مؤقت وإرشادات لتدليل متبادل بالشموع والزيوت، كل واحد دوره</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="coupons">
+              <span class="fc-icon">🎟️</span>
+              <strong>قسايم الحب</strong>
+              <p>كوبونات سرّية: عشاء من إيدي، رقصة ببيجاما، طلب بدون سؤال</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="dress-code">
+              <span class="fc-icon">👗</span>
+              <strong>كود السهرة</strong>
+              <p>الأسود فقط، لبسة العرس الأول، أو مفاجأة من الخزانة</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="blindfold">
+              <span class="fc-icon">🙈</span>
+              <strong>العيون المغمّضة</strong>
+              <p>ألعاب تذوّق وتخمين وهمس بعيون مغطّاة بتزيد التشويق</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="seconds">
+              <span class="fc-icon">💋</span>
+              <strong>تحدي الثواني</strong>
+              <p>مؤقت لحضن طويل أو رقصة قريبة أو لحظة صامتة بينكم</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="fantasy-cards">
+              <span class="fc-icon">🃏</span>
+              <strong>كروت الخيال</strong>
+              <p>أفكار سهرات مفاجئة بتنسحب عشوائي حسب مستوى الجرأة</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="mood-matcher">
+              <span class="fc-icon">🌡️</span>
+              <strong>مقياس الأجواء</strong>
+              <p>كل واحد بيختار مزاجه والتطبيق بيقترح السهرة الأنسب للاثنين</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="ready-nights">
+              <span class="fc-icon">🕯️</span>
+              <strong>أفكار سهرات جاهزة</strong>
+              <p>عشاء على الشموع، سينما بالبيت، رقصة هادئة، نزهة ليلية</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="music">
+              <span class="fc-icon">🎶</span>
+              <strong>موسيقى وأجواء</strong>
+              <p>قوائم تشغيل رومانسية ومؤثرات دافئة حسب مزاج السهرة</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="love-notes">
+              <span class="fc-icon">💌</span>
+              <strong>رسائل حب سرّية</strong>
+              <p>ابعت لشريكك كلمة حلوة أو مفاجأة تنفتح بتوقيت تختاره</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="no-phone">
+              <span class="fc-icon">📵</span>
+              <strong>وضع «لا موبايل»</strong>
+              <p>بيقفل الإشعارات ساعتين على ضوء الشمعة حتى تكون السهرة إلكم بس</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="secret-album">
+              <span class="fc-icon">📸</span>
+              <strong>ألبوم سرّي</strong>
+              <p>احفظوا لحظاتكم وصوركم الحلوة بمكان خاص محمي برمز PIN</p>
+            </button>
+
+            <button type="button" class="feature-card" data-open-feature="reminder">
+              <span class="fc-icon">⏰</span>
+              <strong>تذكير كل خميس</strong>
+              <p>تنبيه أسبوعي دافئ حتى ما تفوتكم السهرة أبداً</p>
+            </button>
+          </div>
+        </section>
+      </section>
+
+      <!-- TAB 2: تحديات وألعاب -->
+      <section class="tab-panel" data-tab-panel="games" hidden>
+        <div class="tab-hero-header">
+          <h2>🎭 ألعاب وتحديات السهرة</h2>
+          <p>اكسروا الروتين بضحكة، همسة، وتشويق يقرّب المسافات بينكم</p>
+        </div>
+        <div class="stack-list" id="gamesTabList"></div>
+      </section>
+
+      <!-- TAB 3: طقوس وأجواء -->
+      <section class="tab-panel" data-tab-panel="rituals" hidden>
+        <div class="tab-hero-header">
+          <h2>🕯️ طقوس الدلال والأجواء</h2>
+          <p>تدليل متبادل، موسيقى ساحرة، كود لبس، وسهرات مرسومة بالحب</p>
+        </div>
+        <div class="stack-list" id="ritualsTabList"></div>
+      </section>
+
+      <!-- TAB 4: أسرارنا -->
+      <section class="tab-panel" data-tab-panel="secrets" hidden>
+        <div class="tab-hero-header">
+          <h2>💌 صندوق أسراركم الخاص</h2>
+          <p>قسايم حب متبادلة، رسائل موقوتة، وألبوم ذكريات محمي برمز سري</p>
+        </div>
+        <div class="stack-list" id="secretsTabList"></div>
+      </section>
+
+      <!-- TAB 5: موعدنا والإعدادات -->
+      <section class="tab-panel" data-tab-panel="couple" hidden>
+        <div class="tab-hero-header">
+          <h2>💑 ملف الزوجين وموعد الخميس</h2>
+          <p>خصّصوا أسماءكم، تنبيه كل خميس، وإحصائيات سهراتكم الحلوة</p>
+        </div>
+        <div id="coupleSettingsView"></div>
+      </section>
+    </main>
+
+    <!-- Persistent Floating Music Mini-Player -->
+    <div class="mini-player" id="miniPlayer" hidden>
+      <button type="button" class="mini-play-toggle" id="miniPlayToggle" aria-label="إيقاف أو تشغيل الموسيقى">
+        ⏸
+      </button>
+      <button type="button" class="mini-player-meta" data-open-feature="music">
+        <strong id="miniPlaylistTitle">🕯️ شموع وعنبر</strong>
+        <small id="miniTrackName">وهج الشموع الذهبي</small>
+      </button>
+      <button type="button" class="mini-close-btn" id="miniStopBtn" aria-label="إغلاق المشغل">
+        ✕
+      </button>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+      <button type="button" class="nav-item is-active" data-nav-tab="home">
+        <span class="nav-icon">✨</span>
+        <span>الليلة</span>
+      </button>
+      <button type="button" class="nav-item" data-nav-tab="games">
+        <span class="nav-icon">🎭</span>
+        <span>تحديات</span>
+      </button>
+      <button type="button" class="nav-item" data-nav-tab="rituals">
+        <span class="nav-icon">🕯️</span>
+        <span>أجواء</span>
+      </button>
+      <button type="button" class="nav-item" data-nav-tab="secrets">
+        <span class="nav-icon">💌</span>
+        <span>أسرارنا</span>
+      </button>
+      <button type="button" class="nav-item" data-nav-tab="couple">
+        <span class="nav-icon">⏰</span>
+        <span>موعدنا</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Slide-Up Full Feature Modal Sheet -->
+  <div class="sheet-backdrop" id="featureSheet" hidden>
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <header class="sheet-header">
+        <button type="button" class="sheet-back-btn" id="sheetCloseBtn" aria-label="رجوع">
+          → رجوع
+        </button>
+        <h2 class="sheet-title" id="sheetTitle">سهرة الخميس</h2>
+        <span class="sheet-mood-pill" id="sheetMoodPill">🕯️ دافي</span>
+      </header>
+      <div class="sheet-content" id="sheetContent"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="appToast" role="status" aria-live="polite" hidden></div>
+
+  <script src="core.js"></script>
+  <script src="data.js"></script>
+  <script src="audio-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "sahrat-alkhamis",
+  "version": "1.0.0",
+  "private": true,
+  "description": "سهرة الخميس — موعدكم الأسبوعي اللي بيرجّع الشرارة (تطبيق أندرويد للأزواج)",
+  "scripts": {
+    "build:assets": "node scripts/build-assets.js",
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "@fontsource/amiri": "^5.3.0",
+    "@fontsource/tajawal": "^5.3.0",
+    "sharp": "^0.35.5"
+  }
+}

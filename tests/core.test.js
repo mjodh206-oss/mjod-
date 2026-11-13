@@ -1,0 +1,4 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const C=require('../www/core');const D=require('../www/data');
+test('Thursday countdown and Thursday night',()=>{let x=C.getNextThursdayInfo(new Date(2026,10,12,20,0),21,0);assert.equal(x.hours,1);assert.equal(x.isTonightActive,false);assert.equal(C.getNextThursdayInfo(new Date(2026,10,12,22),21,0).isTonightActive,true)});
+test('mood matching and content',()=>{assert.equal(C.computeMoodMatch({boldness:'calm'},{boldness:'calm'}).recommendedMood,'calm');for(let mood of ['calm','warm','fiery']){assert.ok(D.FANTASY_CARDS.some(x=>x.mood===mood));assert.ok(D.TRUTH_OR_DARE.some(x=>x.mood===mood&&x.type==='truth'));assert.ok(D.TRUTH_OR_DARE.some(x=>x.mood===mood&&x.type==='dare'))}});
+test('notes and clock',()=>{assert.equal(C.isNoteUnlocked({unlockAt:100},99),false);assert.equal(C.isNoteUnlocked({unlockAt:100},100),true);assert.equal(C.formatClock(90),'01:30')});

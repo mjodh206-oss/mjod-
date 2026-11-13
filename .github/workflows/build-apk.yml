@@ -1,0 +1,51 @@
+name: Build Android APK
+on:
+  push:
+    branches: ["arena/f8728794-mjod"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - run: npm ci && npm run build:assets && npm test
+      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Generate signing key for this build
+        run: |
+          keytool -genkeypair -keystore "$RUNNER_TEMP/sahra.p12" -storetype PKCS12 -storepass temporary-build-key -keypass temporary-build-key -alias sahra -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Sahrat Al Khamis, O=Sahra, C=NL"
+      - name: Build signed APK
+        run: gradle -p android assembleRelease
+        env:
+          SAHRA_KEYSTORE: ${{ runner.temp }}/sahra.p12
+          SAHRA_STORE_PASSWORD: temporary-build-key
+      - name: Verify APK
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -v 4 android/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
+          cp android/app/build/outputs/apk/release/app-release.apk SahratAlKhamis.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SahratAlKhamis
+          path: SahratAlKhamis.apk
+      - name: Publish direct download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view sahrat-alkhamis-v1.0.0 >/dev/null 2>&1; then
+            gh release create sahrat-alkhamis-v1.0.0 --target "$GITHUB_SHA" --title 'سهرة الخميس 1.0.0' --notes 'تطبيق سهرة الخميس للأزواج لأجهزة أندرويد.'
+          fi
+          gh release upload sahrat-alkhamis-v1.0.0 SahratAlKhamis.apk --clobber
