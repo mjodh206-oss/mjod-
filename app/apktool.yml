@@ -1,0 +1,21 @@
+version: 2.4.1
+apkFileName: SmartRemote.apk
+isFrameworkApk: false
+packageInfo:
+  cur_package: com.amjadhabib.smartremote
+  orig_package: com.amjadhabib.smartremote
+compressionType: false
+sharedLibrary: false
+sparseResources: false
+unknownFiles: {}
+usesFramework:
+  ids:
+    - 1
+  tag: android
+sdkInfo:
+  minSdkVersion: '21'
+  targetSdkVersion: '34'
+versionInfo:
+  versionCode: '1'
+  versionName: '1.0.0'
+isLibrary: false

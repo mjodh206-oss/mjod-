@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05071a">
+<title>ريموتي الذكي — ريموت الأشعة تحت الحمراء</title>
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ══════════════ شاشة الافتتاحية (Splash) ══════════════ -->
+<section id="screen-splash" class="screen visible" aria-label="ريموتي الذكي">
+  <div class="splash-bg"></div>
+  <div class="splash-stage">
+    <div class="splash-devices" aria-hidden="true">
+      <span class="splash-device d-tv"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="26" rx="3.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M17 42h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><i></i></span>
+      <span class="splash-device d-ac"><svg viewBox="0 0 48 48"><rect x="4" y="12" width="40" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M10 34v3M17 34v5M24 34v3M31 34v5M38 34v3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><i></i></span>
+      <span class="splash-device d-fan"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="4.5" fill="none" stroke="currentColor" stroke-width="2.4"/><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M24 19.5c0-6 2-10 8-11 2 5-1 9-8 11z"/><path d="M28.5 26.5c6 0 10 2 11 8-5 2-9-1-11-8z"/><path d="M24 28.5c0 6-2 10-8 11-2-5 1-9 8-11z"/><path d="M19.5 21.5c-6 0-10-2-11-8 5-2 9 1 11 8z"/></g></svg><i></i></span>
+      <span class="splash-device d-bulb"><svg viewBox="0 0 48 48"><path d="M24 5a13 13 0 0 0-8 23c1.6 1.4 2.5 3 2.5 5h11c0-2 .9-3.6 2.5-5A13 13 0 0 0 24 5z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M19.5 39h9M21 44h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><i></i></span>
+    </div>
+
+    <div class="splash-remote" aria-hidden="true">
+      <svg class="splash-waves" viewBox="0 0 120 120">
+        <path class="wave w1" d="M60 26a30 30 0 0 1 21 9" fill="none" stroke="url(#g1)" stroke-width="6" stroke-linecap="round"/>
+        <path class="wave w2" d="M60 10a46 46 0 0 1 32 14" fill="none" stroke="url(#g1)" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+        <path class="wave w3" d="M60 -6a62 62 0 0 1 43 19" fill="none" stroke="url(#g1)" stroke-width="6" stroke-linecap="round" opacity=".7"/>
+        <path class="wave w4" d="M60 42a14 14 0 0 1 10 4" fill="none" stroke="url(#g1)" stroke-width="6" stroke-linecap="round" opacity=".95"/>
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+      </svg>
+      <div class="splash-remote-body">
+        <svg viewBox="0 0 96 150" class="splash-remote-svg">
+          <defs>
+            <linearGradient id="rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2145"/><stop offset="1" stop-color="#0d1130"/></linearGradient>
+            <linearGradient id="redge" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+          </defs>
+          <rect x="8" y="6" width="80" height="138" rx="22" fill="url(#rb)" stroke="url(#redge)" stroke-width="3.5" class="remote-shell"/>
+          <circle cx="66" cy="30" r="9" fill="none" stroke="#22d3ee" stroke-width="2.4" class="pwr-ico"/>
+          <path d="M66 24v8" stroke="#22d3ee" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="48" cy="66" r="17" fill="none" stroke="#38bdf8" stroke-width="2.6" class="dpad-ico"/>
+          <circle cx="48" cy="66" r="6.5" fill="#22d3ee" opacity=".9"/>
+          <rect x="22" y="100" width="22" height="11" rx="5.5" fill="none" stroke="#8b5cf6" stroke-width="2.2"/>
+          <rect x="52" y="100" width="22" height="11" rx="5.5" fill="none" stroke="#8b5cf6" stroke-width="2.2"/>
+          <rect x="35" y="120" width="26" height="10" rx="5" fill="none" stroke="#8b5cf6" stroke-width="2.2"/>
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="splash-title">ريموتي الذكي</h1>
+    <p class="splash-tagline">ريموت الأشعة تحت الحمراء لكل أجهزتك</p>
+    <p class="splash-credit">تم تطوير وتنفيذ هذا التطبيق بواسطة <b>أمجد حبيب</b></p>
+  </div>
+  <p class="splash-skip">المس للتخطي</p>
+</section>
+
+<!-- ══════════════ الشاشة الرئيسية ══════════════ -->
+<section id="screen-home" class="screen" aria-label="القائمة الرئيسية">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="icon.png" alt="شعار ريموتي الذكي" class="topbar-logo">
+      <div>
+        <div class="topbar-title">ريموتي <span>الذكي</span></div>
+        <div class="topbar-sub">SMART IR REMOTE</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btn-theme" aria-label="تبديل المظهر">
+        <svg viewBox="0 0 24 24" class="ico-moon"><path fill="currentColor" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z"/></svg>
+        <svg viewBox="0 0 24 24" class="ico-sun"><path fill="currentColor" d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-14v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-settings" aria-label="الإعدادات"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.04 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg></button>
+      <button class="icon-btn" id="btn-about" aria-label="عن التطبيق"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="7.8" r="1.3" fill="currentColor"/></svg></button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h2 class="hero-title">كل أجهزة بيتك<br>في <em>ريموت واحد</em></h2>
+    <p class="hero-sub">يكتشف التطبيق أجهزة الأشعة تحت الحمراء تلقائياً — وجّه هاتفك نحو الجهاز ودع التطبيق يبحث عن الكود الصحيح بنفسه، بدون أي إعدادات.</p>
+    <div class="hero-badges">
+      <span class="hero-badge"><i class="dot ok"></i>يعمل بدون إنترنت</span>
+      <span class="hero-badge"><i class="dot ok"></i>برمجة تلقائية</span>
+      <span class="hero-badge"><i class="dot accent"></i>+490 قاعدة أكواد</span>
+    </div>
+  </div>
+
+  <div class="mydevices-wrap" id="mydevices-wrap" hidden>
+    <div class="section-head"><h3>أجهزتي</h3><span class="section-count" id="mydevices-count"></span></div>
+    <div class="mydevices" id="mydevices"></div>
+  </div>
+
+  <div class="section-head"><h3>اختر القسم</h3><span class="section-hint">البحث يبدأ تلقائياً</span></div>
+  <div class="cats" id="cats-grid"></div>
+
+  <footer class="home-credit">تم تطوير وتنفيذ هذا التطبيق بواسطة <b>أمجد حبيب</b></footer>
+</section>
+
+<!-- ══════════════ شاشة البحث التلقائي ══════════════ -->
+<section id="screen-search" class="screen" aria-label="البحث التلقائي عن الأكواد">
+  <header class="subbar">
+    <button class="icon-btn" id="search-back" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="subbar-title"><span id="search-cat-icon">📺</span> البحث التلقائي — <span id="search-cat-name">الشاشات</span></div>
+    <span class="subbar-spacer"></span>
+  </header>
+
+  <div class="search-hero">
+    <div class="radar" id="radar">
+      <div class="radar-ring r1"></div><div class="radar-ring r2"></div><div class="radar-ring r3"></div>
+      <div class="radar-sweep"></div>
+      <div class="radar-core">
+        <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M12 3v2m6.4 1.6-1.4 1.4M21 12h-2M17 17l1.4 1.4M12 12l3.6-3.6"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M12 12a4.5 4.5 0 0 1 4.5 4.5M12 12a8.5 8.5 0 0 1 8.5 8.5" opacity=".0"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg>
+      </div>
+    </div>
+
+    <div class="search-brand-chip" id="search-brand-chip"><span class="chip-dot"></span><span id="search-brand-name">…</span></div>
+    <div class="search-progress-text"><span id="search-step">0</span> من <span id="search-total">0</span> كود</div>
+    <div class="search-bar"><div class="search-bar-fill" id="search-bar-fill"></div></div>
+    <p class="search-hint">وجّه الهاتف نحو الجهاز… يراقب التطبيق استجابة الجهاز ويتوقف عند أول كود ناجح.</p>
+
+    <button class="worked-btn" id="btn-worked">
+      <svg viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      اشتغل الجهاز!
+    </button>
+
+    <div class="search-controls">
+      <button class="ctrl-btn" id="btn-pause"><svg viewBox="0 0 24 24" class="ic-pause"><path fill="currentColor" d="M8 5h2.6v14H8zM13.4 5H16v14h-2.6z"/></svg><svg viewBox="0 0 24 24" class="ic-play"><path fill="currentColor" d="M8.5 5.5v13l11-6.5z"/></svg><span id="pause-label">إيقاف مؤقت</span></button>
+      <button class="ctrl-btn" id="btn-back-step"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 5V1.8L6.6 7 12 12.2V9a6 6 0 1 1-6 6H4a8 8 0 1 0 8-10z"/></svg><span>رجوع خطوة</span></button>
+      <button class="ctrl-btn" id="btn-skip-brand"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 6l7 6-7 6V6zm9 0h2.5v12H14z"/></svg><span>تخطي الماركة</span></button>
+    </div>
+
+    <div class="search-fallback" id="search-fallback" hidden>
+      <div class="fallback-card">
+        <h4>انتهت الأكواد دون نتيجة</h4>
+        <p>جرّب اختيار الماركة يدوياً، أو تأكد أن هاتفك يحتوي على ناشر IR في الأعلى:</p>
+        <div class="fallback-actions">
+          <button class="ghost-btn" id="btn-manual-brand">اختيار الماركة يدوياً</button>
+          <button class="ghost-btn" id="btn-learn-note">التعلّم من ريموت أصلي</button>
+          <button class="ghost-btn primary" id="btn-retry-search">إعادة المحاولة</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- لوحة الماركات اليدوية -->
+  <div class="sheet" id="brand-sheet" hidden>
+    <div class="sheet-backdrop" data-close-sheet></div>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h4 class="sheet-title">اختر الماركة يدوياً</h4>
+      <div class="brand-grid" id="brand-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- مودال التأكيد: هل اشتغل الجهاز؟ -->
+<div class="modal" id="confirm-modal" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="modal-card">
+    <div class="modal-glow"></div>
+    <div class="modal-icon">✦</div>
+    <h4>هل اشتغل الجهاز؟</h4>
+    <p>الكود <b id="confirm-code-desc">«سامسونج»</b> — إذا انطفأ الجهاز أو استجاب فهذا هو الكود الصحيح.</p>
+    <div class="modal-actions">
+      <button class="modal-btn ok" id="confirm-yes">نعم، احفظه</button>
+      <button class="modal-btn ghost" id="confirm-no">لا، كمّل البحث</button>
+    </div>
+  </div>
+</div>
+
+<!-- مودال التسمية والحفظ -->
+<div class="modal" id="save-modal" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="modal-card">
+    <div class="modal-glow violet"></div>
+    <div class="modal-icon">✓</div>
+    <h4>ممتاز! تم التعرّف على الجهاز</h4>
+    <label class="field-label" for="device-name-input">اسم الجهاز</label>
+    <input class="text-field" id="device-name-input" type="text" maxlength="40" placeholder="مثال: شاشة الصالة" autocomplete="off">
+    <div class="modal-actions">
+      <button class="modal-btn ok" id="save-device-confirm">حفظ وفتح الريموت</button>
+      <button class="modal-btn ghost" id="save-device-cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ شاشة الريموت الكامل ══════════════ -->
+<section id="screen-remote" class="screen" aria-label="الرموت الكامل">
+  <header class="subbar">
+    <button class="icon-btn" id="remote-back" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="subbar-title remote-title"><span id="remote-cat-icon">📺</span><span id="remote-device-name">الجهاز</span></div>
+    <button class="icon-btn" id="remote-menu" aria-label="خيارات الجهاز"><svg viewBox="0 0 24 24"><circle cx="12" cy="5.2" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="18.8" r="1.7" fill="currentColor"/></svg></button>
+  </header>
+  <div class="remote-brandline"><span class="chip-dot small"></span><span id="remote-brand-line">الماركة</span><span class="remote-ir-badge">IR <i></i></span></div>
+  <div class="remote-body" id="remote-body"></div>
+  <div class="send-flash" id="send-flash" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13 2 4.5 13.5H11L10 22l8.5-11.5H13z"/></svg> أُرسلت الإشارة</div>
+</section>
+
+<!-- قائمة خيارات الجهاز -->
+<div class="sheet" id="device-sheet" hidden>
+  <div class="sheet-backdrop" data-close-sheet></div>
+  <div class="sheet-panel small">
+    <div class="sheet-handle"></div>
+    <button class="sheet-item" id="device-rename"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 20h4.5L20 8.5a2.1 2.1 0 0 0-3-3L5.5 17 4 20z"/></svg>إعادة تسمية الجهاز</button>
+    <button class="sheet-item danger" id="device-delete"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9.5 7V4.8A.8.8 0 0 1 10.3 4h3.4a.8.8 0 0 1 .8.8V7M6.5 7l1 13a1.6 1.6 0 0 0 1.6 1.5h5.8a1.6 1.6 0 0 0 1.6-1.5l1-13"/></svg>حذف الجهاز</button>
+  </div>
+</div>
+
+<!-- ══════════════ الإعدادات ══════════════ -->
+<section id="screen-settings" class="screen" aria-label="الإعدادات">
+  <header class="subbar">
+    <button class="icon-btn" id="settings-back" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="subbar-title">الإعدادات</div>
+    <span class="subbar-spacer"></span>
+  </header>
+  <div class="settings-body">
+    <div class="settings-group">
+      <div class="settings-group-title">المظهر</div>
+      <div class="settings-row">
+        <div><div class="settings-label">السمة</div><div class="settings-desc">داكن هادئ للعين أو فاتح نهاري</div></div>
+        <div class="segmented" id="theme-segment">
+          <button data-theme-val="dark" class="seg-btn">داكن</button>
+          <button data-theme-val="light" class="seg-btn">فاتح</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title">الاستجابة</div>
+      <div class="settings-row">
+        <div><div class="settings-label">صوت الأزرار</div><div class="settings-desc">نبضة قصيرة مع كل إرسال</div></div>
+        <button class="switch" id="toggle-sound" role="switch" aria-checked="true" aria-label="صوت الأزرار"><span class="knob"></span></button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">الاهتزاز</div><div class="settings-desc">اهتزاز خفيف عند كل ضغطة</div></div>
+        <button class="switch" id="toggle-haptic" role="switch" aria-checked="true" aria-label="الاهتزاز"><span class="knob"></span></button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title">سرعة البحث التلقائي</div>
+      <div class="settings-desc pad">الفاصل الزمني بين كل إرسال والأخر أثناء البحث — الأسرع قد لا يناسب كل الأجهزة</div>
+      <div class="segmented wide" id="interval-segment">
+        <button data-interval="300" class="seg-btn">سريع<br><small>0.3 ث</small></button>
+        <button data-interval="450" class="seg-btn">متوسط<br><small>0.45 ث</small></button>
+        <button data-interval="650" class="seg-btn">هادئ<br><small>0.65 ث</small></button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title">البيانات</div>
+      <button class="danger-btn" id="clear-devices">مسح جميع الأجهزة المحفوظة</button>
+      <button class="ghost-btn full" id="reset-settings">إعادة ضبط الإعدادات الافتراضية</button>
+    </div>
+
+    <p class="settings-foot">ريموتي الذكي — الإصدار 1.0.0 · قاعدة الأكواد Flipper-IRDB (CC0) · يعمل دون إنترنت</p>
+  </div>
+</section>
+
+<!-- ══════════════ عن التطبيق ══════════════ -->
+<section id="screen-about" class="screen" aria-label="عن التطبيق">
+  <header class="subbar">
+    <button class="icon-btn" id="about-back" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="subbar-title">عن التطبيق</div>
+    <span class="subbar-spacer"></span>
+  </header>
+  <div class="about-body">
+    <div class="about-logo-wrap"><img src="icon.png" alt="أيقونة ريموتي الذكي" class="about-logo"></div>
+    <h2 class="about-name">ريموتي <span>الذكي</span></h2>
+    <p class="about-en">SMART IR REMOTE</p>
+    <div class="about-version">الإصدار 1.0.0 · أندرويد 5.0+</div>
+
+    <div class="about-credit-card">
+      <div class="about-credit-text">تم تطوير وتنفيذ هذا التطبيق بواسطة</div>
+      <div class="about-credit-name">أمجد حبيب</div>
+      <div class="about-credit-role">AMJAD HABIB · مطوّر ومهندس برمجيات</div>
+    </div>
+
+    <div class="about-block">
+      <div class="about-block-title">الدعم والمساعدة</div>
+      <a class="about-link" href="https://github.com/mjodh206-oss/mjod-/issues" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.9 9.7.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.6-1.1-1.6-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.2.6-1.5-2.2-.3-4.6-1.2-4.6-5 0-1.1.4-2 1-2.7-.1-.2-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.7 9.7 0 0 1 5.1 0C17.3 6.6 18 7 18 7c.5 1.4.2 2.5.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7 1 .7 2v2.9c0 .3.2.6.7.5A10.2 10.2 0 0 0 22 12.2C22 6.6 17.5 2 12 2z"/></svg>
+        <span>الإبلاغ عن مشكلة أو اقتراح — GitHub Issues</span>
+        <svg viewBox="0 0 24 24" class="ext-arrow"><path d="M7 17L17 7M17 7h-7M17 7v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+
+    <div class="about-block">
+      <div class="about-block-title">نبذة تقنية</div>
+      <ul class="about-bullets">
+        <li>إرسال عبر ناشر <b>الأشعة تحت الحمراء</b> فقط (صلاحية <code>TRANSMIT_IR</code>) — لا كاميرا، لا موقع، لا حساب، لا إنترنت.</li>
+        <li>يعمل دون اتصال: قاعدة الأكواد مدمجة محلياً داخل التطبيق (+490 ملفاً من ماركات حقيقية).</li>
+        <li>الأكواد من مشروع <b>Flipper-IRDB</b> مفتوح المصدر (رخصة CC0) مع مولّدات بروتوكولات NEC وSamsung وSony SIRC.</li>
+        <li>الخط المستخدم: <b>Cairo</b> بترخيص SIL Open Font License.</li>
+      </ul>
+    </div>
+
+    <p class="about-footer">ريموتي الذكي © 2026 أمجد حبيب</p>
+  </div>
+</section>
+
+<!-- ══════════════ مودال عام للرسائل ══════════════ -->
+<div class="modal" id="info-modal" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="modal-card">
+    <div class="modal-glow"></div>
+    <div class="modal-icon" id="info-modal-icon">ℹ</div>
+    <h4 id="info-modal-title">تنبيه</h4>
+    <p id="info-modal-text">تفاصيل</p>
+    <div class="modal-actions">
+      <button class="modal-btn ok" id="info-modal-ok">حسناً</button>
+      <button class="modal-btn ghost" id="info-modal-cancel" hidden>إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ مودال: لا يوجد ناشر IR ══════════════ -->
+<div class="modal" id="noir-modal" hidden>
+  <div class="modal-backdrop"></div>
+  <div class="modal-card">
+    <div class="modal-glow"></div>
+    <div class="modal-icon">📡</div>
+    <h4>هذا الهاتف بدون ناشر IR</h4>
+    <p>جهازك لا يحتوي على <b>باعث الأشعة تحت الحمراء</b> المدمج، وهو غير موجود إلا في هواتف متخصصة (مثل بعض هواتف Xiaomi وRedmi وPOCO وHuawei القديمة وبعض هواتف Samsung Galaxy S/Note بإصدارات معينة).</p>
+    <p class="modal-sub"><b>الحل:</b> يمكن توصيل ملحق IR صغير بمنفذ USB-C أو منفذ السماعات بحوالي 3–10 دولارات، وسيعمل مع هذا التطبيق مباشرة.</p>
+    <div class="modal-actions">
+      <button class="modal-btn ok" id="noir-continue">المتابعة بالوضع التجريبي</button>
+      <button class="modal-btn ghost" id="noir-recheck">إعادة الفحص</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status"></div>
+
+<script src="js/db.js"></script>
+<script src="js/ir.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

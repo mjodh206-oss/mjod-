@@ -1,0 +1,9 @@
+build/
+dist/
+out/
+node_modules/
+*.apk
+*.keystore
+*.jks
+tools/signing/
+.DS_Store
