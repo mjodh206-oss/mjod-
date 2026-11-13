@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
                 Insets safeArea = insets.getInsets(
                         WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
                 view.setPadding(safeArea.left, safeArea.top, safeArea.right, safeArea.bottom);
-                return insets;
+                return WindowInsets.CONSUMED;
             });
             webView.requestApplyInsets();
         }

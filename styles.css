@@ -18,10 +18,13 @@
 }
 
 * { box-sizing: border-box; }
+html { min-height: 100%; overflow-x: hidden; }
 body {
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
+  overflow-x: hidden;
   background: linear-gradient(180deg, #f7f9fc 0, #f3f5f9 300px, #f4f6fa 100%);
 }
 button, input { font: inherit; }
@@ -166,23 +169,13 @@ html.app-ready .launch-splash { opacity: 0; visibility: hidden; }
 .launch-monogram path:nth-child(2) { animation-delay: .08s; }
 .launch-monogram path:nth-child(3) { animation-delay: .16s; }
 .launch-wordmark { position: relative; color: #f7f9ff; font-size: 18px; font-weight: 720; letter-spacing: .38em; text-indent: .38em; opacity: 0; animation: wordmarkIn .32s .34s ease-out forwards; }
-.balance-card { isolation: isolate; animation: balanceReveal .42s .03s cubic-bezier(.2,.75,.25,1) both; }
-.balance-card::before { position: absolute; z-index: 0; top: -35%; bottom: -35%; left: 0; width: 38%; transform: translateX(-170%) skewX(-18deg); background: linear-gradient(90deg, transparent, #ffffff20, transparent); content: ""; pointer-events: none; animation: cardSheen .78s .2s ease-out both; }
-.stats-grid { animation: introRise .38s .1s ease-out both; }
-.actions { animation: introRise .38s .16s ease-out both; }
-.transactions-section { animation: introRise .38s .22s ease-out both; }
-footer { animation: introRise .38s .26s ease-out both; }
+
 @keyframes haloIn { from { opacity: 0; transform: scale(.84); } to { opacity: 1; transform: scale(1); } }
 @keyframes markPop { from { opacity: 0; transform: scale(.78); } 78% { opacity: 1; transform: scale(1.035); } to { opacity: 1; transform: scale(1); } }
 @keyframes orbitIn { from { opacity: 0; transform: rotate(-55deg) scale(.88); } to { opacity: 1; transform: rotate(0) scale(1); } }
 @keyframes monogramDraw { to { stroke-dashoffset: 0; } }
 @keyframes wordmarkIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes introRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes balanceReveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes cardSheen { to { transform: translateX(430%) skewX(-18deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  /* Keep the brief requested brand intro; reduce only persistent page effects. */
-  .balance-card, .balance-card::before, .stats-grid, .actions, .transactions-section, footer { animation: none !important; }
-  .balance-card::before { display: none; }
+  /* Keep the brief requested brand intro; the dashboard itself remains still. */
   *, *::before, *::after { transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
