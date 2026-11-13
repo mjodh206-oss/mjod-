@@ -31,12 +31,15 @@ jobs:
           class CheckHTML(HTMLParser): pass
           html = open('index.html', encoding='utf-8').read()
           styles = open('styles.css', encoding='utf-8').read()
+          app = open('app.js', encoding='utf-8').read()
           CheckHTML().feed(html)
           assert 'class="launch-splash"' in html, 'Animated QNC launch screen is missing'
-          assert 'class="brand-icon"' not in html, 'Redundant page-header logo should stay removed'
-          assert '@keyframes monogramDraw' in styles and '@keyframes splashExit' in styles, 'Launch animation is incomplete'
+          assert 'class="brand-icon"' not in html and 'class="welcome-row"' not in html, 'Redundant top section should stay removed'
+          assert html.index('<section class="balance-card"') < html.index('<section class="stats-grid"'), 'Dashboard should start at current balance'
+          assert '@keyframes monogramDraw' in styles and 'html.app-ready .launch-splash' in styles, 'Launch animation is incomplete'
+          assert "classList.add('app-ready')" in app, 'Launch screen must wait for the app to finish loading'
           assert 'class="privacy-badge"' not in html, 'Removed privacy badge should stay absent'
-          print('Metadata, markup, and launch-screen validation passed')
+          print('Metadata, markup, launch-screen, and balance-first checks passed')
           PY
 
       - name: Install Java
@@ -116,7 +119,7 @@ jobs:
         if: steps.lint.outcome == 'success'
         uses: softprops/action-gh-release@v3.0.4
         with:
-          tag_name: android-v1.0.14
-          name: QNC للأندرويد — 1.0.14
+          tag_name: android-v1.0.15
+          name: QNC للأندرويد — 1.0.15
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/app-debug.apk
