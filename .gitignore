@@ -1,0 +1,3 @@
+android/output/
+*.keystore
+*.jks

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b101a"><meta name="description" content="ريموت ذكي لتنظيم أجهزتك وغرفك في مكان واحد">
+  <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <title>ريموتي | بيتك بلمسة</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="#home" class="brand"><span class="brand-mark"><i data-icon="signal"></i></span><span><strong>ريموتي<span class="brand-dot">.</span></strong><small>تحكّم أذكى، حياة أسهل</small></span></a>
+    <div class="nav-label">القائمة الرئيسية</div>
+    <nav class="nav">
+      <button class="nav-item active" data-nav="home"><i data-icon="home"></i><span>الرئيسية</span><b></b></button>
+      <button class="nav-item" data-nav="devices"><i data-icon="grid"></i><span>أجهزتي</span></button>
+      <button class="nav-item" data-nav="rooms"><i data-icon="door"></i><span>الغرف</span></button>
+      <button class="nav-item" data-nav="favorites"><i data-icon="heart"></i><span>المفضلة</span></button>
+    </nav>
+    <div class="nav-label second">عام</div>
+    <nav class="nav"><button class="nav-item" data-nav="settings"><i data-icon="settings"></i><span>الإعدادات</span></button></nav>
+    <div class="sidebar-bottom"><div class="sidebar-art"><i data-icon="sparkles"></i></div><strong>كل أجهزتك، مكان واحد</strong><p>تجربة تحكّم أبسط لكل تفاصيل بيتك.</p><button class="side-button" data-action="discover">ابدأ الاكتشاف <span>←</span></button></div>
+    <div class="credit">صُنع بكل <span>♥</span> بواسطة <strong>أمجد حبيب</strong></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="mobile-brand"><span class="brand-mark"><i data-icon="signal"></i></span><strong>ريموتي<span class="brand-dot">.</span></strong></div><div class="top-title">لوحة التحكم <span>/</span> <b id="breadcrumb">الرئيسية</b></div><div class="top-actions"><span class="demo-pill"><span></span> وضع التجربة</span><button class="icon-button" data-action="settings" aria-label="الإعدادات"><i data-icon="settings"></i></button><span class="avatar">أ</span></div></header>
+    <div class="content" id="content"></div>
+    <footer>صُمم بحب لتجربة أسهل <span>✦</span> تطوير وتنفيذ أمجد حبيب <span class="footer-left">ريموتي © 2026</span></footer>
+  </main>
+</div>
+<nav class="mobile-nav"><button data-nav="home" class="active"><i data-icon="home"></i><span>الرئيسية</span></button><button data-nav="devices"><i data-icon="grid"></i><span>أجهزتي</span></button><button data-nav="rooms"><i data-icon="door"></i><span>الغرف</span></button><button data-nav="favorites"><i data-icon="heart"></i><span>المفضلة</span></button></nav>
+<div id="modal-root"></div><div id="toast" role="status"></div>
+<script src="app.js"></script><script src="android.js"></script>
+</body></html>
