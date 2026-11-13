@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">QnS</string>
+    <string name="title_activity_main">QnS</string>
+    <string name="package_name">com.amjadhabib.qns</string>
+    <string name="custom_url_scheme">com.amjadhabib.qns</string>
+</resources>

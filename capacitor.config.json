@@ -1,0 +1,16 @@
+{
+  "appId": "com.amjadhabib.qns",
+  "appName": "QnS",
+  "webDir": "www",
+  "backgroundColor": "#0A1430",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0A1430"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_qns",
+      "iconColor": "#D4AF37"
+    }
+  }
+}

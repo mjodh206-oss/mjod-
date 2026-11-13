@@ -1,0 +1,53 @@
+name: Build QnS APK
+
+on:
+  push:
+    branches: ["**"]
+    paths-ignore: ["README.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install & test
+        run: |
+          npm ci
+          npm test
+      - name: Sync web assets
+        run: npx cap sync android
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          cp app/build/outputs/apk/release/app-release.apk ../QnS.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QnS-apk
+          path: QnS.apk
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v1.0.${{ github.run_number }}"
+          gh release create "$TAG" QnS.apk --target "${{ github.sha }}" \
+            --title "QnS $TAG" \
+            --notes "تطبيق QnS لإدارة الإيداع والسحب — تطوير وتنفيذ: أمجد حبيب. حمّل ملف QnS.apk وثبّته على هاتف أندرويد."
