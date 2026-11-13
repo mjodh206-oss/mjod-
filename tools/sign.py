@@ -155,13 +155,18 @@ def build_v2v3(content, cd, eocd_orig, eocd_final, cert_der, key_path, min_sdk=2
 
 # ───────────────────────── v1 (JAR) ─────────────────────────
 
+def _aligned_extra(offset, name_len, target_align=4):
+    # حساب عدد بايتات الحشو في حقل extra بحيث تبدأ البيانات على مضاعف target_align
+    need = (target_align - ((offset + 30 + name_len) % target_align)) % target_align
+    return b"\x00" * need
+
 def v1_sign(src_apk, key_path, cert_path, out_apk):
     with zipfile.ZipFile(src_apk, "r") as zin:
-        entries = [(i.filename, zin.read(i.filename)) for i in zin.infolist()]
+        entries = [(i.filename, i.compress_type, zin.read(i.filename)) for i in zin.infolist()]
 
     # MANIFEST.MF
     sections = []
-    for name, data in entries:
+    for name, _ct, data in entries:
         if name.endswith("/") or name.startswith("META-INF/"):
             continue
         sec = f"Name: {name}\r\nSHA-256-Digest: {base64.b64encode(h256(data)).decode()}\r\n"
@@ -189,11 +194,14 @@ def v1_sign(src_apk, key_path, cert_path, out_apk):
         sf_bytes,
     )
 
-    with zipfile.ZipFile(out_apk, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zout:
-        for name, data in entries:
+    with zipfile.ZipFile(out_apk, "w", compresslevel=9) as zout:
+        for name, compress_type, data in entries:
             zi = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            zi.compress_type = zipfile.ZIP_DEFLATED
+            zi.compress_type = compress_type  # الحفاظ على STORED/DEFLATE كما هي
             zi.external_attr = 0o644 << 16
+            if compress_type == zipfile.ZIP_STORED:
+                offset = zout.fp.tell()
+                zi.extra = _aligned_extra(offset, len(name.encode("utf-8")), 4)
             zout.writestr(zi, data)
         for name, data in (("META-INF/MANIFEST.MF", manifest_bytes),
                            ("META-INF/CERT.SF", sf_bytes),
