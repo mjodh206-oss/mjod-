@@ -39,7 +39,11 @@ jobs:
           assert '@keyframes monogramDraw' in styles and 'html.app-ready .launch-splash' in styles, 'Launch animation is incomplete'
           assert "classList.add('app-ready')" in app, 'Launch screen must wait for the app to finish loading'
           assert 'min-height: 100dvh' in styles and '@keyframes introRise' not in styles, 'Responsive layout should use the visible viewport without sliding dashboard sections'
-          assert 'margin-top: auto' in styles and 'Noto Sans Arabic' in styles, 'Polished full-height Arabic dashboard styles are missing'
+          assert 'width: min(100%, 560px)' in styles and 'min-height: 153px' in styles, 'Compact responsive dashboard proportions are missing'
+          assert '.filter-tabs[hidden] { display: none; }' in styles, 'Collapsed transaction filters should stay hidden'
+          assert 'emptyTitle' in html and 'aria-expanded' in html, 'Accessible empty and filter states are missing'
+          assert 'margin-top: auto' not in styles and 'Noto Sans Arabic' in styles, 'Compact Arabic dashboard should not pin the footer below a large blank area'
+          assert "versionName '1.0.18'" in open('android/app/build.gradle', encoding='utf-8').read(), 'Android app version is not updated'
           assert 'class="privacy-badge"' not in html, 'Removed privacy badge should stay absent'
           print('Metadata, markup, launch-screen, and balance-first checks passed')
           PY
@@ -122,7 +126,7 @@ jobs:
         if: steps.lint.outcome == 'success'
         uses: softprops/action-gh-release@v3.0.4
         with:
-          tag_name: android-v1.0.17
-          name: QNC للأندرويد — 1.0.17
+          tag_name: android-v1.0.18
+          name: QNC للأندرويد — 1.0.18
           generate_release_notes: true
           files: android/app/build/outputs/apk/debug/app-debug.apk

@@ -21,36 +21,60 @@
     </div>
     <span class="launch-wordmark">QNC</span>
   </div>
+
   <main class="app-shell">
     <header class="topbar">
-      <button id="installButton" class="install-button" type="button" hidden><span>＋</span> تثبيت التطبيق</button>
+      <button id="installButton" class="install-button" type="button" hidden><span aria-hidden="true">＋</span> تثبيت التطبيق</button>
     </header>
 
     <section class="balance-card" aria-label="ملخص المحفظة">
-      <div class="balance-top"><span class="balance-label">الرصيد الحالي</span><span class="currency-pill"><span class="currency-dot"></span> ليرة سورية <b>ل.س</b></span></div>
+      <div class="balance-top">
+        <span class="balance-label"><span class="balance-indicator" aria-hidden="true"></span> الرصيد الحالي</span>
+        <span class="currency-pill"><span class="currency-dot" aria-hidden="true"></span> ليرة سورية <b>ل.س</b></span>
+      </div>
       <div class="balance-amount" id="balanceAmount">0 <span>ل.س</span></div>
-      <div class="balance-footer"><span class="balance-caption"><span class="balance-dot"></span> صافي الرصيد في محفظتك</span><span class="balance-decoration">QNC <span aria-hidden="true">✦</span></span></div>
+      <div class="balance-footer"><span class="balance-caption">صافي الرصيد في محفظتك</span><span class="balance-decoration">QNC <span aria-hidden="true">✦</span></span></div>
     </section>
 
     <section class="stats-grid" aria-label="إجمالي الحركات">
-      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol in">＋</span><span>إجمالي الإيداعات</span></div><strong id="incomeAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المضافة</span></article>
-      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol out">−</span><span>إجمالي السحوبات</span></div><strong id="expenseAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المسحوبة</span></article>
+      <article class="stat-card income-card">
+        <div class="stat-heading"><span class="stat-symbol in" aria-hidden="true">＋</span><span>إجمالي الإيداعات</span></div>
+        <strong id="incomeAmount">0 <small>ل.س</small></strong>
+        <span class="stat-note">المبالغ المضافة</span>
+      </article>
+      <article class="stat-card expense-card">
+        <div class="stat-heading"><span class="stat-symbol out" aria-hidden="true">−</span><span>إجمالي السحوبات</span></div>
+        <strong id="expenseAmount">0 <small>ل.س</small></strong>
+        <span class="stat-note">المبالغ المسحوبة</span>
+      </article>
     </section>
 
     <section class="actions" aria-label="إدارة الرصيد">
-      <button class="action-button deposit-button" id="depositButton" type="button"><span class="action-icon">＋</span><span><strong>إضافة إيداع</strong><small>تسجيل مبلغ جديد</small></span></button>
-      <button class="action-button withdraw-button" id="withdrawButton" type="button"><span class="action-icon">−</span><span><strong>تسجيل سحب</strong><small>تسجيل مبلغ مسحوب</small></span></button>
+      <button class="action-button deposit-button" id="depositButton" type="button"><span class="action-icon" aria-hidden="true">＋</span><span class="action-copy"><strong>إضافة إيداع</strong><small>تسجيل مبلغ جديد</small></span><span class="action-arrow" aria-hidden="true">↗</span></button>
+      <button class="action-button withdraw-button" id="withdrawButton" type="button"><span class="action-icon" aria-hidden="true">−</span><span class="action-copy"><strong>تسجيل سحب</strong><small>خصم من الرصيد</small></span><span class="action-arrow" aria-hidden="true">↙</span></button>
     </section>
 
-    <section class="transactions-section">
-      <div class="section-heading"><div><h2>سجل المعاملات</h2><p id="transactionCount">سجّل أول معاملة للبدء</p></div><button class="filter-button" id="filterButton" type="button" aria-label="تصفية المعاملات" title="تصفية"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button></div>
+    <section class="transactions-section" aria-labelledby="transactionsTitle">
+      <div class="section-heading">
+        <div><h2 id="transactionsTitle">سجل المعاملات</h2><p id="transactionCount">ابدأ بتسجيل أول حركة</p></div>
+        <button class="filter-button" id="filterButton" type="button" aria-label="إظهار خيارات التصفية" aria-expanded="false" aria-controls="filterTabs" title="تصفية المعاملات">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
+        </button>
+      </div>
       <div class="filter-tabs" id="filterTabs" hidden>
-        <button class="filter-tab active" data-filter="all" type="button">الكل</button><button class="filter-tab" data-filter="deposit" type="button">الإيداعات</button><button class="filter-tab" data-filter="withdraw" type="button">السحوبات</button>
+        <button class="filter-tab active" data-filter="all" type="button" aria-pressed="true">الكل</button>
+        <button class="filter-tab" data-filter="deposit" type="button" aria-pressed="false">الإيداعات</button>
+        <button class="filter-tab" data-filter="withdraw" type="button" aria-pressed="false">السحوبات</button>
       </div>
       <div class="transaction-list" id="transactionList"></div>
-      <div class="empty-state" id="emptyState"><span class="empty-icon">✦</span><strong>ابدأ بإدارة محفظتك</strong><p>أضف أول إيداع لمتابعة رصيدك ومعاملاتك بسهولة.</p><button id="emptyDepositButton" type="button">＋ إضافة أول إيداع</button></div>
+      <div class="empty-state" id="emptyState">
+        <span class="empty-icon" aria-hidden="true">✦</span>
+        <div class="empty-copy"><strong id="emptyTitle">ابدأ بإدارة محفظتك</strong><p id="emptyDescription">سجّل إيداعك الأول لتتابع رصيدك وحركاتك في مكان واحد.</p></div>
+        <button id="emptyDepositButton" type="button"><span aria-hidden="true">＋</span> إضافة أول إيداع</button>
+      </div>
     </section>
-    <footer>QNC <span>•</span> تم تطوير وتنفيذ هذا التطبيق بواسطة أمجد حبيب</footer>
+
+    <footer>تم تطوير وتنفيذ هذا التطبيق بواسطة أمجد حبيب</footer>
   </main>
 
   <div class="modal-backdrop" id="modalBackdrop" hidden>
