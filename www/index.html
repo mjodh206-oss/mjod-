@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" data-mood="warm">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#120914" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -92,6 +92,22 @@
     <main class="main-content" id="mainContent">
       <!-- TAB 1: الليلة (Home) -->
       <section class="tab-panel is-active" data-tab-panel="home">
+        <section class="simple-start" aria-label="ابدأ السهرة">
+          <div class="simple-start-content">
+            <span class="simple-kicker">سهرة إلكم أنتم الاثنين ✨</span>
+            <h1>خلّوا الليلة أقرب ❤️</h1>
+            <p>اختاروا سؤالاً أو تحدّياً.. والباقي عليكم.</p>
+            <button type="button" class="btn btn-primary btn-block simple-main-btn" data-open-feature="quick-question">💌 ابدأوا بسؤال رومانسي</button>
+            <button type="button" class="btn btn-glass btn-block simple-main-btn" data-open-feature="quick-dare">❤️‍🔥 فاجئني بتحدٍّ جريء</button>
+            <p class="simple-consent">كل سؤال وتحدٍّ اختياري وبراحة الطرفين.</p>
+          </div>
+        </section>
+        <div class="simple-shortcuts">
+          <button type="button" class="simple-shortcut" data-open-feature="music">🎶 موسيقى</button>
+          <button type="button" class="simple-shortcut" data-open-feature="ready-nights">🕯️ أفكار سهرة</button>
+          <button type="button" class="simple-shortcut" data-open-feature="reminder">⏰ تذكير</button>
+        </div>
+        <details class="more-options"><summary>✨ المزيد من الألعاب والإعدادات <span>⌄</span></summary>
         <!-- Hero Countdown & Evening Ambiance Card -->
         <article class="hero-card">
           <div class="hero-bg" style="background-image: url('img/hero-ambiance.jpg');"></div>
@@ -305,6 +321,7 @@
             </button>
           </div>
         </section>
+        </details>
       </section>
 
       <!-- TAB 2: تحديات وألعاب -->
