@@ -179,6 +179,70 @@ def v1_sign(src_apk, key_path, cert_path, out_apk):
             zi.external_attr = 0o644 << 16
             zout.writestr(zi, data)
 
+
+# ───────────────────────── v1 التحقق ─────────────────────────
+
+def verify_v1(apk_path, key_dir):
+    with zipfile.ZipFile(apk_path, "r") as z:
+        bad = z.testzip()
+        assert bad is None, f"CRC mismatch in entry: {bad}"
+        names = z.namelist()
+        cert_pem = os.path.join(key_dir, "cert.pem")
+        manifest = z.read("META-INF/MANIFEST.MF").decode("utf-8")
+        sf = z.read("META-INF/CERT.SF").decode("utf-8")
+        rsa = z.read("META-INF/CERT.RSA")
+
+    def sections(text):
+        # يفصل أقسام JAR بالأسطر الفارغة، يعيد (name, raw_section_bytes)
+        out = {}
+        raw = text
+        for chunk in raw.split("\r\n\r\n"):
+            chunk = chunk.strip("\r\n")
+            if not chunk or not chunk.startswith("Name: "):
+                continue
+            sec_bytes = (chunk + "\r\n").encode("utf-8")
+            name = chunk.split("Name: ", 1)[1].splitlines()[0].strip()
+            out[name] = sec_bytes
+        return out
+
+    ok = True
+    man_sections = sections(manifest)
+    sf_sections = sections(sf)
+    with zipfile.ZipFile(apk_path, "r") as z:
+        for name, data in ((i.filename, z.read(i.filename)) for i in z.infolist()):
+            if name.startswith("META-INF/") or name.endswith("/"):
+                continue
+            entry_ok = base64.b64encode(h256(data)).decode() == _digest_of(man_sections.get(name), "SHA-256-Digest:")
+            print(f"  v1 manifest {name}: {'✓' if entry_ok else '✗ FAIL'}")
+            ok = ok and entry_ok
+    for name, sec_bytes in man_sections.items():
+        sf_ok = base64.b64encode(h256(sec_bytes)).decode() == _digest_of(sf_sections.get(name), "SHA-256-Digest:")
+        if not sf_ok:
+            print(f"  v1 SF {name}: ✗ FAIL")
+            ok = False
+    man_digest_ok = base64.b64encode(h256(manifest.encode("utf-8"))).decode() in sf
+    print(f"  v1 SF manifest digest: {'✓' if man_digest_ok else '✗ FAIL'}")
+    ok = ok and man_digest_ok
+
+    # التحقق من توقيع PKCS#7 عبر openssl
+    with open("/tmp/_cert.sf", "wb") as f: f.write(sf.encode("utf-8"))
+    with open("/tmp/_cert.rsa", "wb") as f: f.write(rsa)
+    r = subprocess.run(
+        ["openssl", "smime", "-verify", "-binary", "-inform", "DER", "-in", "/tmp/_cert.rsa",
+         "-content", "/tmp/_cert.sf", "-noverify", "-out", "/dev/null"],
+        capture_output=True)
+    smime_ok = r.returncode == 0
+    print(f"  v1 PKCS#7 signature: {'✓ VALID' if smime_ok else '✗ FAIL: ' + r.stderr.decode('utf-8', 'ignore')[:200]}")
+    return ok and smime_ok
+
+def _digest_of(section_bytes, key):
+    if not section_bytes:
+        return None
+    for line in section_bytes.decode("utf-8").splitlines():
+        if line.startswith(key):
+            return line.split(": ", 1)[1].strip()
+    return None
+
 # ───────────────────────── v2/v3 إدخال ─────────────────────────
 
 def v23_sign(src_apk, key_path, cert_der, out_apk, min_sdk=21, max_sdk=0xFFFFFFFF):
@@ -317,9 +381,11 @@ def main():
     print("2/3 — توقيع v2 + v3 (APK Signing Block)…")
     v23_sign(tmp_v1, key_path, cert_der, dst, min_sdk=21)
     os.remove(tmp_v1)
-    print("3/3 — التحقق المستقل من التوقيعين…")
+    print("3/4 — التحقق المستقل من v1…")
+    ok_v1 = verify_v1(dst, key_dir)
+    print("4/4 — التحقق المستقل من v2 + v3…")
     ok = verify(dst, key_dir)
-    if not ok:
+    if not (ok and ok_v1):
         print("❌ فشل التحقق — لا تستخدم هذا الملف")
         sys.exit(2)
     print(f"✅ تم: {dst} ({os.path.getsize(dst) / 1048576:.2f} MB)")
