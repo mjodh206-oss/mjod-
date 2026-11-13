@@ -30,8 +30,8 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .app-shell { width: min(100%, 760px); margin: 0 auto; padding: 28px 30px 18px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; }
 .brand { display: inline-flex; align-items: center; gap: 11px; color: inherit; text-decoration: none; }
-.brand-icon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 14px; background: var(--blue); color: #fff; box-shadow: 0 5px 12px #1949bd25; }
-.brand-icon svg { width: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.brand-icon { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid #ffffff25; border-radius: 14px; background: linear-gradient(145deg, #2c63e3, #163b93); color: #fff; box-shadow: 0 5px 12px #1949bd25; }
+.brand-icon svg { width: 36px; fill: none; stroke: currentColor; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
 .brand strong, .brand small { display: block; }
 .brand strong { font-size: 19px; font-weight: 750; letter-spacing: .2px; line-height: 1.25; }
 .brand small { margin-top: 3px; color: var(--muted); font-size: 12px; }
@@ -41,8 +41,6 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .eyebrow { margin: 0 0 5px; color: var(--blue); font-size: 12px; font-weight: 700; }
 .welcome-row h1 { margin: 0; font-size: 27px; font-weight: 720; letter-spacing: -.4px; line-height: 1.35; }
 .welcome-sub { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
-.privacy-badge { flex: none; margin-bottom: 3px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 30px; background: #ffffffb8; color: #526078; font-size: 11px; }
-.privacy-dot { display: inline-block; width: 7px; height: 7px; margin-left: 5px; border-radius: 50%; background: #34a36b; vertical-align: 1px; }
 .balance-card { position: relative; overflow: hidden; min-height: 184px; padding: 23px 25px 18px; border: 1px solid #ffffff30; border-radius: 20px; background: linear-gradient(118deg, #142b54 0%, #1b438f 55%, #275bc0 100%); box-shadow: 0 13px 28px #16387422; color: #fff; }
 .balance-card::after { position: absolute; top: -105px; left: -59px; width: 205px; height: 205px; border: 1px solid #ffffff19; border-radius: 50%; box-shadow: 0 0 0 20px #ffffff08, 0 0 0 42px #ffffff05; content: ""; pointer-events: none; }
 .balance-top, .balance-footer { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -158,4 +156,20 @@ footer span { margin: 0 4px; color: #b5bfce; }
   .transaction-value { font-size: 11px; }
   .transaction-date { font-size: 9px; }
 }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+/* Subtle first-open motion: staged content, a quick brand reveal, and one balance-card sheen. */
+.topbar { animation: introRise .58s cubic-bezier(.2,.75,.25,1) both; }
+.brand-icon { animation: brandReveal .72s cubic-bezier(.18,.85,.24,1.25) both; }
+.welcome-row { animation: introRise .58s .06s cubic-bezier(.2,.75,.25,1) both; }
+.balance-card { isolation: isolate; animation: balanceReveal .78s .12s cubic-bezier(.2,.8,.2,1) both; }
+.balance-card::before { position: absolute; z-index: 0; top: -35%; bottom: -35%; left: -60%; width: 38%; transform: skewX(-18deg); background: linear-gradient(90deg, transparent, #ffffff22, transparent); content: ""; pointer-events: none; animation: cardSheen 1.35s .48s ease-out both; }
+.balance-card::after { animation: haloDrift 7s 1.1s ease-in-out infinite alternate; }
+.stats-grid { animation: introRise .58s .22s cubic-bezier(.2,.75,.25,1) both; }
+.actions { animation: introRise .58s .3s cubic-bezier(.2,.75,.25,1) both; }
+.transactions-section { animation: introRise .58s .38s cubic-bezier(.2,.75,.25,1) both; }
+footer { animation: introRise .58s .46s cubic-bezier(.2,.75,.25,1) both; }
+@keyframes introRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes brandReveal { from { opacity: 0; transform: scale(.72) rotate(-9deg); } 75% { opacity: 1; transform: scale(1.07) rotate(2deg); } to { transform: scale(1) rotate(0); } }
+@keyframes balanceReveal { from { opacity: 0; transform: translateY(20px) scale(.975); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes cardSheen { from { left: -60%; opacity: 0; } 20% { opacity: 1; } to { left: 125%; opacity: 0; } }
+@keyframes haloDrift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-13px, 8px, 0); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
