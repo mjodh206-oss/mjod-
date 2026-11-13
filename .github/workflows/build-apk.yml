@@ -46,8 +46,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view sahrat-alkhamis-v1.1.0 >/dev/null 2>&1; then
+          if gh release view sahrat-alkhamis-v1.2.0 >/dev/null 2>&1; then
             echo "Release already exists; refusing to replace it with a differently signed APK."
             exit 1
           fi
-          gh release create sahrat-alkhamis-v1.1.0 SahratAlKhamis.apk --target "$GITHUB_SHA" --title 'سهرة الخميس — قمة الشغف 1.1.0' --notes 'نسخة قمة الشغف بأسئلة وتحديات جديدة. تُثبّت كتطبيق منفصل عن النسخة الأولى ولا تنقل بياناتها.'
+          gh release create sahrat-alkhamis-v1.2.0 SahratAlKhamis.apk --target "$GITHUB_SHA" --title 'سهرة الخميس — حديث القلوب 1.2.0' --notes 'نسخة حديث القلوب بأسئلة رومانسية جديدة. تُثبّت بشكل منفصل عن النسخ السابقة ولا تنقل بياناتها.'
