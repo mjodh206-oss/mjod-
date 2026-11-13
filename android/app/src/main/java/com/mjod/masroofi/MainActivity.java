@@ -88,13 +88,15 @@ public class MainActivity extends Activity {
             });
             webView.requestApplyInsets();
         }
-        webView.loadUrl("https://" + APP_ASSET_HOST + "/index.html");
+        webView.loadUrl("https://" + APP_ASSET_HOST + "/www/index.html");
     }
 
     private static boolean isTrustedAppUrl(Uri uri) {
         return "https".equals(uri.getScheme())
                 && APP_ASSET_HOST.equals(uri.getHost())
-                && (uri.getPort() == -1 || uri.getPort() == 443);
+                && (uri.getPort() == -1 || uri.getPort() == 443)
+                && uri.getPath() != null
+                && uri.getPath().startsWith("/www/");
     }
 
     @Override

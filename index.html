@@ -3,63 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f7f9fc" />
-  <meta name="description" content="محفظة شخصية بسيطة لتسجيل المصاري ومتابعة الرصيد بالليرة السورية." />
+  <meta name="theme-color" content="#f4f6fa" />
+  <meta name="description" content="QNC محفظة شخصية لإدارة الرصيد وتسجيل الإيداعات والسحوبات بالليرة السورية." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
-  <title>QNC — محفظتك اليومية</title>
+  <title>QNC — محفظتك المالية</title>
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <a class="brand" href="#" aria-label="QNC، الصفحة الرئيسية">
         <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H20v14H6.5A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 8h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4M15.5 12h.01"/></svg></span>
-        <span><strong>QNC</strong><small>محفظتك اليومية</small></span>
+        <span><strong>QNC</strong><small>محفظتك المالية</small></span>
       </a>
-      <button id="installButton" class="install-button" hidden><span>＋</span> ثبّت التطبيق</button>
+      <button id="installButton" class="install-button" type="button" hidden><span>＋</span> تثبيت التطبيق</button>
     </header>
 
     <section class="welcome-row">
-      <div><p class="eyebrow" id="todayLabel">محفظتك الشخصية</p><h1>أهلاً فيك 👋</h1><p class="welcome-sub">كل مصرياتك بمكان واحد، بكل بساطة.</p></div>
-      <div class="privacy-badge"><span class="privacy-dot"></span> بياناتك على جهازك</div>
+      <div><p class="eyebrow" id="todayLabel">محفظتك الشخصية</p><h1>مرحباً بك في QNC</h1><p class="welcome-sub">إدارة واضحة لأموالك، في مكان واحد.</p></div>
+      <div class="privacy-badge"><span class="privacy-dot"></span> بياناتك محفوظة على جهازك</div>
     </section>
 
     <section class="balance-card" aria-label="ملخص المحفظة">
       <div class="balance-top"><span class="balance-label"><span class="balance-icon" aria-hidden="true">▣</span><span>الرصيد الحالي</span></span><span class="currency-pill"><span class="currency-dot"></span> ليرة سورية <b>ل.س</b></span></div>
-      <div class="balance-amount" id="balanceAmount">٠ <span>ل.س</span></div>
-      <div class="balance-footer"><span class="balance-caption"><span class="balance-dot"></span> هذا اللي صافي معك هلأ</span><span class="balance-decoration">QNC <span aria-hidden="true">✦</span></span></div>
+      <div class="balance-amount" id="balanceAmount">0 <span>ل.س</span></div>
+      <div class="balance-footer"><span class="balance-caption"><span class="balance-dot"></span> صافي الرصيد في محفظتك</span><span class="balance-decoration">QNC <span aria-hidden="true">✦</span></span></div>
     </section>
 
     <section class="stats-grid" aria-label="إجمالي الحركات">
-      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol in">↓</span><span>مجموع اللي حطيته</span></div><strong id="incomeAmount">٠ <small>ل.س</small></strong><span class="stat-note">كل الإيداعات</span></article>
-      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol out">↑</span><span>مجموع اللي سحبته</span></div><strong id="expenseAmount">٠ <small>ل.س</small></strong><span class="stat-note">كل المسحوبات</span></article>
+      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol in">↓</span><span>إجمالي الإيداعات</span></div><strong id="incomeAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المضافة</span></article>
+      <article class="stat-card"><div class="stat-heading"><span class="stat-symbol out">↑</span><span>إجمالي السحوبات</span></div><strong id="expenseAmount">0 <small>ل.س</small></strong><span class="stat-note">مجموع المبالغ المسحوبة</span></article>
     </section>
 
-    <section class="actions" aria-label="إضافة حركة">
-      <button class="action-button deposit-button" id="depositButton"><span class="action-icon">＋</span><span><strong>حط مصاري</strong><small>سجّل إيداع جديد</small></span></button>
-      <button class="action-button withdraw-button" id="withdrawButton"><span class="action-icon">−</span><span><strong>اسحب دفعة</strong><small>سجّل مبلغ مسحوب</small></span></button>
+    <section class="actions" aria-label="إدارة الرصيد">
+      <button class="action-button deposit-button" id="depositButton" type="button"><span class="action-icon">＋</span><span><strong>إضافة إيداع</strong><small>تسجيل مبلغ جديد</small></span></button>
+      <button class="action-button withdraw-button" id="withdrawButton" type="button"><span class="action-icon">−</span><span><strong>تسجيل سحب</strong><small>تسجيل مبلغ مسحوب</small></span></button>
     </section>
 
     <section class="transactions-section">
-      <div class="section-heading"><div><h2>آخر الحركات</h2><p id="transactionCount">سجّل أول حركة بمحفظتك</p></div><button class="filter-button" id="filterButton" aria-label="تصفية الحركات" title="تصفية">☷</button></div>
+      <div class="section-heading"><div><h2>سجل المعاملات</h2><p id="transactionCount">سجّل أول معاملة للبدء</p></div><button class="filter-button" id="filterButton" type="button" aria-label="تصفية المعاملات" title="تصفية">☷</button></div>
       <div class="filter-tabs" id="filterTabs" hidden>
-        <button class="filter-tab active" data-filter="all">الكل</button><button class="filter-tab" data-filter="deposit">الإيداعات</button><button class="filter-tab" data-filter="withdraw">المسحوبات</button>
+        <button class="filter-tab active" data-filter="all" type="button">الكل</button><button class="filter-tab" data-filter="deposit" type="button">الإيداعات</button><button class="filter-tab" data-filter="withdraw" type="button">السحوبات</button>
       </div>
       <div class="transaction-list" id="transactionList"></div>
-      <div class="empty-state" id="emptyState"><span class="empty-icon">✦</span><strong>محفظتك جاهزة!</strong><p>ضيف أول إيداع، وخلي QNC يحسبلك قديش صار معك.</p><button id="emptyDepositButton">＋ حط أول مصاري</button></div>
+      <div class="empty-state" id="emptyState"><span class="empty-icon">✦</span><strong>ابدأ بإدارة محفظتك</strong><p>أضف أول إيداع لمتابعة رصيدك ومعاملاتك بسهولة.</p><button id="emptyDepositButton" type="button">＋ إضافة أول إيداع</button></div>
     </section>
     <footer>QNC <span>•</span> تم تطوير وتنفيذ هذا التطبيق بواسطة أمجد حبيب</footer>
   </main>
 
   <div class="modal-backdrop" id="modalBackdrop" hidden>
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button class="modal-close" id="closeModal" aria-label="إغلاق">×</button>
-      <div class="modal-mark" id="modalMark">＋</div><p class="modal-kicker" id="modalKicker">إيداع جديد</p><h2 id="modalTitle">حط مصاري</h2><p class="modal-subtitle" id="modalSubtitle">قديش حابب تضيف على محفظتك؟</p>
+      <button class="modal-close" id="closeModal" type="button" aria-label="إغلاق">×</button>
+      <div class="modal-mark" id="modalMark">＋</div><p class="modal-kicker" id="modalKicker">إيداع جديد</p><h2 id="modalTitle">إضافة إيداع</h2><p class="modal-subtitle" id="modalSubtitle">أدخل المبلغ المراد إضافته إلى محفظتك.</p>
       <form id="transactionForm">
         <label for="amountInput">المبلغ <span>(ليرة سورية)</span></label>
-        <div class="amount-field"><input id="amountInput" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="مثلاً ٥٠٬٠٠٠" required /><span>ل.س</span></div>
-        <label for="noteInput">ملاحظة <span>(اختياري)</span></label><input class="note-field" id="noteInput" name="note" type="text" maxlength="80" placeholder="مثلاً: راتب، مشتريات..." />
+        <div class="amount-field"><input id="amountInput" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="مثال: 50000" required /><span>ل.س</span></div>
+        <label for="noteInput">ملاحظة <span>(اختيارية)</span></label><input class="note-field" id="noteInput" name="note" type="text" maxlength="80" placeholder="مثال: راتب، مشتريات" />
         <p class="form-error" id="formError" role="alert"></p>
         <button class="submit-button" id="submitButton" type="submit">تأكيد الإيداع</button>
       </form>
@@ -68,9 +68,9 @@
   <div class="modal-backdrop" id="deleteConfirmBackdrop" hidden>
     <section class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-describedby="deleteConfirmMessage">
       <div class="confirm-mark" aria-hidden="true">!</div>
-      <h2 id="deleteConfirmTitle">تأكيد الحذف</h2>
-      <p id="deleteConfirmMessage">متأكد بدك تحذف هالحركة؟ رح يتحدّث رصيدك ومجموع الحركات، وما في تراجع عن الحذف.</p>
-      <div class="confirm-actions"><button class="cancel-delete" id="cancelDelete" type="button">إلغاء</button><button class="confirm-delete" id="confirmDelete" type="button">إيه، احذفها</button></div>
+      <h2 id="deleteConfirmTitle">تأكيد حذف المعاملة</h2>
+      <p id="deleteConfirmMessage">هل تريد حذف هذه المعاملة؟ سيُحدّث الرصيد والإجمالي، ولا يمكن التراجع عن الحذف.</p>
+      <div class="confirm-actions"><button class="cancel-delete" id="cancelDelete" type="button">إلغاء</button><button class="confirm-delete" id="confirmDelete" type="button">حذف المعاملة</button></div>
     </section>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
