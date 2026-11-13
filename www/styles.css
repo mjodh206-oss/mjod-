@@ -783,7 +783,7 @@ html.app-ready .launch-splash {
 .bottom-nav {
   height: var(--nav-height);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   background: rgba(18, 8, 22, 0.96);
   border-top: 1px solid rgba(245, 202, 134, 0.14);
   backdrop-filter: blur(16px);
@@ -1389,3 +1389,5 @@ input[type="range"] {
 /* Simplified first screen: begin in one tap; other features remain available. */
 .simple-start {position:relative;overflow:hidden;border-radius:24px;min-height:320px;border:1px solid rgba(245,202,134,.3);background:linear-gradient(0deg,rgba(22,8,25,.96) 7%,rgba(28,9,25,.78) 50%,rgba(29,10,24,.48)),url('img/hero-ambiance.jpg') center/cover;box-shadow:0 15px 35px rgba(0,0,0,.4);margin-bottom:12px}
 .simple-start-content{padding:27px 19px 18px;text-align:center}.simple-kicker{display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(26,10,26,.7);border:1px solid rgba(245,202,134,.25);font-size:.8rem;color:var(--gold-soft)}.simple-start h1{font:700 1.9rem var(--font-display);color:#fff0df;line-height:1.35;margin:14px 0 3px}.simple-start p{color:#e7d0d5;margin:0 0 15px;font-size:.95rem}.simple-start .simple-consent{font-size:.75rem;color:#d9bec7;margin:12px 0 0}.simple-main-btn{margin:9px 0;min-height:51px;font-size:1rem}.simple-shortcuts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:15px}.simple-shortcut{border:1px solid var(--mood-border);border-radius:13px;padding:11px 5px;background:var(--bg-card);font-size:.83rem;font-weight:700;cursor:pointer}.more-options>summary{list-style:none;display:flex;justify-content:space-between;padding:14px 16px;background:var(--bg-card);border:1px solid var(--mood-border);border-radius:15px;color:var(--gold-soft);font-weight:700;cursor:pointer}.more-options>summary::-webkit-details-marker{display:none}.more-options[open]>summary{margin-bottom:14px}.quick-stage{margin-top:5px;min-height:245px}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick-actions .btn{width:100%}.quick-subtle{text-align:center;color:var(--text-secondary);font-size:.82rem}.quick-switch{display:flex;justify-content:center;margin:16px 0}
+
+button:focus-visible, summary:focus-visible {outline: 2px solid var(--gold-soft); outline-offset: 3px;}

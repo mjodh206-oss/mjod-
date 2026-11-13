@@ -351,6 +351,17 @@
         <div class="stack-list" id="secretsTabList"></div>
       </section>
 
+      <!-- قائمة مختصرة لبقية الميزات -->
+      <section class="tab-panel" data-tab-panel="more" hidden>
+        <div class="tab-hero-header"><h2>✨ المزيد</h2><p>كل أدوات السهرة بمكان واحد</p></div>
+        <div class="stack-list">
+          <button type="button" class="wide-feature-row" data-nav-tab="games"><span class="wf-icon">🎭</span><span class="wf-body"><strong>ألعاب وأسئلة</strong><p>حقيقة أو جرأة وكروت الخيال</p></span><span class="wf-arrow">←</span></button>
+          <button type="button" class="wide-feature-row" data-nav-tab="secrets"><span class="wf-icon">💌</span><span class="wf-body"><strong>أسرارنا</strong><p>الرسائل والقسائم والألبوم الخاص</p></span><span class="wf-arrow">←</span></button>
+          <button type="button" class="wide-feature-row" data-open-feature="no-phone"><span class="wf-icon">📵</span><span class="wf-body"><strong>وضع لا موبايل</strong><p>وقت خاص لكما بعيداً عن التنبيهات</p></span><span class="wf-arrow">←</span></button>
+          <button type="button" class="wide-feature-row" data-nav-tab="couple"><span class="wf-icon">⏰</span><span class="wf-body"><strong>الأسماء والتذكير</strong><p>تعديل الأسماء وضبط موعد الخميس</p></span><span class="wf-arrow">←</span></button>
+        </div>
+      </section>
+
       <!-- TAB 5: موعدنا والإعدادات -->
       <section class="tab-panel" data-tab-panel="couple" hidden>
         <div class="tab-hero-header">
@@ -377,26 +388,9 @@
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav" aria-label="التنقل الرئيسي">
-      <button type="button" class="nav-item is-active" data-nav-tab="home">
-        <span class="nav-icon">✨</span>
-        <span>الليلة</span>
-      </button>
-      <button type="button" class="nav-item" data-nav-tab="games">
-        <span class="nav-icon">🎭</span>
-        <span>تحديات</span>
-      </button>
-      <button type="button" class="nav-item" data-nav-tab="rituals">
-        <span class="nav-icon">🕯️</span>
-        <span>أجواء</span>
-      </button>
-      <button type="button" class="nav-item" data-nav-tab="secrets">
-        <span class="nav-icon">💌</span>
-        <span>أسرارنا</span>
-      </button>
-      <button type="button" class="nav-item" data-nav-tab="couple">
-        <span class="nav-icon">⏰</span>
-        <span>موعدنا</span>
-      </button>
+      <button type="button" class="nav-item is-active" data-nav-tab="home" aria-current="page"><span class="nav-icon">✨</span><span>الليلة</span></button>
+      <button type="button" class="nav-item" data-nav-tab="rituals"><span class="nav-icon">🕯️</span><span>أجواء</span></button>
+      <button type="button" class="nav-item" data-nav-tab="more"><span class="nav-icon">☰</span><span>المزيد</span></button>
     </nav>
   </div>
 
