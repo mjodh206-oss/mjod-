@@ -36,6 +36,30 @@ def seq_field(items):
 
 def h256(b): return hashlib.sha256(b).digest()
 
+def chunked_sha256(segments):
+    # خوارزمية CHUNKED_SHA256 حسب apksig:
+    # 1) كل مقطع يُقسّم لأجزاء 1MB، هضم كل جزء = SHA256(0xa5 || len-u32le || chunk)
+    # 2) النتيجة = SHA256(0x5a || chunkCount-u32le || concatenation(chunk digests))
+    CHUNK = 1024 * 1024
+    total = sum((len(s) + CHUNK - 1) // CHUNK for s in segments)
+    out = bytearray(b"\x5a" + u32le(total))
+    for seg in segments:
+        off = 0
+        while off < len(seg):
+            chunk = seg[off:off + CHUNK]
+            md = hashlib.sha256()
+            md.update(b"\xa5" + u32le(len(chunk)))
+            md.update(chunk)
+            out += md.digest()
+            off += CHUNK
+    return h256(bytes(out))
+
+def eocd_for_digest(eocd_bytes, cd_offset_value):
+    # EoCD المستخدمة داخل التلخيص تحمل إزاحة CD = نهاية المحتوى (بداية بلوك التوقيع)
+    buf = bytearray(eocd_bytes)
+    struct.pack_into("<I", buf, 16, cd_offset_value)
+    return bytes(buf)
+
 def run_openssl(args, data_in=None):
     r = subprocess.run(["openssl"] + args, input=data_in, capture_output=True)
     if r.returncode != 0:
@@ -90,9 +114,9 @@ def signer_block_sizes(cert_len, pk_len, with_sdk):
     value = 4 + (4 + signer)              # signers: u32le(len(signers-field)) + signer entries... each signer length-prefixed
     return value
 
-def build_v2v3(content, cd, eocd_final, cert_der, key_path, min_sdk=21, max_sdk=0xFFFFFFFF):
-    chunks = (content, cd, eocd_final)
-    digests = [h256(c) for c in chunks]
+def build_v2v3(content, cd, eocd_orig, eocd_final, cert_der, key_path, min_sdk=21, max_sdk=0x7FFFFFFF):
+    eocd_digest = eocd_for_digest(eocd_orig, len(content))
+    digests = [chunked_sha256([content, cd, eocd_digest])]
 
     def build_sd(with_sdk):
         digests_field = seq_field([make_digest_entry(d) for d in digests])
@@ -105,10 +129,10 @@ def build_v2v3(content, cd, eocd_final, cert_der, key_path, min_sdk=21, max_sdk=
     def sign_sd(sd):
         return run_openssl(["dgst", "-sha256", "-sign", key_path], sd)
 
-    def make_value(sd, sig, pk_pkcs1):
+    def make_value(sd, sig, pk_spki):
         sig_item = u32le(ALG_RSA_SHA256) + length_prefixed(sig)
         signatures = seq_field([sig_item])
-        signer = length_prefixed(sd) + length_prefixed(signatures) + length_prefixed(pk_pkcs1)
+        signer = length_prefixed(sd) + length_prefixed(signatures) + length_prefixed(pk_spki)
         return seq_field([signer])
 
     sd2 = build_sd(with_sdk=False)
@@ -116,10 +140,10 @@ def build_v2v3(content, cd, eocd_final, cert_der, key_path, min_sdk=21, max_sdk=
     sig2 = sign_sd(sd2)
     sig3 = sign_sd(sd3)
 
-    pk_pkcs1 = run_openssl(["rsa", "-in", key_path, "-outform", "DER", "-pubout", "-RSAPublicKey_out"])
+    pk_spki = run_openssl(["rsa", "-in", key_path, "-outform", "DER", "-pubout"])
 
-    v2_value = make_value(sd2, sig2, pk_pkcs1)
-    v3_value = make_value(sd3, sig3, pk_pkcs1)
+    v2_value = make_value(sd2, sig2, pk_spki)
+    v3_value = make_value(sd3, sig3, pk_spki)
 
     pair2 = u64le(4 + len(v2_value)) + u32le(SIG_V2) + v2_value
     pair3 = u64le(4 + len(v3_value)) + u32le(SIG_V3) + v3_value
@@ -245,19 +269,19 @@ def _digest_of(section_bytes, key):
 
 # ───────────────────────── v2/v3 إدخال ─────────────────────────
 
-def v23_sign(src_apk, key_path, cert_der, out_apk, min_sdk=21, max_sdk=0xFFFFFFFF):
+def v23_sign(src_apk, key_path, cert_der, out_apk, min_sdk=21, max_sdk=0x7FFFFFFF):
     data = open(src_apk, "rb").read()
     content, cd, eocd, cd_offset, eocd_offset = read_apk_chunks(data)
 
     # المرحلة 1: حساب حجم البلوك بحساب الأبعاد فقط (طول الشهادة والتوقيع ثابتان)
-    pk_pkcs1 = run_openssl(["rsa", "-in", key_path, "-outform", "DER", "-pubout", "-RSAPublicKey_out"])
-    sd2_len = (4 + (3 * (4 + 4 + 4 + 32))) + (4 + (4 + len(cert_der))) + 4  # digests_field + certs_field + additionalAttributes
-    sd3_len = (4 + (3 * (4 + 4 + 4 + 32))) + (4 + (4 + len(cert_der))) + 4 + 4 + 4
+    pk_spki = run_openssl(["rsa", "-in", key_path, "-outform", "DER", "-pubout"])
+    sd2_len = (4 + (1 * (4 + 4 + 4 + 32))) + (4 + (4 + len(cert_der))) + 4  # digests_field + certs_field + additionalAttributes
+    sd3_len = (4 + (1 * (4 + 4 + 4 + 32))) + (4 + (4 + len(cert_der))) + 4 + 4 + 4
     sig_len = 256
 
     def value_len(sd_len):
         sigs_field = 4 + (4 + (4 + 4 + sig_len))
-        signer = 4 + sd_len + 4 + sigs_field + 4 + len(pk_pkcs1)
+        signer = 4 + sd_len + 4 + sigs_field + 4 + len(pk_spki)
         return 4 + (4 + signer)
 
     pair = lambda vid, vlen: 8 + 4 + vlen  # u64le(len) + u32le(id) + value
@@ -268,7 +292,7 @@ def v23_sign(src_apk, key_path, cert_der, out_apk, min_sdk=21, max_sdk=0xFFFFFFF
     # المرحلة 2: التخطيط النهائي + التوقيعات الحقيقية
     new_cd_offset = cd_offset + block_total
     eocd_final = rebuild_eocd(eocd, new_cd_offset)
-    block = build_v2v3(content, cd, eocd_final, cert_der, key_path, min_sdk, max_sdk)
+    block = build_v2v3(content, cd, eocd, eocd_final, cert_der, key_path, min_sdk, max_sdk)
     assert len(block) == block_total, f"block size mismatch: {len(block)} != {block_total} (sd2={sd2_len}, sd3={sd3_len}, pairs={pairs_len})"
 
     with open(out_apk, "wb") as f:
@@ -316,6 +340,11 @@ def verify(apk_path, key_dir):
     pairs_end = cd_offset - 24
     content = data[:block_start]
 
+    # مرجع المفتاح العام بصيغة SPKI (ما يتوقعه apksig: X509EncodedKeySpec)
+    pub_pem = run_openssl(["x509", "-in", os.path.join(key_dir, "cert.pem"), "-pubkey", "-noout"])
+    with open("/tmp/_pub_spki.pem", "wb") as f: f.write(pub_pem)
+    ref_spki = run_openssl(["pkey", "-pubin", "-outform", "DER", "-in", "/tmp/_pub_spki.pem"])
+
     ok = True
     for kind, vid in (("v2", SIG_V2), ("v3", SIG_V3)):
         off = pairs_start
@@ -330,8 +359,12 @@ def verify(apk_path, key_dir):
                 break
         assert found is not None, f"{kind}: block not found"
         digests_b, certs_b, signatures_b, public_key, sd = parse_v2v3_value(found)
-        # إعادة حساب التجزئات
-        exp = [h256(content), h256(cd), h256(eocd)]
+        pk_ok = (public_key == ref_spki)
+        print(f"  {kind}: public_key == cert SPKI: {'✓' if pk_ok else '✗ FAIL (' + str(len(public_key)) + 'B vs ' + str(len(ref_spki) if ref_spki else '?') + 'B)'}")
+        ok = ok and pk_ok
+        # إعادة حساب التجزئات (CHUNKED_SHA256 مع EoCD معدلة)
+        eocd_digest = eocd_for_digest(eocd, block_start)
+        exp = [chunked_sha256([content, cd, eocd_digest])]
         off = 0
         got = []
         while off < len(digests_b):
