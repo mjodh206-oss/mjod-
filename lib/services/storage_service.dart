@@ -193,4 +193,9 @@ class StorageService {
   Future<void> clearAll() async {
     await _safeBox.clear();
   }
+
+  Future<void> close() async {
+    await Hive.close();
+    _box = null;
+  }
 }

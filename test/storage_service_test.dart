@@ -12,12 +12,12 @@ import 'package:rattib/services/storage_service.dart';
 void main() {
   test('StorageService round-trip and JSON backup/restore', () async {
     final tmpDir = Directory.systemTemp.createTempSync('rattib_storage_test_');
-    addTearDown(() {
-      if (tmpDir.existsSync()) tmpDir.deleteSync(recursive: true);
-    });
-
     final storage = StorageService();
     await storage.init(customPath: tmpDir.path);
+    addTearDown(() async {
+      await storage.close();
+      if (tmpDir.existsSync()) tmpDir.deleteSync(recursive: true);
+    });
 
     const profile = SalaryProfile(
       monthlySalary: 2000000,

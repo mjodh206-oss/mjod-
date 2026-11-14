@@ -62,11 +62,12 @@ class _TestNotificationService extends NotificationService {
 
 void main() {
   late Directory tmpDir;
+  late StorageService storage;
   late AppController controller;
 
   setUp(() async {
     tmpDir = Directory.systemTemp.createTempSync('rattib_widget_test_');
-    final storage = StorageService();
+    storage = StorageService();
     await storage.init(customPath: tmpDir.path);
     controller = AppController(
       storage: storage,
@@ -79,7 +80,8 @@ void main() {
     await controller.initialize();
   });
 
-  tearDown(() {
+  tearDown(() async {
+    await storage.close();
     if (tmpDir.existsSync()) tmpDir.deleteSync(recursive: true);
   });
 
@@ -122,67 +124,91 @@ void main() {
     expect(find.text('يعمل بدون إنترنت بالكامل'), findsOneWidget);
   });
 
-  testWidgets('MainShell renders plan and switches tabs cleanly', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1080, 2340);
-    tester.view.devicePixelRatio = 2.5;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
+  testWidgets(
+    'MainShell renders plan and switches tabs cleanly',
+    timeout: const Timeout(Duration(seconds: 45)),
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.5;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
 
-    await controller.saveWizardProfile(
-      const SalaryProfile(
-        monthlySalary: 1500000,
-        currencyCode: 'SYP',
-        isRenting: true,
-        rentAmount: 400000,
-        salaryDay: 1,
-      ),
-    );
+      await tester.runAsync(() async {
+        await controller.saveWizardProfile(
+          const SalaryProfile(
+            monthlySalary: 1500000,
+            currencyCode: 'SYP',
+            isRenting: true,
+            rentAmount: 400000,
+            salaryDay: 1,
+          ),
+        );
+      });
 
-    await tester.pumpWidget(
-      RattibApp(
-        controller: controller,
-        homeOverride: MainShell(controller: controller),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        RattibApp(
+          controller: controller,
+          homeOverride: MainShell(controller: controller),
+        ),
+      );
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 15),
+      );
 
-    expect(find.text('توزيع راتبك الشهري'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('كم ممكن توفر بالسنة؟'),
-      250,
-      scrollable: find.descendant(
-        of: find.byType(PlanScreen),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    expect(find.text('كم ممكن توفر بالسنة؟'), findsOneWidget);
+      expect(find.text('توزيع راتبك الشهري'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('كم ممكن توفر بالسنة؟'),
+        250,
+        scrollable: find.descendant(
+          of: find.byType(PlanScreen),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      expect(find.text('كم ممكن توفر بالسنة؟'), findsOneWidget);
 
-    await tester.tap(find.text('المصاريف'));
-    await tester.pumpAndSettle();
-    expect(find.text('مقارنة بين الخطة والواقع'), findsOneWidget);
+      await tester.tap(find.text('المصاريف'));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 15),
+      );
+      expect(find.text('مقارنة بين الخطة والواقع'), findsOneWidget);
 
-    await tester.tap(find.text('الأهداف'));
-    await tester.pumpAndSettle();
-    expect(find.text('أهدافك تصنع مستقبلك'), findsOneWidget);
+      await tester.tap(find.text('الأهداف'));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 15),
+      );
+      expect(find.text('أهدافك تصنع مستقبلك'), findsOneWidget);
 
-    await tester.tap(find.text('النصائح'));
-    await tester.pumpAndSettle();
-    expect(find.text('نصيحة اليوم'), findsOneWidget);
+      await tester.tap(find.text('النصائح'));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 15),
+      );
+      expect(find.text('نصيحة اليوم'), findsOneWidget);
 
-    await tester.tap(find.text('المزيد'));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('تصدير تقرير شهري PDF'),
-      250,
-      scrollable: find.descendant(
-        of: find.byType(MoreScreen),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    expect(find.text('تصدير تقرير شهري PDF'), findsOneWidget);
-  });
+      await tester.tap(find.text('المزيد'));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 15),
+      );
+      await tester.scrollUntilVisible(
+        find.text('تصدير تقرير شهري PDF'),
+        250,
+        scrollable: find.descendant(
+          of: find.byType(MoreScreen),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      expect(find.text('تصدير تقرير شهري PDF'), findsOneWidget);
+    },
+  );
 }
