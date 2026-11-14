@@ -1,8 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
 
 class SoundService {
-  final AudioPlayer _sfxPlayer = AudioPlayer();
-  final AudioPlayer _musicPlayer = AudioPlayer();
+  AudioPlayer? _sfxPlayer;
+  AudioPlayer? _musicPlayer;
 
   bool _soundEnabled = true;
   bool _musicEnabled = false;
@@ -10,6 +10,9 @@ class SoundService {
 
   bool get soundEnabled => _soundEnabled;
   bool get musicEnabled => _musicEnabled;
+
+  AudioPlayer _ensureSfxPlayer() => _sfxPlayer ??= AudioPlayer();
+  AudioPlayer _ensureMusicPlayer() => _musicPlayer ??= AudioPlayer();
 
   void updatePreferences({
     required bool soundEnabled,
@@ -42,9 +45,10 @@ class SoundService {
   Future<void> startAmbientMusic() async {
     if (!_musicEnabled || _isMusicPlaying) return;
     try {
-      await _musicPlayer.setReleaseMode(ReleaseMode.loop);
-      await _musicPlayer.setVolume(0.22);
-      await _musicPlayer.play(AssetSource('sounds/ambient_soft.wav'));
+      final player = _ensureMusicPlayer();
+      await player.setReleaseMode(ReleaseMode.loop);
+      await player.setVolume(0.22);
+      await player.play(AssetSource('sounds/ambient_soft.wav'));
       _isMusicPlaying = true;
     } catch (_) {
       _isMusicPlaying = false;
@@ -52,8 +56,13 @@ class SoundService {
   }
 
   Future<void> stopAmbientMusic() async {
+    final player = _musicPlayer;
+    if (player == null) {
+      _isMusicPlaying = false;
+      return;
+    }
     try {
-      await _musicPlayer.stop();
+      await player.stop();
     } catch (_) {
       // Ignore in test / headless environments
     } finally {
@@ -63,9 +72,10 @@ class SoundService {
 
   Future<void> _playSfx(String assetPath, {double volume = 0.7}) async {
     try {
-      await _sfxPlayer.stop();
-      await _sfxPlayer.setVolume(volume);
-      await _sfxPlayer.play(AssetSource(assetPath));
+      final player = _ensureSfxPlayer();
+      await player.stop();
+      await player.setVolume(volume);
+      await player.play(AssetSource(assetPath));
     } catch (_) {
       // Ignore audio errors on unsupported/test devices
     }
@@ -73,8 +83,8 @@ class SoundService {
 
   Future<void> dispose() async {
     try {
-      await _sfxPlayer.dispose();
-      await _musicPlayer.dispose();
+      await _sfxPlayer?.dispose();
+      await _musicPlayer?.dispose();
     } catch (_) {}
   }
 }

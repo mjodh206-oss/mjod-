@@ -52,7 +52,7 @@ jobs:
       - name: Run unit & widget tests
         run: |
           set -o pipefail
-          flutter test 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
+          flutter test --timeout 60s 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
       - name: Prepare Gradle wrapper
         run: |

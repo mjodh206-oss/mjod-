@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rattib/app.dart';
+import 'package:rattib/models/app_settings.dart';
+import 'package:rattib/models/debt_item.dart';
 import 'package:rattib/models/salary_profile.dart';
 import 'package:rattib/screens/home/main_shell.dart';
 import 'package:rattib/screens/more/about_screen.dart';
@@ -19,6 +21,12 @@ import 'package:rattib/state/app_controller.dart';
 
 class _TestSoundService extends SoundService {
   @override
+  void updatePreferences({
+    required bool soundEnabled,
+    required bool musicEnabled,
+  }) {}
+
+  @override
   Future<void> playSplashIntro() async {}
   @override
   Future<void> playExpenseAdd() async {}
@@ -28,6 +36,8 @@ class _TestSoundService extends SoundService {
   Future<void> startAmbientMusic() async {}
   @override
   Future<void> stopAmbientMusic() async {}
+  @override
+  Future<void> dispose() async {}
 }
 
 class _TestNotificationService extends NotificationService {
@@ -35,6 +45,13 @@ class _TestNotificationService extends NotificationService {
   Future<void> init() async {}
   @override
   Future<bool> requestPermission() async => true;
+  @override
+  Future<void> syncAllSchedules({
+    required AppSettings settings,
+    required SalaryProfile? profile,
+    required List<DebtItem> debts,
+    required double estimatedWeeklySaving,
+  }) async {}
   @override
   Future<void> showBudgetWarning({
     required String bucketTitleAr,
@@ -86,7 +103,7 @@ void main() {
       ),
     );
 
-    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 1900));
     expect(find.text('فلوسك بتستاهل خطة'), findsOneWidget);
     expect(find.text('تنفيذ وتطوير أمجد حبيب'), findsOneWidget);
   });
