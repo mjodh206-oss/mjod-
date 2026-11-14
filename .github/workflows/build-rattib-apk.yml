@@ -1,0 +1,99 @@
+name: Build Rattib Android APK
+
+on:
+  push:
+    branches:
+      - "arena/39728818-mjod"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rattib-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.10"
+          channel: stable
+          cache: true
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14"
+
+      - name: Install Android SDK components
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
+
+      - name: Install Flutter packages
+        run: flutter pub get
+
+      - name: Analyze Dart & Flutter code
+        run: flutter analyze
+
+      - name: Run unit & widget tests
+        run: flutter test
+
+      - name: Prepare Gradle wrapper
+        run: |
+          gradle -p android wrapper --gradle-version 8.14
+          chmod +x android/gradlew
+
+      - name: Generate release signing key
+        run: |
+          keytool -genkeypair \
+            -keystore "$RUNNER_TEMP/rattib.p12" \
+            -storetype PKCS12 \
+            -storepass rattib-release-2026 \
+            -keypass rattib-release-2026 \
+            -alias rattib \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Rattib App, O=Amjad Habib, C=SY"
+
+      - name: Build signed release APK
+        env:
+          RATTIB_KEYSTORE: ${{ runner.temp }}/rattib.p12
+          RATTIB_STORE_PASSWORD: rattib-release-2026
+          RATTIB_KEY_ALIAS: rattib
+          RATTIB_KEY_PASSWORD: rattib-release-2026
+        run: flutter build apk --release
+
+      - name: Verify APK alignment & signature
+        run: |
+          APK="build/app/outputs/apk/release/app-release.apk"
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -v 4 "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          cp "$APK" Rattib.apk
+          sha256sum Rattib.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Rattib-APK
+          path: Rattib.apk
+
+      - name: Publish GitHub Release with direct APK download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="rattib-v1.0.${{ github.run_number }}"
+          gh release create "$TAG" Rattib.apk \
+            --target "${{ github.sha }}" \
+            --title "رَتِّبْ — لتنظيم الراتب ($TAG)" \
+            --notes "تطبيق رَتِّبْ لتنظيم الراتب والميزانية الشخصية (أندرويد 6.0 فما فوق) — تنفيذ وتطوير: أمجد حبيب. حمّل ملف Rattib.apk مباشرة وثبّته على هاتفك."
+          echo "DIRECT_DOWNLOAD=https://github.com/${{ github.repository }}/releases/download/$TAG/Rattib.apk"
