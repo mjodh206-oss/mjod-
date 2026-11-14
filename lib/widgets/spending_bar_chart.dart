@@ -141,7 +141,7 @@ class PlanVsActualBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buckets = AppCategories.buckets;
+    const buckets = AppCategories.buckets;
     double maxY = 10;
     for (final b in buckets) {
       maxY = math.max(maxY, plan.amountFor(b.bucket));

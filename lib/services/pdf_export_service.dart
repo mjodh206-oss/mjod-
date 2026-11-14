@@ -34,9 +34,9 @@ class PdfExportService {
     final remaining = profile.totalMonthlyIncome - totalSpent;
 
     final pdf = pw.Document();
-    final emerald = PdfColor.fromInt(0xFF0B6E4F);
-    final gold = PdfColor.fromInt(0xFFD4AF37);
-    final lightBg = PdfColor.fromInt(0xFFF3F9F6);
+    const emerald = PdfColor.fromInt(0xFF0B6E4F);
+    const gold = PdfColor.fromInt(0xFFD4AF37);
+    const lightBg = PdfColor.fromInt(0xFFF3F9F6);
 
     pdf.addPage(
       pw.MultiPage(
