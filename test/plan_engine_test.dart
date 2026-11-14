@@ -89,7 +89,7 @@ void main() {
         DebtItem(
           id: 'd1',
           name: 'بطاقة ائتمان',
-          remainingBalance: 2000,
+          remainingBalance: 1000,
           minimumMonthly: 100,
           interestRatePercent: 24,
         ),
@@ -97,7 +97,7 @@ void main() {
           id: 'd2',
           name: 'دين شخصي صغير',
           remainingBalance: 600,
-          minimumMonthly: 80,
+          minimumMonthly: 50,
           interestRatePercent: 0,
         ),
       ];
@@ -117,7 +117,7 @@ void main() {
       expect(avalanche.steps.first.debt.id, 'd1');
       expect(
         avalanche.totalInterestPaid,
-        lessThanOrEqualTo(snowball.totalInterestPaid),
+        lessThan(snowball.totalInterestPaid),
       );
     });
 

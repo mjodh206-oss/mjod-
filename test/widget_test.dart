@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rattib/app.dart';
 import 'package:rattib/models/salary_profile.dart';
 import 'package:rattib/screens/home/main_shell.dart';
 import 'package:rattib/screens/more/about_screen.dart';
+import 'package:rattib/screens/more/more_screen.dart';
+import 'package:rattib/screens/plan/plan_screen.dart';
 import 'package:rattib/screens/splash/splash_screen.dart';
 import 'package:rattib/services/notification_service.dart';
 import 'package:rattib/services/pdf_export_service.dart';
@@ -66,6 +69,13 @@ void main() {
   testWidgets('SplashScreen displays tagline and Amjad Habib credit', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.5;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       RattibApp(
         controller: controller,
@@ -98,6 +108,13 @@ void main() {
   testWidgets('MainShell renders plan and switches tabs cleanly', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.5;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await controller.saveWizardProfile(
       const SalaryProfile(
         monthlySalary: 1500000,
@@ -117,6 +134,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('توزيع راتبك الشهري'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('كم ممكن توفر بالسنة؟'),
+      250,
+      scrollable: find.descendant(
+        of: find.byType(PlanScreen),
+        matching: find.byType(Scrollable),
+      ),
+    );
     expect(find.text('كم ممكن توفر بالسنة؟'), findsOneWidget);
 
     await tester.tap(find.text('المصاريف'));
@@ -133,6 +158,14 @@ void main() {
 
     await tester.tap(find.text('المزيد'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('تصدير تقرير شهري PDF'),
+      250,
+      scrollable: find.descendant(
+        of: find.byType(MoreScreen),
+        matching: find.byType(Scrollable),
+      ),
+    );
     expect(find.text('تصدير تقرير شهري PDF'), findsOneWidget);
   });
 }

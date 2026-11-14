@@ -30,6 +30,11 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
 
+# pdf 3.12.0 caps archive <4.1.0, while image 4.11.0 uses ZLibDecoder.decodeLazy
+# (introduced in archive 4.5.0) without bumping its archive bound.
+dependency_overrides:
+  image: 4.10.2
+
 flutter:
   uses-material-design: true
   assets:
