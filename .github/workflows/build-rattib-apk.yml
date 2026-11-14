@@ -40,17 +40,24 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
 
       - name: Install Flutter packages
-        run: flutter pub get
+        run: |
+          set -o pipefail
+          flutter pub get 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
       - name: Analyze Dart & Flutter code
-        run: flutter analyze
+        run: |
+          set -o pipefail
+          flutter analyze 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
       - name: Run unit & widget tests
-        run: flutter test
+        run: |
+          set -o pipefail
+          flutter test 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
       - name: Prepare Gradle wrapper
         run: |
-          gradle -p android wrapper --gradle-version 8.14
+          set -o pipefail
+          gradle -p android wrapper --gradle-version 8.14 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
           chmod +x android/gradlew
 
       - name: Generate release signing key
@@ -72,15 +79,18 @@ jobs:
           RATTIB_STORE_PASSWORD: rattib-release-2026
           RATTIB_KEY_ALIAS: rattib
           RATTIB_KEY_PASSWORD: rattib-release-2026
-        run: flutter build apk --release
+        run: |
+          set -o pipefail
+          flutter build apk --release 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
       - name: Verify APK alignment & signature
         run: |
+          set -o pipefail
           APK="build/app/outputs/apk/release/app-release.apk"
-          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -v 4 "$APK"
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -v 4 "$APK" | tail -n 10 | tee -a "$RUNNER_TEMP/ci.log"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK" 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
           cp "$APK" Rattib.apk
-          sha256sum Rattib.apk
+          sha256sum Rattib.apk | tee -a "$RUNNER_TEMP/ci.log"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -97,3 +107,16 @@ jobs:
             --title "رَتِّبْ — لتنظيم الراتب ($TAG)" \
             --notes "تطبيق رَتِّبْ لتنظيم الراتب والميزانية الشخصية (أندرويد 6.0 فما فوق) — تنفيذ وتطوير: أمجد حبيب. حمّل ملف Rattib.apk مباشرة وثبّته على هاتفك."
           echo "DIRECT_DOWNLOAD=https://github.com/${{ github.repository }}/releases/download/$TAG/Rattib.apk"
+
+      - name: Emit diagnostics on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f "$RUNNER_TEMP/ci.log" ]; then
+            tail -n 120 "$RUNNER_TEMP/ci.log" | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            BODY=$(tail -n 150 "$RUNNER_TEMP/ci.log")
+            gh api -X POST "repos/${{ github.repository }}/commits/${{ github.sha }}/comments" -f body="$BODY" || true
+          fi
