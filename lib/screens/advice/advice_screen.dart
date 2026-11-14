@@ -74,9 +74,8 @@ class _AdviceScreenState extends State<AdviceScreen> {
                 ),
                 const SizedBox(height: 10),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('يوم السداد الشهري:'),
+                    const Expanded(child: Text('يوم السداد الشهري:')),
                     DropdownButton<int>(
                       value: dueDay,
                       items: List.generate(28, (i) => i + 1)

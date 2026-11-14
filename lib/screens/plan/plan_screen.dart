@@ -162,56 +162,68 @@ class _PlanScreenState extends State<PlanScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'المتبقي من الشهر',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            color: Color(0xFFF5C443),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'المتبقي من الشهر',
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: Color(0xFFF5C443),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        Text(
-                          ArabicFormatters.formatMoney(remaining, currency),
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Text(
+                              ArabicFormatters.formatMoney(remaining, currency),
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text(
-                          'المصروف حتى الآن',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            color: Color(0xFFD7F3E6),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'المصروف حتى الآن',
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: Color(0xFFD7F3E6),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          ArabicFormatters.formatMoney(
-                            c.totalSpentCurrentCycle,
-                            currency,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: Text(
+                              ArabicFormatters.formatMoney(
+                                c.totalSpentCurrentCycle,
+                                currency,
+                              ),
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -320,11 +332,12 @@ class _PlanScreenState extends State<PlanScreen> {
                     children: [
                       const Divider(height: 24),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'حرّك المنزلقات — الرسم يتحدث لحظياً',
-                            style: theme.textTheme.titleMedium,
+                          Expanded(
+                            child: Text(
+                              'حرّك المنزلقات — الرسم يتحدث لحظياً',
+                              style: theme.textTheme.titleMedium,
+                            ),
                           ),
                           if (plan.isCustomized)
                             TextButton(
@@ -339,28 +352,33 @@ class _PlanScreenState extends State<PlanScreen> {
                         return Column(
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      meta.icon,
-                                      size: 18,
+                                Icon(
+                                  meta.icon,
+                                  size: 18,
+                                  color: meta.color,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    meta.titleAr,
+                                    style: theme.textTheme.bodyLarge,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    '${pct.toStringAsFixed(0)}% • ${ArabicFormatters.formatCompactMoney(plan.amountFor(meta.bucket), currency)}',
+                                    textAlign: TextAlign.end,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: 'Cairo',
+                                      fontWeight: FontWeight.w700,
                                       color: meta.color,
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      meta.titleAr,
-                                      style: theme.textTheme.bodyLarge,
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  '${pct.toStringAsFixed(0)}% • ${ArabicFormatters.formatCompactMoney(plan.amountFor(meta.bucket), currency)}',
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.w700,
-                                    color: meta.color,
                                   ),
                                 ),
                               ],
@@ -520,12 +538,16 @@ class _PlanScreenState extends State<PlanScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('تفاصيل كل بند', style: theme.textTheme.titleLarge),
-              Text(
-                'المس أي بطاقة للتفاصيل',
-                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+              Expanded(
+                child: Text('تفاصيل كل بند', style: theme.textTheme.titleLarge),
+              ),
+              Flexible(
+                child: Text(
+                  'المس أي بطاقة للتفاصيل',
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -614,25 +636,34 @@ class _PlanScreenState extends State<PlanScreen> {
                       CategoryProgressBar(ratio: ratio, height: 8),
                       const SizedBox(height: 6),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'المصروف: ${ArabicFormatters.formatMoney(spent, currency)}',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontSize: 12,
+                          Expanded(
+                            child: Text(
+                              'المصروف: ${ArabicFormatters.formatMoney(spent, currency)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                          Text(
-                            planned - spent >= 0
-                                ? 'متبقي: ${ArabicFormatters.formatMoney(planned - spent, currency)}'
-                                : 'تجاوز: ${ArabicFormatters.formatMoney((planned - spent).abs(), currency)}',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: planned - spent >= 0
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFEF4444),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              planned - spent >= 0
+                                  ? 'متبقي: ${ArabicFormatters.formatMoney(planned - spent, currency)}'
+                                  : 'تجاوز: ${ArabicFormatters.formatMoney((planned - spent).abs(), currency)}',
+                              textAlign: TextAlign.end,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: planned - spent >= 0
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFEF4444),
+                              ),
                             ),
                           ),
                         ],

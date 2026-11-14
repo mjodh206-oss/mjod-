@@ -143,22 +143,27 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(b.icon, size: 18, color: b.color),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    b.titleAr,
-                                    style: theme.textTheme.titleMedium,
-                                  ),
-                                ],
+                              Icon(b.icon, size: 18, color: b.color),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  b.titleAr,
+                                  style: theme.textTheme.titleMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                              Text(
-                                '${ArabicFormatters.formatCompactMoney(spent, currency)} / ${ArabicFormatters.formatCompactMoney(planned, currency)}',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  '${ArabicFormatters.formatCompactMoney(spent, currency)} / ${ArabicFormatters.formatCompactMoney(planned, currency)}',
+                                  textAlign: TextAlign.end,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ],

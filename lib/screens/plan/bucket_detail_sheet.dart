@@ -114,24 +114,29 @@ class _BucketDetailSheet extends StatelessWidget {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _statCol(
-                        'المخصص شهرياً',
-                        ArabicFormatters.formatMoney(planned, currency),
-                        meta.color,
+                      Expanded(
+                        child: _statCol(
+                          'المخصص شهرياً',
+                          ArabicFormatters.formatMoney(planned, currency),
+                          meta.color,
+                        ),
                       ),
-                      _statCol(
-                        'المصروف فعلياً',
-                        ArabicFormatters.formatMoney(spent, currency),
-                        theme.textTheme.bodyLarge?.color ?? Colors.black,
+                      Expanded(
+                        child: _statCol(
+                          'المصروف فعلياً',
+                          ArabicFormatters.formatMoney(spent, currency),
+                          theme.textTheme.bodyLarge?.color ?? Colors.black,
+                        ),
                       ),
-                      _statCol(
-                        remaining >= 0 ? 'المتبقي' : 'التجاوز',
-                        ArabicFormatters.formatMoney(remaining.abs(), currency),
-                        remaining >= 0
-                            ? const Color(0xFF10B981)
-                            : const Color(0xFFEF4444),
+                      Expanded(
+                        child: _statCol(
+                          remaining >= 0 ? 'المتبقي' : 'التجاوز',
+                          ArabicFormatters.formatMoney(remaining.abs(), currency),
+                          remaining >= 0
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFEF4444),
+                        ),
                       ),
                     ],
                   ),

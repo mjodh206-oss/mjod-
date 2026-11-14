@@ -6,6 +6,7 @@ import 'package:rattib/app.dart';
 import 'package:rattib/models/app_settings.dart';
 import 'package:rattib/models/debt_item.dart';
 import 'package:rattib/models/salary_profile.dart';
+import 'package:rattib/screens/expenses/expenses_screen.dart';
 import 'package:rattib/screens/home/main_shell.dart';
 import 'package:rattib/screens/more/about_screen.dart';
 import 'package:rattib/screens/more/more_screen.dart';
@@ -175,6 +176,14 @@ void main() {
         const Duration(milliseconds: 100),
         EnginePhase.sendSemanticsUpdate,
         const Duration(seconds: 15),
+      );
+      await tester.scrollUntilVisible(
+        find.text('مقارنة بين الخطة والواقع'),
+        250,
+        scrollable: find.descendant(
+          of: find.byType(ExpensesScreen),
+          matching: find.byType(Scrollable),
+        ),
       );
       expect(find.text('مقارنة بين الخطة والواقع'), findsOneWidget);
 

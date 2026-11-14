@@ -490,21 +490,30 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'المدخر: ${ArabicFormatters.formatMoney(goal.savedAmount, currency)} ($pct%)',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
+                            Expanded(
+                              child: Text(
+                                'المدخر: ${ArabicFormatters.formatMoney(goal.savedAmount, currency)} ($pct%)',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                            Text(
-                              goal.isCompleted
-                                  ? 'تم الوصول!'
-                                  : 'اللازم شهرياً: ${ArabicFormatters.formatCompactMoney(goal.monthlyRequired, currency)}',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w700,
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                goal.isCompleted
+                                    ? 'تم الوصول!'
+                                    : 'اللازم شهرياً: ${ArabicFormatters.formatCompactMoney(goal.monthlyRequired, currency)}',
+                                textAlign: TextAlign.end,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ],
