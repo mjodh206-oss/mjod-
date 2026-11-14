@@ -68,7 +68,7 @@ class PdfExportService {
                 pw.SizedBox(height: 4),
                 pw.Text(
                   'فلوسك بتستاهل خطة  |  تاريخ التقرير: ${ArabicFormatters.formatDateAr(DateTime.now())}',
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 11,
                     color: gold,
                   ),
@@ -126,7 +126,7 @@ class PdfExportService {
               color: PdfColors.white,
               fontSize: 10.5,
             ),
-            headerDecoration: pw.BoxDecoration(color: emerald),
+            headerDecoration: const pw.BoxDecoration(color: emerald),
             cellStyle: const pw.TextStyle(fontSize: 10),
             cellAlignment: pw.Alignment.centerRight,
             headers: ['المتبقي', 'المنصرف', 'المخطط', 'النسبة', 'البند'],
@@ -168,7 +168,7 @@ class PdfExportService {
                 color: PdfColors.white,
                 fontSize: 10.5,
               ),
-              headerDecoration: pw.BoxDecoration(color: emerald),
+              headerDecoration: const pw.BoxDecoration(color: emerald),
               cellStyle: const pw.TextStyle(fontSize: 10),
               cellAlignment: pw.Alignment.centerRight,
               headers: ['الإنجاز', 'المدخر', 'المبلغ المطلوب', 'الهدف'],
@@ -197,7 +197,7 @@ class PdfExportService {
                 color: PdfColors.white,
                 fontSize: 10,
               ),
-              headerDecoration: pw.BoxDecoration(color: emerald),
+              headerDecoration: const pw.BoxDecoration(color: emerald),
               cellStyle: const pw.TextStyle(fontSize: 9.5),
               cellAlignment: pw.Alignment.centerRight,
               headers: ['التاريخ', 'ملاحظة', 'المبلغ', 'الفئة'],
