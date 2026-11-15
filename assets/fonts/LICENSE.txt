@@ -1,0 +1,2 @@
+Cairo & Almarai fonts (SIL Open Font License 1.1) — subsets from @fontsource (npm).
+Sources: https://github.com/googlefonts/cairo  |  https://github.com/almarai

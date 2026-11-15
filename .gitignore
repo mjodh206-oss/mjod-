@@ -1,0 +1,9 @@
+# وسوم الإنتاج (artifacts)
+build/*
+!build/build_video.py
+!build/vo/
+!build/vo/*.mp3
+
+__pycache__/
+*.pyc
+.DS_Store
