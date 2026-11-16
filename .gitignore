@@ -7,6 +7,9 @@ build/*
 !build/lab/
 !build/motion/
 !build/lab/**
+!build/kt/
+!build/kt/**
+build/kt/*.wav
 
 __pycache__/
 *.pyc
