@@ -12,3 +12,6 @@ __pycache__/
 
 node_modules/
 package-lock.json
+build/motion/stills/
+build/motion/qa*.jpg
+build/motion/diag*.mjs
