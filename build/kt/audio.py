@@ -17,18 +17,20 @@ SR = 48000
 FF = "/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v9.0.2"
 
 TEXTS = [
-    "في قاعدة واحدة… ومحدش بيقولها لك.",
-    "الفرق مش في اللي بتكسبه. الفرق في اللي بتشتريه باللي كسبته.",
+    "السر مش في اللي بتكسبه… السر في اللي بتشتريه.",
     "كل جنيه بتصرفه… يا بيشتغل معاك، يا إنت بتشتغل عشانه.",
-    "اللي بيشتري منظر… بيشتري حاجة بتخلص، وبيقسّط عليها سنين.",
-    "واللي بيشتري أصل… بيشتري حاجة بتفضل تجيب، وإنت نايم.",
-    "عشان كده ناس دخلها ضعف دخل غيرها… وعايشة أضعف منهم.",
-    "القاعدة: اشتري اللي يفضل يجيب، ما تشتريش اللي بياخد.",
-    "اكتب في الكومنت أول أصل هتشتريه… واحفظ الفيديو.",
+    "الغني بيشتري أصل… والفقير بيشتري منظر.",
+    "المنظر بيخلص في شهر… والقسط بيفضل سنين.",
+    "الأصل بيفضل يجيب… وإنت نايم.",
+    "عشان كده ناس دخلها ضعف دخل غيرها… وعايشة أقل منهم.",
+    "القاعدة: اشتري اللي يفضل يجيب… ما تشتريش اللي بياخد.",
+    "اكتب في الكومنت أول أصل هتشتريه… واحفظ الفيديو قبل ما تنساه.",
 ]
 # per-line: tempo, lead-in, tail
-PACE = [(1.02, 0.45, 0.55), (1.05, 0.30, 0.45), (1.05, 0.28, 0.40), (1.05, 0.28, 0.45),
-        (1.04, 0.28, 0.45), (1.04, 0.30, 0.45), (0.98, 0.40, 0.75), (1.02, 0.55, 1.85)]
+PACE = [(1.00, 0.18, 0.45), (1.04, 0.26, 0.42), (1.04, 0.26, 0.40), (1.05, 0.26, 0.42),
+        (1.04, 0.26, 0.42), (1.04, 0.28, 0.42), (0.98, 0.36, 0.80), (1.02, 0.50, 1.70)]
+
+VO_DIR = "n"
 
 def run(cmd):
     r = subprocess.run(cmd, capture_output=True, text=True)
@@ -50,15 +52,17 @@ def speak_bounds(a):
 # ------------------------------------------------------------------ VO
 voices = []
 for i, (txt, (tempo, lead, tail)) in enumerate(zip(TEXTS, PACE), 1):
-    src = os.path.join(KT, "vo", f"k{i}.mp3")
+    src = os.path.join(KT, "vo", f"{VO_DIR}{i}.mp3")
     dst = os.path.join(KT, f"v{i}.wav")
     chain = (
-        f"atempo={tempo},highpass=f=95,"
-        "equalizer=f=220:t=q:w=1.2:g=1.5,"      # body
-        "equalizer=f=3200:t=q:w=1.6:g=2.2,"     # presence
-        "deesser=i=0.45:m=0.6,"
-        "acompressor=threshold=-19dB:ratio=3.2:attack=5:release=170:makeup=2,"
-        "alimiter=limit=0.95,volume=0.94"
+        f"atempo={tempo},highpass=f=100,"
+        "equalizer=f=380:t=q:w=1.1:g=-2.0,"     # clear mud
+        "equalizer=f=220:t=q:w=1.2:g=1.2,"      # body
+        "equalizer=f=3200:t=q:w=1.5:g=2.6,"     # presence / intelligibility
+        "equalizer=f=7000:t=q:w=1.4:g=1.2,"     # air
+        "deesser=i=0.5:m=0.55,"
+        "acompressor=threshold=-18dB:ratio=3.0:attack=4:release=160:makeup=2.5,"
+        "alimiter=limit=0.95,volume=0.96"
     )
     run([FF, "-hide_banner", "-loglevel", "error", "-y", "-i", src,
          "-ac", "1", "-ar", str(SR), "-af", chain, dst])
@@ -209,18 +213,16 @@ def riser(dur=1.5, gain=0.32):
 
 sfx = np.zeros(n)
 for ln in lines:
-    add(sfx, ln["start"] - ln["lead"] - 0.05, whoosh(0.5, 0.26))
+    add(sfx, ln["start"] - ln["lead"] - 0.05, whoosh(0.5, 0.17))
 for idx in (0, 6, 7):
-    add(sfx, lines[idx]["start"] - 0.28, impact(0.9 if idx == 6 else 0.7))
-# word ticks (skip punctuation)
-for ln in lines:
-    for k, w in enumerate(ln["words"]):
-        if w["w"] in ("…", "،", ":", "."): continue
-        add(sfx, w["t"] - 0.01, tick(1900 + (k % 4)*260, 0.055 if ln["i"] > 1 else 0.075))
+    add(sfx, lines[idx]["start"] - 0.28, impact(0.80 if idx == 6 else 0.62))
+# soft accent tick on the first word of each beat only
+for ln in lines[1:]:
+    add(sfx, ln["words"][0]["t"] - 0.02, tick(2400, 0.05))
 # riser into the rule
 add(sfx, lines[6]["start"] - 1.45, riser(1.45, 0.34))
 # confirm pop on CTA
-add(sfx, lines[7]["start"] + 0.15, tick(1250, 0.16))
+add(sfx, lines[7]["start"] + 0.15, tick(1250, 0.12))
 
 # ------------------------------------------------------------------ voice track
 voice = np.zeros(n)
@@ -240,8 +242,8 @@ env = np.convolve(env, np.ones(9)/9, mode="same")
 gate = np.clip((env - 0.02) / 0.09, 0, 1)
 gate = np.repeat(gate, hop)[:n]
 if len(gate) < n: gate = np.pad(gate, (0, n-len(gate)), mode="edge")
-duck = 1.0 - 0.56*gate
-music = bed * 0.40 * duck
+duck = 1.0 - 0.62*gate
+music = bed * 0.38 * duck
 fx = sfx * 0.82
 
 mix = voice + music + fx

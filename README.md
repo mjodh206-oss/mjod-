@@ -61,12 +61,13 @@ python3 build/build_video.py     # ≈ 4.5 دقيقة على CPU
 
 > كل النصوص والحركة والصور مُنتجة لهذا المشروع — مفيش موسيقى أو فيديو محمي بحقوق.
 
-## 3) النسخة الكينيتيك (v3) — `output/kt_short.mp4`
-تايبوغرافي حركي 1080×1920 · 40.36 ث · 30fps · صوت AAC 48kHz · −13.8 LUFS.
+## 3) النسخة الكينيتيك (v4) — `output/kt_short.mp4`
+تايبوغرافي حركي + شرح بصري · 1080×1920 · 36.2 ث · 30fps · AAC 48kHz · −14 LUFS.
+8 مشاهد: هيدر ثابت (قاعدة الفلوس + 01/08) + شريط تقدّم + رسوم (عملة، أعداد، راية، مقارنة) + لافتة CTA.
 
 ```
 build/kt/
- ├─ vo/k1..k8.mp3      تعليق صوتي مصري (مقطع لكل جملة)
+ ├─ vo/n1..n8.mp3      تعليق صوتي مصري (مقطع لكل جملة)
  ├─ audio.py           المزج: معالجة الصوت + بيت 92 BPM + مؤثرات + Ducking + timeline.json
  ├─ timeline.json      توقيت كل كلمة (t/d) — هو اللي بيحرّك النص
  ├─ index.html         محرك الكينيتيك (window.__seek(t))
@@ -76,7 +77,7 @@ build/kt/
 ```bash
 python3 build/kt/audio.py                                     # mix.wav + timeline.json
 node build/lab/render_lab.mjs --page=build/kt/index.html \
-  --out=output/kt_short.mp4 --dur=40.36 --audio=build/kt/mix.wav   # ≈16 دقيقة
+  --out=output/kt_short.mp4 --dur=36.2 --audio=build/kt/mix.wav    # ≈10 دقائق
 ```
 قواعد مهمة: النص العربي لازم يكون HTML (مش Canvas)، وكل سطر بيتقاس ويعاد تحجيمه أوتوماتيك قبل الرندر
 (عشان ما يقصّش على 1080px)، ولازم مساحة آمنة ~90px من كل جنب.
