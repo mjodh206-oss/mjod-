@@ -6,12 +6,28 @@
 ### المخرجات الحالية
 | الملف | الوصف |
 |---|---|
-| `output/money_shorts.mp4` | شورتس 44 ثانية — مال وثروة، لهجة مصرية، تعليق رجالي |
+| `output/money_shorts_v2.mp4` | **النسخة القوية** — موشن جرافيكس حقيقية عبر Chromium (عدّاد، طابع، بطاقات، جزيئات، كارةوكي) |
+| `output/money_shorts.mp4` | نسخة v1 — ffmpeg + libass (أخف وأبسط) |
 | `output/cover.jpg` | غلاف 1080×1920 |
 | `output/money_shorts.srt` | ترجمة جاهزة للرفع |
 | `output/publish_kit.md` | عناوين + وصف + هاشتاجات + خطة نشر |
 
-### كيف بيتبني الفيديو
+### محرّكان
+
+### 1) `build/motion/` — Chromium (v2، الأقوى)
+HTML/CSS/Canvas + Chromium 153 headless: كل فريم بيتحسب كدالة نقية في الزمن `window.__seek(t)`
+ثم `page.screenshot()` → pipe إلى ffmpeg. النتيجة: Spring animation، تدرّجات، غبار ذهبي،
+عدّادات أرقام، طوابع، بطاقات مقارنة، وحركة تايبوغرافي بنفس توقيت التعليق الصوتي.
+
+```bash
+node build/motion/render.mjs --stills=1.5,22,42          # معاينة سريعة
+node build/motion/render.mjs --out=output/money_shorts_v2.mp4   # ≈15 دقيقة
+```
+
+> التشغيل بيحتاج مكتبات NSS: بتتاخد من `al2023.tar.br` جوه حزمة `@sparticuz/chromium`
+> (`LD_LIBRARY_PATH=/tmp/al/lib`). متصفح كامل + تشكيل عربي صحيح عبر HarfBuzz.
+
+### 2) `build/build_video.py` — ffmpeg + libass (v1)
 ```
 build/build_video.py
  ├─ 1. السكربت (Egyptian Arabic) + خط الزمن حسب طول كل جملة صوتية
