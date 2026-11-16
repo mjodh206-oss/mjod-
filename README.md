@@ -12,6 +12,16 @@
 | `output/money_shorts.srt` | ترجمة جاهزة للرفع |
 | `output/publish_kit.md` | عناوين + وصف + هاشتاجات + خطة نشر |
 
+### مختبر اللوك (lab) — عينات 3D / UI
+`build/lab/` فيه ٣ محرّكات لوك جاهزة (تُصوَّر بنفس Chromium):
+- `tunnel.html` — WebGL shader: نفق جزيئات ذهبية + حلقات warp (three.js r180).
+- `fintech.html` — واجهة زجاجية: عدّاد أصول + sparkline + بارات (CSS/SVG).
+- `ktype.html` — تايبوغرافي حركي: كلمات ضخمة + streaks + فلاشات.
+```bash
+node build/lab/render_lab.mjs --page=build/lab/tunnel.html --out=out.mp4 --dur=3
+```
+المخرجات: `output/samples_reel.mp4` + `output/samples/*`.
+
 ### محرّكان
 
 ### 1) `build/motion/` — Chromium (v2، الأقوى)

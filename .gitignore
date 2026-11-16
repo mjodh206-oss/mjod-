@@ -4,7 +4,9 @@ build/*
 !build/vo/
 !build/vo/*.mp3
 !build/motion/
-!build/motion/**
+!build/lab/
+!build/motion/
+!build/lab/**
 
 __pycache__/
 *.pyc
@@ -15,3 +17,12 @@ package-lock.json
 build/motion/stills/
 build/motion/qa*.jpg
 build/motion/diag*.mjs
+build/lab/bed.wav
+build/lab/reel_silent.mp4
+build/lab/st_*.png
+build/lab/check_*.png
+build/lab/s3d_*.png
+build/lab/samples_sheet.jpg
+build/lab/s3d*.png
+build/lab/webgl-test.html
+build/lab/bench.mjs

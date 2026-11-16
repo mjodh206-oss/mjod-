@@ -1,0 +1,115 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:#050506;width:1080px;height:1920px;overflow:hidden}
+#c{display:block;position:absolute;inset:0}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 45%,transparent 35%,rgba(0,0,0,.75) 100%)}
+</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body><canvas id="c" width="1080" height="1920"></canvas><div id="vig"></div>
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(1080, 1920, false);
+renderer.setPixelRatio(1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x040405);
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envScene = new THREE.Scene();
+envScene.background = new THREE.Color(0x050505);
+function panel(color, intensity, w, h, pos, rot){
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(intensity), side: THREE.DoubleSide }));
+  m.position.set(...pos); m.rotation.set(...rot); envScene.add(m); return m;
+}
+panel(0xfff4de, 14.0, 1.7, 15, [-5.4, 3.6, 4.6], [0, 0.55, 0]);
+panel(0xffb14d, 18.0, 1.2, 15, [5.6, 1.0, -3.2], [0, -0.85, 0]);
+panel(0xffffff, 6.0, 1.0, 10, [0.5, 6.5, 1.5], [0.35, 0, 0]);
+panel(0x24303f, 1.0, 24, 24, [0, -9, 0], [Math.PI/2, 0, 0]);
+scene.environment = pmrem.fromScene(envScene, 0.02).texture;
+
+const camera = new THREE.PerspectiveCamera(30, 1080/1920, 0.1, 200);
+camera.position.set(0, 0.25, 13.5);
+camera.lookAt(0, 0, 0);
+
+/* --- engraved face texture --- */
+const tc = document.createElement('canvas'); tc.width = tc.height = 1024;
+const x = tc.getContext('2d');
+x.fillStyle = '#808080'; x.fillRect(0,0,1024,1024);
+x.translate(512,512);
+for (let i=0;i<9;i++){ x.beginPath(); x.arc(0,0,430-i*20,0,6.283);
+  x.lineWidth=4+ (i%2? 5:0); x.strokeStyle = i%2? 'rgba(240,240,240,.85)':'rgba(40,40,40,.9)'; x.stroke(); }
+for (let i=0;i<72;i++){ const a=i/72*6.283; x.save(); x.rotate(a); x.translate(0,-372);
+  x.beginPath(); x.arc(0,0,7+(i%3)*3,0,6.283); x.fillStyle='rgba(235,235,235,.75)'; x.fill(); x.restore(); }
+x.beginPath(); x.arc(0,0,150,0,6.283); x.lineWidth=10; x.strokeStyle='rgba(60,60,60,.8)'; x.stroke();
+const faceTex = new THREE.CanvasTexture(tc);
+faceTex.colorSpace = THREE.SRGBColorSpace;
+faceTex.anisotropy = 4;
+
+const gold = new THREE.MeshPhysicalMaterial({
+  color: 0xE8B44A, metalness: 0.88, roughness: 0.26,
+  clearcoat: 0.9, clearcoatRoughness: 0.12, envMapIntensity: 1.3,
+  bumpMap: faceTex, bumpScale: 0.10,
+});
+const coin = new THREE.Group();
+const disc = new THREE.Mesh(new THREE.CylinderGeometry(1.75, 1.75, 0.26, 128), gold);
+disc.rotation.x = Math.PI/2; coin.add(disc);
+const rim = new THREE.Mesh(new THREE.TorusGeometry(1.75, 0.062, 32, 160), gold);
+coin.add(rim);
+coin.position.y = 0.15;
+scene.add(coin);
+
+const ring = new THREE.Mesh(new THREE.TorusGeometry(2.55, 0.010, 12, 220),
+  new THREE.MeshBasicMaterial({ color: 0xE8B44A, transparent: true, opacity: .55 }));
+ring.rotation.x = 1.22; ring.position.y = 0.15; scene.add(ring);
+
+const ring2 = ring.clone(); ring2.rotation.x = 1.42; ring2.scale.setScalar(1.18);
+ring2.material = ring.material.clone(); ring2.material.opacity = .28; scene.add(ring2);
+
+const key = new THREE.DirectionalLight(0xfff0cf, 3.4); key.position.set(-5, 7, 6); scene.add(key);
+const rimLight = new THREE.DirectionalLight(0xffb757, 5.0); rimLight.position.set(6, 1.5, -5.5); scene.add(rimLight);
+const fill = new THREE.DirectionalLight(0x8fa6ff, 1.1); fill.position.set(3, -4, 4); scene.add(fill);
+const head = new THREE.DirectionalLight(0xfff3de, 0.45); head.position.set(0.5, 2.5, 9); scene.add(head);
+const pt = new THREE.PointLight(0xffd27a, 30, 20, 2); pt.position.set(-2.6, -3.4, 4.2); scene.add(pt);
+
+/* --- gold dust (small, soft) --- */
+const N = 260, pos = new Float32Array(N*3), seed = new Float32Array(N);
+for (let i=0;i<N;i++){ pos[i*3]=(Math.random()-.5)*11; pos[i*3+1]=(Math.random()-.5)*16; pos[i*3+2]=(Math.random()-.5)*7; seed[i]=Math.random(); }
+const dg = new THREE.BufferGeometry();
+dg.setAttribute('position', new THREE.BufferAttribute(pos,3));
+dg.setAttribute('aSeed', new THREE.BufferAttribute(seed,1));
+const dust = new THREE.Points(dg, new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+  uniforms:{uTime:{value:0}},
+  vertexShader:`attribute float aSeed; uniform float uTime; varying float vA;
+    void main(){ vec3 p=position; p.y=mod(p.y+uTime*(0.25+aSeed*0.55)+8.0,16.0)-8.0;
+      p.x+=sin(uTime*0.6+aSeed*6.28)*0.25;
+      vA=0.15+0.55*abs(sin(uTime*1.1+aSeed*6.28));
+      vec4 mv=modelViewMatrix*vec4(p,1.0);
+      gl_PointSize=clamp((1.6+aSeed*2.2)*(60.0/-mv.z),1.0,7.0);
+      gl_Position=projectionMatrix*mv; }`,
+  fragmentShader:`varying float vA; void main(){ vec2 d=gl_PointCoord-0.5; float r=length(d);
+      if(r>0.5) discard; gl_FragColor=vec4(1.0,0.88,0.63, smoothstep(0.5,0.0,r)*vA); }`
+}));
+scene.add(dust);
+
+window.__seek = t => {
+  coin.rotation.y = t*0.62;
+  coin.rotation.x = 0.12*Math.sin(t*0.7);
+  coin.position.y = 0.15 + 0.12*Math.sin(t*0.9);
+  ring.rotation.z = -t*0.55; ring2.rotation.z = t*0.35;
+  dust.material.uniforms.uTime.value = t;
+  camera.position.x = Math.sin(t*0.22)*0.5;
+  camera.position.y = 0.3 + Math.cos(t*0.17)*0.18;
+  camera.lookAt(0, 0.1, 0);
+  renderer.render(scene, camera);
+  return true;
+};
+window.__seek(0);
+window.__ready = true;
+</script></body></html>

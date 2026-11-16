@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'CB';src:url('/assets/fonts/Cairo-Black.ttf')}
+@font-face{font-family:'CBd';src:url('/assets/fonts/Cairo-Bold.ttf')}
+@font-face{font-family:'AXB';src:url('/assets/fonts/Almarai-ExtraBold.ttf')}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;background:#050507;overflow:hidden;font-family:'CB';-webkit-font-smoothing:antialiased}
+#bg{position:absolute;inset:0;background:
+  radial-gradient(60% 45% at 72% 18%,rgba(232,180,74,.22),transparent 62%),
+  radial-gradient(55% 40% at 18% 82%,rgba(120,90,255,.16),transparent 65%),
+  linear-gradient(180deg,#08080b,#050507 55%,#08070a)}
+#grid{position:absolute;inset:0;opacity:.16;
+  background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:90px 90px;mask-image:radial-gradient(ellipse 70% 50% at 50% 50%,#000 30%,transparent 75%)}
+#kicker{position:absolute;top:230px;left:0;right:0;text-align:center;font-family:'AXB';font-size:44px;
+  letter-spacing:.22em;color:#E8B44A;opacity:0}
+#title{position:absolute;top:318px;left:0;right:0;text-align:center;font-size:88px;color:#F6F2EA;opacity:0;
+  text-shadow:0 10px 40px rgba(0,0,0,.8)}
+.card{position:absolute;left:64px;right:64px;top:500px;border-radius:44px;padding:52px 48px 44px;
+  background:linear-gradient(158deg,rgba(255,255,255,.085),rgba(255,255,255,.028));
+  border:1.5px solid rgba(255,255,255,.16);
+  box-shadow:0 40px 120px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.22);
+  opacity:0;transform-origin:50% 60%}
+.row{display:flex;align-items:center;justify-content:space-between}
+.lbl{font-family:'AXB';font-size:40px;letter-spacing:.06em;color:#A39C90}
+.badge{font-family:'AXB';font-size:34px;padding:12px 26px;border-radius:999px;
+  color:#FFE6B4;background:rgba(232,180,74,.16);border:1.5px solid rgba(232,180,74,.55)}
+.val{font-size:132px;line-height:1.05;margin-top:10px;letter-spacing:-.02em;
+  background:linear-gradient(180deg,#FFF6DF,#F2CB77 45%,#D89B36);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.cur{font-family:'AXB';font-size:44px;color:#8E877C;margin-inline-start:14px}
+.spark{margin-top:30px;height:220px;position:relative}
+.bars{margin-top:10px;display:flex;gap:18px;align-items:flex-end;height:190px}
+.bar{flex:1;border-radius:12px 12px 6px 6px;background:linear-gradient(180deg,#F5CE7E,#C4882C);
+  box-shadow:0 0 30px rgba(232,180,74,.35);height:0}
+.bar.dim{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07));box-shadow:none}
+.legend{margin-top:22px;display:flex;gap:30px;font-family:'AXB';font-size:32px;color:#9F988C}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;margin-inline-end:10px}
+#foot{position:absolute;left:90px;right:90px;bottom:300px;display:flex;justify-content:space-between;
+  font-family:'AXB';font-size:34px;color:#7C766C;opacity:0}
+#vign{position:absolute;inset:0;background:radial-gradient(ellipse 80% 65% at 50% 45%,transparent 45%,rgba(0,0,0,.7))}
+</style></head><body>
+<div id="bg"></div><div id="grid"></div>
+<div id="kicker">محفظتك اليوم</div>
+<div id="title">فلوسك بتحصل إيه؟</div>
+<div class="card" id="card">
+  <div class="row"><div class="lbl">صافي الأصول</div><div class="badge">+18.4% هذا الشهر</div></div>
+  <div><span class="val" id="val">0</span><span class="cur">جنيه</span></div>
+  <div class="spark">
+    <svg viewBox="0 0 800 220" width="100%" height="220" preserveAspectRatio="none">
+      <defs><linearGradient id="lg" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#E8B44A" stop-opacity="0"/><stop offset="100%" stop-color="#F5CE7E" stop-opacity=".9"/></linearGradient></defs>
+      <path id="area" fill="url(#lg)" opacity=".35" d=""></path>
+      <path id="line" fill="none" stroke="#FFE1A0" stroke-width="7" stroke-linecap="round" d=""></path>
+      <circle id="pt" r="12" fill="#FFF6E0" opacity="0"></circle>
+    </svg>
+  </div>
+  <div class="bars">
+    <div class="bar" id="b1"></div><div class="bar dim" id="b2"></div><div class="bar" id="b3"></div>
+    <div class="bar dim" id="b4"></div><div class="bar" id="b5"></div>
+  </div>
+  <div class="legend"><span><i class="dot" style="background:#E8B44A"></i>أصول</span>
+    <span><i class="dot" style="background:rgba(255,255,255,.25)"></i>منظر</span></div>
+</div>
+<div id="foot"><span>تحديث آلي كل شهر</span><span>24 شهر · 0 أصل</span></div>
+<div id="vign"></div>
+<script>
+const $=id=>document.getElementById(id);
+const clamp=(v,a=0,b=1)=>v<a?a:v>b?b:v;
+const seg=(t,a,b)=>clamp((t-a)/(b-a||1e-6));
+const outC=t=>1-Math.pow(1-t,3);
+const P=[[20,190],[140,170],[260,150],[380,120],[500,96],[620,60],[740,34],[790,22]];
+let D='M'+P[0][0]+' '+P[0][1];
+for(let i=1;i<P.length;i++){const [x,y]=P[i],[px,py]=P[i-1],cx=(px+x)/2;
+  D+=` C ${cx} ${py} ${cx} ${y} ${x} ${y}`;}
+$('line').setAttribute('d',D);
+const LEN=2600;
+$('line').style.strokeDasharray=LEN; $('line').style.strokeDashoffset=LEN;
+function seek(t){
+  const p=outC(seg(t,0.05,0.7));
+  $('kicker').style.opacity=seg(t,0.02,0.4)*0.95;
+  $('title').style.opacity=p; $('title').style.transform=`translateY(${(1-p)*40}px)`; $('title').style.filter=`blur(${(1-p)*8}px)`;
+  const pc=outC(seg(t,0.35,0.95));
+  $('card').style.opacity=pc; $('card').style.transform=`translateY(${(1-pc)*80}px) scale(${0.94+0.06*pc})`;
+  const v=Math.round(outC(seg(t,0.5,1.5))*124800);
+  $('val').textContent=v.toLocaleString('en-US');
+  const sp=outC(seg(t,0.6,1.9));
+  $('line').style.strokeDashoffset=LEN*(1-sp);
+  $('area').setAttribute('d',D+` L790 220 L20 220 Z`);
+  $('area').setAttribute('opacity',0.32*sp);
+  const pt=$('pt'); pt.setAttribute('cx',790); pt.setAttribute('cy',22); pt.setAttribute('opacity',sp>0.98?1:0);
+  const hs=[0.42,0.30,0.72,0.22,0.60];
+  ['b1','b2','b3','b4','b5'].forEach((id,i)=>{
+    const k=outC(seg(t,0.9+i*0.09,1.5+i*0.09));
+    $(id).style.height=(hs[i]*100*k)+'%';
+  });
+  const pf=seg(t,1.2,1.8); $('foot').style.opacity=pf*0.9;
+}
+window.__seek=t=>{seek(t);return true};
+seek(0); window.__ready=true;
+</script></body></html>

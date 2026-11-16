@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'CB';src:url('/assets/fonts/Cairo-Black.ttf')}
+@font-face{font-family:'AXB';src:url('/assets/fonts/Almarai-ExtraBold.ttf')}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;background:#040405;overflow:hidden}
+#c{position:absolute;inset:0}
+#glow{position:absolute;inset:0;background:radial-gradient(ellipse 55% 38% at 50% 46%,rgba(255,206,120,.20),transparent 70%)}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse 72% 58% at 50% 47%,transparent 40%,rgba(0,0,0,.82) 100%)}
+#type{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;font-family:'CB'}
+.big{font-size:236px;line-height:.92;letter-spacing:-.02em;
+  background:linear-gradient(178deg,#FFF8E7,#F7D08A 34%,#E8B44A 64%,#B8791F);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 10px 40px rgba(0,0,0,.75)) drop-shadow(0 0 40px rgba(232,180,74,.35))}
+.sub{font-family:'AXB';font-size:74px;color:#EFE9DD;letter-spacing:.02em;
+  text-shadow:0 8px 40px rgba(0,0,0,.9)}
+#kicker{position:absolute;top:250px;left:0;right:0;text-align:center;font-family:'AXB';
+  font-size:46px;letter-spacing:.22em;color:#E8B44A;opacity:0}
+</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js"}}</script>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div id="glow"></div><div id="vig"></div>
+<div id="kicker">قاعدة الفلوس</div>
+<div id="type"><div class="big" id="big">فلوس</div><div class="sub" id="sub">بتشتغل وإنت نايم</div></div>
+<script type="module">
+import * as THREE from 'three';
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true,alpha:true});
+renderer.setSize(1080,1920,false); renderer.setPixelRatio(1);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(48,1080/1920,0.1,400);
+camera.position.set(0,0,0);
+
+const N=4200, pos=new Float32Array(N*3), seed=new Float32Array(N), rad=new Float32Array(N);
+const rnd=()=>{seedR=(seedR*1664525+1013904223)&0x7fffffff;return seedR/0x7fffffff};
+let seedR=12345;
+for(let i=0;i<N;i++){
+  const a=rnd()*Math.PI*2, r=2.2+rnd()*6.5;
+  pos[i*3]=Math.cos(a)*r; pos[i*3+1]=Math.sin(a)*r; pos[i*3+2]=-rnd()*90;
+  seed[i]=rnd(); rad[i]=r;
+}
+const g=new THREE.BufferGeometry();
+g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+g.setAttribute('aSeed',new THREE.BufferAttribute(seed,1));
+const mat=new THREE.ShaderMaterial({
+  transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+  uniforms:{uTime:{value:0}},
+  vertexShader:`attribute float aSeed; uniform float uTime; varying float vS;
+    void main(){
+      vec3 p=position;
+      p.z = mod(p.z + uTime*26.0, 90.0) - 90.0;
+      float d = -p.z;
+      vS = aSeed;
+      vec4 mv = modelViewMatrix*vec4(p,1.0);
+      gl_PointSize = clamp((320.0/max(d,0.6))*(0.35+aSeed*1.25), 0.7, 13.0);
+      gl_Position = projectionMatrix*mv;
+    }`,
+  fragmentShader:`varying float vS;
+    void main(){ vec2 q=gl_PointCoord-0.5; float r=length(q); if(r>0.5) discard;
+      float a=smoothstep(.5,.0,r)*(0.14+vS*0.75);
+      vec3 c=mix(vec3(1.0,0.82,0.52), vec3(1.0,0.97,0.90), vS*0.55);
+      gl_FragColor=vec4(c,a); }`
+});
+scene.add(new THREE.Points(g,mat));
+
+// warp rings
+const rings=[];
+for(let i=0;i<7;i++){
+  const r=new THREE.Mesh(new THREE.TorusGeometry(3.2+i*0.45,0.012,8,180),
+    new THREE.MeshBasicMaterial({color:0xE8B44A,transparent:true,opacity:.5,blending:THREE.AdditiveBlending}));
+  r.position.z=-(i*13+4); rings.push(r); scene.add(r);
+}
+window.__seek=t=>{
+  mat.uniforms.uTime.value=t;
+  rings.forEach((r,i)=>{ r.position.z = -(((i*13+4) + t*26) % 92) - 2;
+    r.material.opacity = 0.55*Math.min(1,(-r.position.z)/14)*(1-Math.min(1,(-r.position.z)/92)); });
+  camera.rotation.z = t*0.05;
+  renderer.render(scene,camera);
+
+  // typography motion
+  const big=document.getElementById('big'), sub=document.getElementById('sub'), kick=document.getElementById('kicker');
+  const p1=Math.min(1,Math.max(0,(t-0.10)/0.55));
+  const e=1-Math.pow(1-p1,3);
+  big.style.transform=`scale(${0.82+0.18*e}) translateY(${(1-e)*40}px)`;
+  big.style.opacity=e;
+  big.style.filter=`drop-shadow(0 10px 40px rgba(0,0,0,.75)) drop-shadow(0 0 40px rgba(232,180,74,${0.15+0.25*e})) blur(${(1-e)*10}px)`;
+  const p2=Math.min(1,Math.max(0,(t-0.55)/0.5)); const e2=1-Math.pow(1-p2,3);
+  sub.style.opacity=e2; sub.style.transform=`translateY(${(1-e2)*30}px)`; sub.style.filter=`blur(${(1-e2)*6}px)`;
+  kick.style.opacity=Math.min(1,Math.max(0,(t-0.0)/0.5))*0.9;
+  return true;
+};
+window.__seek(0); window.__ready=true;
+</script></body></html>

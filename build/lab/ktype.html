@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'CB';src:url('/assets/fonts/Cairo-Black.ttf')}
+@font-face{font-family:'AXB';src:url('/assets/fonts/Almarai-ExtraBold.ttf')}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#060608;font-family:'CB';-webkit-font-smoothing:antialiased}
+#bg{position:absolute;inset:0;background:
+  radial-gradient(55% 38% at 50% 42%,rgba(232,180,74,.16),transparent 70%),
+  linear-gradient(180deg,#0a0a0d,#050507 60%,#0a0908)}
+#lines{position:absolute;inset:0;overflow:hidden;opacity:.5}
+.streak{position:absolute;left:-20%;width:140%;height:2px;background:linear-gradient(90deg,transparent,rgba(232,180,74,.55),transparent)}
+#stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.word{position:absolute;white-space:nowrap;font-size:162px;line-height:1;letter-spacing:-.03em;color:#F7F3EB;
+  text-shadow:0 14px 50px rgba(0,0,0,.9)}
+.word.gold{background:linear-gradient(178deg,#FFF8E7,#F7D08A 32%,#E8B44A 62%,#B8791F);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;
+  filter:drop-shadow(0 12px 44px rgba(0,0,0,.8)) drop-shadow(0 0 34px rgba(232,180,74,.28))}
+#small{position:absolute;left:0;right:0;top:1030px;text-align:center;font-family:'AXB';font-size:66px;
+  color:#CFC7B9;letter-spacing:.04em;text-shadow:0 8px 34px rgba(0,0,0,.9)}
+#kicker{position:absolute;top:230px;left:0;right:0;text-align:center;font-family:'AXB';font-size:44px;
+  letter-spacing:.24em;color:#E8B44A}
+#flash{position:absolute;inset:0;background:#fff;opacity:0}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse 74% 60% at 50% 46%,transparent 42%,rgba(0,0,0,.8))}
+</style></head><body>
+<div id="bg"></div><div id="lines"></div>
+<div id="kicker">قاعدة الفلوس</div>
+<div id="stage">
+  <div class="word" id="w1" style="top:560px;font-size:112px">الغني بيشتري</div>
+  <div class="word gold" id="w2" style="top:740px;font-size:300px">رخيص</div>
+</div>
+<div id="small" style="top:1100px">والفقير بيشتري المنظر… غالي</div>
+<div id="flash"></div><div id="vig"></div>
+<script>
+const $=id=>document.getElementById(id);
+const clamp=(v,a=0,b=1)=>v<a?a:v>b?b:v;
+const seg=(t,a,b)=>clamp((t-a)/(b-a||1e-6));
+const outE=t=>t>=1?1:1-Math.pow(2,-10*t);
+const outB=(t,s=1.6)=>{const c3=s+1;return 1+c3*Math.pow(t-1,3)+s*Math.pow(t-1,2)};
+// streaks
+const box=$('lines');
+const S=Array.from({length:14},(_,i)=>({
+  el:(()=>{const d=document.createElement('div');d.className='streak';box.appendChild(d);return d})(),
+  y:120+i*126, sp:0.6+((i*37)%50)/60, w:0.25+((i*17)%60)/100
+}));
+function seek(t){
+  // cinematic type-in
+  const a=seg(t,0.05,0.62), ea=outB(a,2.2), ta=outE(a);
+  $('w1').style.opacity=ta;
+  $('w1').style.transform=`translateY(${(1-ea)*90}px) scale(${0.86+0.14*ea})`;
+  $('w1').style.filter=`blur(${(1-ta)*14}px)`;
+  const b=seg(t,0.55,1.15), eb=outB(b,1.9), tb=outE(b);
+  $('w2').style.opacity=tb;
+  $('w2').style.transform=`translateY(${(1-eb)*100}px) scale(${1.06-0.06*eb})`;
+  $('w2').style.filter=`drop-shadow(0 12px 44px rgba(0,0,0,.8)) drop-shadow(0 0 34px rgba(232,180,74,${0.1+0.25*tb})) blur(${(1-tb)*16}px)`;
+  const c=seg(t,1.15,1.75), tc=outE(c);
+  $('small').style.opacity=tc*0.95; $('small').style.transform=`translateY(${(1-tc)*26}px)`;
+  $('kicker').style.opacity=seg(t,0.0,0.5)*0.9;
+  // speed streaks
+  S.forEach((s,i)=>{
+    const ph=(t*s.sp + i*0.13)%1;
+    s.el.style.top=s.y+'px';
+    s.el.style.opacity=String(0.14+0.5*Math.abs(Math.sin(ph*Math.PI*2)));
+    s.el.style.transform=`translateX(${(ph-0.5)*160}px) scaleX(${s.w+0.6*Math.abs(Math.cos(ph*6.28))})`;
+  });
+  // impact flash
+  $('flash').style.opacity=(t<0.16? (1-t/0.16)*0.18 : 0)+ (t>1.1&&t<1.26? (1-(t-1.1)/0.16)*0.10 : 0);
+}
+window.__seek=t=>{seek(t);return true};
+seek(0); window.__ready=true;
+</script></body></html>

@@ -1,0 +1,12 @@
+{
+  "name": "mjod-shorts-studio",
+  "private": true,
+  "type": "module",
+  "description": "Chromium-driven vertical video studio (Remotion-style engine + three.js/GSAP look-dev)",
+  "dependencies": {
+    "@sparticuz/chromium": "^140.0.0",
+    "gsap": "^3.13.0",
+    "puppeteer-core": "^24.0.0",
+    "three": "^0.180.0"
+  }
+}
