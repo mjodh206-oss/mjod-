@@ -24,7 +24,7 @@ class SetupWizardScreen extends StatefulWidget {
 }
 
 class _SetupWizardScreenState extends State<SetupWizardScreen> {
-  static const int _totalSteps = 8;
+  static const int _totalSteps = 2;
   final PageController _pageCtrl = PageController();
   int _step = 0;
   bool _saving = false;
@@ -35,6 +35,8 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
   final TextEditingController _extraCtrl = TextEditingController();
   bool _isRenting = false;
   final TextEditingController _rentCtrl = TextEditingController();
+  bool _hasDebt = false;
+  final TextEditingController _debtsCtrl = TextEditingController();
   int _familyMembers = 1;
   int _dependents = 0;
 
@@ -42,7 +44,6 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
   final TextEditingController _transportCtrl = TextEditingController();
   final TextEditingController _telecomCtrl = TextEditingController();
   final TextEditingController _installmentsCtrl = TextEditingController();
-  final TextEditingController _debtsCtrl = TextEditingController();
 
   bool _hasCurrentSavings = false;
   final TextEditingController _savingsCtrl = TextEditingController();
@@ -67,6 +68,13 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
       if (existing.rentAmount > 0) {
         _rentCtrl.text = existing.rentAmount.toInt().toString();
       }
+      _hasDebt = existing.totalDebtAndInstallments > 0;
+      if (existing.debtsMonthlyPayment > 0) {
+        _debtsCtrl.text = existing.debtsMonthlyPayment.toInt().toString();
+      }
+      if (existing.installmentsCost > 0) {
+        _installmentsCtrl.text = existing.installmentsCost.toInt().toString();
+      }
       _familyMembers = existing.familyMembers;
       _dependents = existing.dependents;
       if (existing.utilitiesCost > 0) {
@@ -77,12 +85,6 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
       }
       if (existing.telecomCost > 0) {
         _telecomCtrl.text = existing.telecomCost.toInt().toString();
-      }
-      if (existing.installmentsCost > 0) {
-        _installmentsCtrl.text = existing.installmentsCost.toInt().toString();
-      }
-      if (existing.debtsMonthlyPayment > 0) {
-        _debtsCtrl.text = existing.debtsMonthlyPayment.toInt().toString();
       }
       _hasCurrentSavings = existing.hasCurrentSavings;
       if (existing.currentSavings > 0) {
@@ -135,29 +137,42 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
     });
   }
 
+  List<double> _quickSalaryPresets() {
+    final s = _currency.sampleSalary;
+    if (s >= 1000000) {
+      return const [500000, 1000000, 1500000, 2000000, 3000000];
+    }
+    if (s >= 10000) {
+      return const [5000, 10000, 15000, 25000, 40000];
+    }
+    if (s >= 3000) {
+      return const [3000, 5000, 8000, 12000, 18000];
+    }
+    return const [300, 500, 1000, 1500, 2500];
+  }
+
   void _nextStep() {
     FocusScope.of(context).unfocus();
-    if (_step == 0 && _parsedSalary <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('أدخل راتبك الشهري أولاً لنبني لك الخطة')),
-      );
-      return;
-    }
-    if (_step == 2 && _isRenting && _parseCtrl(_rentCtrl) <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('أدخل مبلغ الإيجار الشهري')),
-      );
-      return;
-    }
-
-    if (_step < _totalSteps - 1) {
-      setState(() => _step++);
+    if (_step == 0) {
+      if (_parsedSalary <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('أدخل راتبك الشهري أولاً لنجهّز خطتك')),
+        );
+        return;
+      }
+      setState(() => _step = 1);
       _pageCtrl.animateToPage(
-        _step,
-        duration: const Duration(milliseconds: 320),
+        1,
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
       );
     } else {
+      if (_isRenting && _parseCtrl(_rentCtrl) <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('أدخل مبلغ الإيجار الشهري أو اختر بيت ملك')),
+        );
+        return;
+      }
       _submit();
     }
   }
@@ -165,15 +180,26 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
   void _prevStep() {
     FocusScope.of(context).unfocus();
     if (_step > 0) {
-      setState(() => _step--);
+      setState(() => _step = 0);
       _pageCtrl.animateToPage(
-        _step,
-        duration: const Duration(milliseconds: 280),
+        0,
+        duration: const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,
       );
     } else if (widget.isEditing) {
       Navigator.of(context).pop();
     }
+  }
+
+  Future<void> _instantPlanFromStep1() async {
+    FocusScope.of(context).unfocus();
+    if (_parsedSalary <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('اكتب راتبك أولاً وسنحسب خطتك فوراً')),
+      );
+      return;
+    }
+    await _submit();
   }
 
   Future<void> _submit() async {
@@ -189,8 +215,8 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
       utilitiesCost: _parseCtrl(_utilitiesCtrl),
       transportCost: _parseCtrl(_transportCtrl),
       telecomCost: _parseCtrl(_telecomCtrl),
-      installmentsCost: _parseCtrl(_installmentsCtrl),
-      debtsMonthlyPayment: _parseCtrl(_debtsCtrl),
+      installmentsCost: _hasDebt ? _parseCtrl(_installmentsCtrl) : 0,
+      debtsMonthlyPayment: _hasDebt ? _parseCtrl(_debtsCtrl) : 0,
       hasCurrentSavings: _hasCurrentSavings,
       currentSavings: _hasCurrentSavings ? _parseCtrl(_savingsCtrl) : 0,
       primaryGoal: _goal,
@@ -221,9 +247,8 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Animated top progress bar + counter step number
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
               child: Column(
                 children: [
                   Row(
@@ -260,12 +285,12 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
-                      height: 10,
+                      height: 8,
                       width: double.infinity,
                       color: theme.colorScheme.primary.withValues(alpha: 0.14),
                       child: TweenAnimationBuilder<double>(
                         tween: Tween<double>(begin: 0, end: progress),
-                        duration: const Duration(milliseconds: 350),
+                        duration: const Duration(milliseconds: 300),
                         curve: Curves.easeOutCubic,
                         builder: (context, val, _) {
                           return FractionallySizedBox(
@@ -279,7 +304,6 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
                                     theme.colorScheme.secondary,
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                           );
@@ -291,41 +315,62 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
               ),
             ),
 
-            // Single-question pages
             Expanded(
               child: PageView(
                 controller: _pageCtrl,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _buildSalaryStep(theme),
-                  _buildExtraIncomeStep(theme),
-                  _buildHousingStep(theme),
-                  _buildFamilyStep(theme),
-                  _buildObligationsStep(theme),
-                  _buildSavingsStep(theme),
-                  _buildGoalStep(theme),
-                  _buildSalaryDayStep(theme),
+                  _buildQuickOptionsStep(theme),
                 ],
               ),
             ),
 
-            // Bottom CTA
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
-              child: FilledButton.icon(
-                onPressed: _saving ? null : _nextStep,
-                icon: Icon(
-                  _step == _totalSteps - 1
-                      ? Icons.auto_awesome_rounded
-                      : Icons.arrow_back_rounded,
-                ),
-                label: Text(
-                  _saving
-                      ? 'جارٍ إعداد خطتك...'
-                      : (_step == _totalSteps - 1
-                          ? 'جهّز خطتي الآن'
-                          : 'التالي'),
-                ),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 54,
+                    child: FilledButton.icon(
+                      onPressed: _saving ? null : _nextStep,
+                      icon: _saving
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Icon(
+                              _step == 1
+                                  ? Icons.auto_awesome_rounded
+                                  : Icons.arrow_back_rounded,
+                            ),
+                      label: Text(
+                        _step == 1
+                            ? 'اعرض خطتي الجاهزة الآن ✨'
+                            : 'التالي: سؤالين سريعين',
+                      ),
+                    ),
+                  ),
+                  if (_step == 0 && !widget.isEditing) ...[
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: _saving ? null : _instantPlanFromStep1,
+                      icon: const Icon(Icons.bolt_rounded, size: 19),
+                      label: const Text(
+                        'احسب خطتي فوراً بدون أسئلة إضافية',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
@@ -334,666 +379,438 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
     );
   }
 
-  Widget _stepShell({
-    required ThemeData theme,
-    required String title,
-    required String subtitle,
-    required Widget child,
-  }) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(title, style: theme.textTheme.headlineMedium),
-          const SizedBox(height: 6),
-          Text(subtitle, style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 18),
-          child,
-        ],
-      ),
+  Widget _buildSalaryStep(ThemeData theme) {
+    final presets = _quickSalaryPresets();
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+      children: [
+        Text(
+          'كم راتبك الشهري؟',
+          style: theme.textTheme.headlineLarge,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'اختر عملتك واضغط على الرقم التقريبي أو اكتبه بالأسفل',
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 14),
+
+        // Currency Selector
+        SizedBox(
+          height: 44,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: AppCurrencies.all.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, idx) {
+              final cur = AppCurrencies.all[idx];
+              final selected = cur.code == _currencyCode;
+              return ChoiceChip(
+                label: Text('${cur.symbol} · ${cur.nameAr}'),
+                selected: selected,
+                onSelected: (_) => setState(() => _currencyCode = cur.code),
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(height: 14),
+
+        // Big Salary Display Box
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF063C2B), Color(0xFF0C684A)],
+            ),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            children: [
+              Text(
+                _parsedSalary > 0
+                    ? ArabicFormatters.formatMoney(_parsedSalary, _currency)
+                    : '0 ${_currency.symbol}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 30,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'عملة الخطة: ${_currency.nameAr}',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12.5,
+                  color: Color(0xFFF5C443),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Quick preset salary chips
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: presets.map((amt) {
+            final isSel = _parsedSalary.round() == amt.round();
+            return ActionChip(
+              avatar: isSel
+                  ? const Icon(Icons.check_circle_rounded, size: 17)
+                  : null,
+              backgroundColor: isSel
+                  ? theme.colorScheme.secondary.withValues(alpha: 0.25)
+                  : null,
+              label: Text(
+                ArabicFormatters.formatCompactMoney(amt, _currency),
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              onPressed: () {
+                setState(() => _salaryDigits = amt.toInt().toString());
+              },
+            );
+          }).toList(),
+        ),
+
+        const SizedBox(height: 14),
+
+        // Large Numeric Keypad
+        _buildNumericKeypad(theme),
+      ],
     );
   }
 
-  // Step 1: Monthly Salary + Large Keypad + Currency selector
-  Widget _buildSalaryStep(ThemeData theme) {
-    final formatted = ArabicFormatters.formatNumber(
-      _parsedSalary,
-      allowDecimals: _currency.allowDecimals,
-    );
+  Widget _buildNumericKeypad(ThemeData theme) {
+    final keys = [
+      '1', '2', '3',
+      '4', '5', '6',
+      '7', '8', '9',
+      '000', '0', '⌫',
+    ];
 
-    return _stepShell(
-      theme: theme,
-      title: 'كم راتبك الشهري؟',
-      subtitle: 'اختر العملة وأدخل صافي الراتب باستخدام لوحة الأرقام.',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Currency selector
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: AppCurrencies.all.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, idx) {
-                final cur = AppCurrencies.all[idx];
-                final selected = cur.code == _currencyCode;
-                return ChoiceChip(
-                  label: Text(
-                    '${cur.nameAr} (${cur.symbol})',
-                    style: const TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: keys.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 2.35,
+      ),
+      itemBuilder: (context, idx) {
+        final k = keys[idx];
+        final isBack = k == '⌫';
+        return Material(
+          color: isBack
+              ? theme.colorScheme.error.withValues(alpha: 0.12)
+              : theme.cardColor,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              if (isBack) {
+                _backspace();
+              } else {
+                _appendDigit(k);
+              }
+            },
+            onLongPress: isBack ? () => setState(() => _salaryDigits = '') : null,
+            child: Center(
+              child: isBack
+                  ? Icon(Icons.backspace_rounded, color: theme.colorScheme.error)
+                  : Text(
+                      k,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  selected: selected,
-                  onSelected: (_) => setState(() => _currencyCode = cur.code),
-                );
-              },
             ),
           ),
-          const SizedBox(height: 14),
+        );
+      },
+    );
+  }
 
-          // Display box
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.colorScheme.primary.withValues(alpha: 0.12),
-                  theme.colorScheme.secondary.withValues(alpha: 0.10),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.25),
-              ),
-            ),
+  Widget _buildQuickOptionsStep(ThemeData theme) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+      children: [
+        Text(
+          'سؤالين سريعين لتظبيط خطتك',
+          style: theme.textTheme.headlineLarge,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'أجب بـ "نعم أو لا" لنوزع راتبك بالطريقة الأنسب لك',
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 16),
+
+        // Rent Card
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  '$formatted ${_currency.symbol}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.primary,
-                  ),
+                  '1. هل تدفع إيجار بيت؟',
+                  style: theme.textTheme.titleMedium,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('لا، بيت ملك')),
+                        selected: !_isRenting,
+                        onSelected: (_) => setState(() => _isRenting = false),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('نعم، أدفع إيجار')),
+                        selected: _isRenting,
+                        onSelected: (_) => setState(() => _isRenting = true),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_isRenting) ...[
+                  const SizedBox(height: 12),
+                  _numberField(
+                    controller: _rentCtrl,
+                    label: 'كم قيمة الإيجار الشهري؟',
+                    hint: 'مثال: 350000',
+                    icon: Icons.apartment_rounded,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Debt Card
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '2. هل عندك أقساط أو ديون شهرية؟',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('لا يوجد')),
+                        selected: !_hasDebt,
+                        onSelected: (_) => setState(() => _hasDebt = false),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('نعم، عندي')),
+                        selected: _hasDebt,
+                        onSelected: (_) => setState(() => _hasDebt = true),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_hasDebt) ...[
+                  const SizedBox(height: 12),
+                  _numberField(
+                    controller: _debtsCtrl,
+                    label: 'كم تدفع للديون/الأقساط بالشهر؟',
+                    hint: 'مثال: 150000',
+                    icon: Icons.payments_rounded,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Main Goal
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '3. شو هدفك الأهم هذا الشهر؟',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
-                  runSpacing: 6,
-                  alignment: WrapAlignment.center,
-                  children: _currency.quickAmounts.map((q) {
-                    return ActionChip(
-                      label: Text(
-                        ArabicFormatters.formatCompactMoney(q, _currency),
-                        style: const TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      onPressed: () {
-                        setState(() => _salaryDigits = q.toInt().toString());
-                      },
+                  runSpacing: 8,
+                  children: PrimaryFinancialGoal.values.map((g) {
+                    final selected = _goal == g;
+                    return ChoiceChip(
+                      label: Text(g.labelAr),
+                      selected: selected,
+                      onSelected: (_) => setState(() => _goal = g),
                     );
                   }).toList(),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
+        ),
 
-          // Large Numeric Keypad (RTL-safe layout forced LTR for calculator grid)
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 2.15,
+        const SizedBox(height: 12),
+
+        // Payday picker
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
               children: [
-                ...['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0']
-                    .map((keyLabel) {
-                  return ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: theme.cardColor,
-                      foregroundColor: theme.textTheme.bodyLarge?.color,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: BorderSide(
-                          color: Colors.grey.withValues(alpha: 0.18),
-                        ),
-                      ),
-                    ),
-                    onPressed: () => _appendDigit(keyLabel),
-                    child: Text(
-                      keyLabel,
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  );
-                }),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.12),
-                    foregroundColor: const Color(0xFFEF4444),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                Icon(Icons.event_available_rounded,
+                    color: theme.colorScheme.primary),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'يوم نزول الراتب بالشهر',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  onPressed: _backspace,
-                  onLongPress: () => setState(() => _salaryDigits = ''),
-                  child: const Icon(Icons.backspace_rounded, size: 22),
+                ),
+                DropdownButton<int>(
+                  value: _salaryDay,
+                  underline: const SizedBox.shrink(),
+                  items: List.generate(28, (i) => i + 1)
+                      .map((d) => DropdownMenuItem(value: d, child: Text('يوم $d')))
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _salaryDay = v);
+                  },
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
 
-  // Step 2: Extra Income
-  Widget _buildExtraIncomeStep(ThemeData theme) {
-    return _stepShell(
-      theme: theme,
-      title: 'هل عندك دخل إضافي؟',
-      subtitle: 'اختياري — عمل حر، مكافأة، أو مصدر جانبي ثابت شهرياً.',
-      child: Column(
-        children: [
-          _optionTile(
-            theme: theme,
-            selected: !_hasExtraIncome,
-            icon: Icons.work_outline_rounded,
-            title: 'لا، الراتب فقط',
-            subtitle: 'تخطّ هذه الخطوة ببساطة',
-            onTap: () => setState(() => _hasExtraIncome = false),
-          ),
-          const SizedBox(height: 12),
-          _optionTile(
-            theme: theme,
-            selected: _hasExtraIncome,
-            icon: Icons.add_chart_rounded,
-            title: 'نعم، عندي دخل إضافي',
-            subtitle: 'أدخل المعدل الشهري التقريبي',
-            onTap: () => setState(() => _hasExtraIncome = true),
-          ),
-          if (_hasExtraIncome) ...[
-            const SizedBox(height: 16),
-            _moneyField(
-              controller: _extraCtrl,
-              label: 'مبلغ الدخل الإضافي (${_currency.symbol})',
-              icon: Icons.attach_money_rounded,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+        const SizedBox(height: 10),
 
-  // Step 3: Housing
-  Widget _buildHousingStep(ThemeData theme) {
-    return _stepShell(
-      theme: theme,
-      title: 'ما نوع السكن؟',
-      subtitle: 'يساعدنا معرفة ضغط السكن على راتبك لنعطيك نصائح أدق.',
-      child: Column(
-        children: [
-          _optionTile(
-            theme: theme,
-            selected: !_isRenting,
-            icon: Icons.home_rounded,
-            title: 'سكن ملك / عائلي',
-            subtitle: 'بدون إيجار شهري',
-            onTap: () => setState(() => _isRenting = false),
-          ),
-          const SizedBox(height: 12),
-          _optionTile(
-            theme: theme,
-            selected: _isRenting,
-            icon: Icons.apartment_rounded,
-            title: 'سكن بالإيجار',
-            subtitle: 'أدخل قيمة الإيجار الشهري',
-            onTap: () => setState(() => _isRenting = true),
-          ),
-          if (_isRenting) ...[
-            const SizedBox(height: 16),
-            _moneyField(
-              controller: _rentCtrl,
-              label: 'مبلغ الإيجار الشهري (${_currency.symbol})',
-              icon: Icons.key_rounded,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // Step 4: Family size & Dependents
-  Widget _buildFamilyStep(ThemeData theme) {
-    return _stepShell(
-      theme: theme,
-      title: 'عدد أفراد الأسرة ومن تعيل',
-      subtitle: 'نحسب مصاريف المعيشة المناسبة لحجم أسرتك.',
-      child: Column(
-        children: [
-          _counterCard(
-            theme: theme,
-            icon: Icons.groups_rounded,
-            title: 'عدد أفراد الأسرة الكلي',
-            subtitle: 'بمن فيهم أنت',
-            value: _familyMembers,
-            min: 1,
-            max: 15,
-            onChanged: (v) {
-              setState(() {
-                _familyMembers = v;
-                if (_dependents >= v) _dependents = v - 1;
-              });
-            },
-          ),
-          const SizedBox(height: 14),
-          _counterCard(
-            theme: theme,
-            icon: Icons.family_restroom_rounded,
-            title: 'كم شخصاً تعيل مالياً؟',
-            subtitle: 'أولاد، والدين، أو زوجة',
-            value: _dependents,
-            min: 0,
-            max: 14,
-            onChanged: (v) => setState(() => _dependents = v),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Step 5: Fixed Obligations
-  Widget _buildObligationsStep(ThemeData theme) {
-    return _stepShell(
-      theme: theme,
-      title: 'التزاماتك الشهرية الثابتة',
-      subtitle: 'اترك أي حقل فارغاً أو صفراً إذا لم يكن ينطبق عليك.',
-      child: Column(
-        children: [
-          _moneyField(
-            controller: _utilitiesCtrl,
-            label: 'فواتير (كهرباء، ماء، غاز) (${_currency.symbol})',
-            icon: Icons.receipt_long_rounded,
-          ),
-          const SizedBox(height: 12),
-          _moneyField(
-            controller: _transportCtrl,
-            label: 'مواصلات وبنزين (${_currency.symbol})',
-            icon: Icons.directions_car_rounded,
-          ),
-          const SizedBox(height: 12),
-          _moneyField(
-            controller: _telecomCtrl,
-            label: 'اتصالات وإنترنت (${_currency.symbol})',
-            icon: Icons.wifi_rounded,
-          ),
-          const SizedBox(height: 12),
-          _moneyField(
-            controller: _installmentsCtrl,
-            label: 'أقساط شهرية (${_currency.symbol})',
-            icon: Icons.credit_card_rounded,
-          ),
-          const SizedBox(height: 12),
-          _moneyField(
-            controller: _debtsCtrl,
-            label: 'سداد ديون شهرية (${_currency.symbol})',
-            icon: Icons.payments_rounded,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Step 6: Current Savings
-  Widget _buildSavingsStep(ThemeData theme) {
-    return _stepShell(
-      theme: theme,
-      title: 'هل عندك مدخرات حالياً؟',
-      subtitle: 'لتقييم صندوق الطوارئ الخاص بك بدقة.',
-      child: Column(
-        children: [
-          _optionTile(
-            theme: theme,
-            selected: !_hasCurrentSavings,
-            icon: Icons.hourglass_empty_rounded,
-            title: 'لا توجد مدخرات حالياً',
-            subtitle: 'سنبدأ ببناء احتياطي أمان من الصفر',
-            onTap: () => setState(() => _hasCurrentSavings = false),
-          ),
-          const SizedBox(height: 12),
-          _optionTile(
-            theme: theme,
-            selected: _hasCurrentSavings,
-            icon: Icons.savings_rounded,
-            title: 'نعم، عندي مبلغ مدّخر',
-            subtitle: 'أدخل إجمالي مدخراتك الحالية',
-            onTap: () => setState(() => _hasCurrentSavings = true),
-          ),
-          if (_hasCurrentSavings) ...[
-            const SizedBox(height: 16),
-            _moneyField(
-              controller: _savingsCtrl,
-              label: 'كم تبلغ مدخراتك الحالية؟ (${_currency.symbol})',
-              icon: Icons.account_balance_wallet_rounded,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // Step 7: Primary Goal
-  Widget _buildGoalStep(ThemeData theme) {
-    const goals = [
-      (
-        goal: PrimaryFinancialGoal.saving,
-        icon: Icons.savings_rounded,
-        title: 'ادخار وتنمية المال',
-        sub: 'تعظيم الفائض الشهري وبناء ثروة تدريجية',
-      ),
-      (
-        goal: PrimaryFinancialGoal.debtPayoff,
-        icon: Icons.credit_score_rounded,
-        title: 'سداد الديون أولاً',
-        sub: 'توجيه فائض إضافي للتخلص من الأقساط أسرع',
-      ),
-      (
-        goal: PrimaryFinancialGoal.purchase,
-        icon: Icons.shopping_bag_rounded,
-        title: 'شراء شيء مهم',
-        sub: 'تجهيز مبلغ لسيارة أو زواج أو جهاز أو سفر',
-      ),
-      (
-        goal: PrimaryFinancialGoal.emergencyFund,
-        icon: Icons.shield_rounded,
-        title: 'بناء صندوق طوارئ',
-        sub: 'تأمين مصاريف 3 إلى 6 أشهر لراحة البال',
-      ),
-    ];
-
-    return _stepShell(
-      theme: theme,
-      title: 'ما هدفك المالي الأساسي الآن؟',
-      subtitle: 'سنكيّف توزيع راتبك فوراً ليخدم هدفك الأهم.',
-      child: Column(
-        children: goals.map((g) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _optionTile(
-              theme: theme,
-              selected: _goal == g.goal,
-              icon: g.icon,
-              title: g.title,
-              subtitle: g.sub,
-              onTap: () => setState(() => _goal = g.goal),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  // Step 8: Salary Date
-  Widget _buildSalaryDayStep(ThemeData theme) {
-    return _stepShell(
-      theme: theme,
-      title: 'متى تستلم راتبك كل شهر؟',
-      subtitle: 'نضبط عليه تذكير «نزل الراتب!» وبداية دورتك الشهرية.',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'يوم استلام الراتب: اليوم $_salaryDay من كل شهر',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 31,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 7,
-                      mainAxisSpacing: 6,
-                      crossAxisSpacing: 6,
-                    ),
-                    itemBuilder: (context, index) {
-                      final day = index + 1;
-                      final selected = day == _salaryDay;
-                      return InkWell(
-                        onTap: () => setState(() => _salaryDay = day),
-                        borderRadius: BorderRadius.circular(10),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? theme.colorScheme.primary
-                                : theme.scaffoldBackgroundColor,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: selected
-                                  ? theme.colorScheme.primary
-                                  : Colors.grey.withValues(alpha: 0.2),
-                            ),
-                          ),
-                          child: Text(
-                            '$day',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.w700,
-                              color: selected ? Colors.white : null,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+        // Optional advanced details (hidden by default for simplicity!)
+        Card(
+          child: ExpansionTile(
+            leading: const Icon(Icons.tune_rounded),
+            title: const Text(
+              'إضافة تفاصيل أخرى (اختياري)',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.notifications_active_rounded,
-                    color: theme.colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'تذكير سداد الفواتير والأقساط كل شهر',
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ),
-                  DropdownButton<int>(
-                    value: _billDueDay,
-                    underline: const SizedBox.shrink(),
-                    items: List.generate(28, (i) => i + 1)
-                        .map(
-                          (d) => DropdownMenuItem(
-                            value: d,
-                            child: Text('يوم $d'),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) {
-                      if (v != null) setState(() => _billDueDay = v);
-                    },
-                  ),
-                ],
-              ),
+            subtitle: const Text(
+              'دخل إضافي، فواتير، عائلة، مدخرات سابقة',
+              style: TextStyle(fontFamily: 'Cairo', fontSize: 12),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _optionTile({
-    required ThemeData theme,
-    required bool selected,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: selected
-              ? theme.colorScheme.primary.withValues(alpha: 0.12)
-              : theme.cardColor,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected
-                ? theme.colorScheme.primary
-                : Colors.grey.withValues(alpha: 0.2),
-            width: selected ? 2 : 1,
+            childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('عندي دخل إضافي شهري'),
+                value: _hasExtraIncome,
+                onChanged: (v) => setState(() => _hasExtraIncome = v),
+              ),
+              if (_hasExtraIncome) ...[
+                _numberField(
+                  controller: _extraCtrl,
+                  label: 'قيمة الدخل الإضافي',
+                  hint: '0',
+                  icon: Icons.add_card_rounded,
+                ),
+                const SizedBox(height: 10),
+              ],
+              _numberField(
+                controller: _utilitiesCtrl,
+                label: 'فواتير الكهرباء والماء والغاز',
+                hint: '0',
+                icon: Icons.bolt_rounded,
+              ),
+              const SizedBox(height: 10),
+              _numberField(
+                controller: _transportCtrl,
+                label: 'المواصلات الشهرية',
+                hint: '0',
+                icon: Icons.directions_car_rounded,
+              ),
+              const SizedBox(height: 10),
+              _numberField(
+                controller: _telecomCtrl,
+                label: 'الإنترنت والاتصالات',
+                hint: '0',
+                icon: Icons.wifi_rounded,
+              ),
+              const SizedBox(height: 10),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('عندي مدخرات حالية'),
+                value: _hasCurrentSavings,
+                onChanged: (v) => setState(() => _hasCurrentSavings = v),
+              ),
+              if (_hasCurrentSavings)
+                _numberField(
+                  controller: _savingsCtrl,
+                  label: 'قيمة مدخراتك الحالية',
+                  hint: '0',
+                  icon: Icons.savings_rounded,
+                ),
+            ],
           ),
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: (selected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.secondary)
-                    .withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                icon,
-                color: selected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.secondary,
-                size: 26,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: theme.textTheme.bodyMedium),
-                ],
-              ),
-            ),
-            if (selected)
-              Icon(
-                Icons.check_circle_rounded,
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
-  Widget _moneyField({
+  Widget _numberField({
     required TextEditingController controller,
     required String label,
+    required String hint,
     required IconData icon,
   }) {
     return TextField(
       controller: controller,
-      keyboardType: TextInputType.numberWithOptions(
-        decimal: _currency.allowDecimals,
-      ),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(
-          _currency.allowDecimals ? RegExp(r'[0-9.]') : RegExp(r'[0-9]'),
-        ),
-      ],
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       decoration: InputDecoration(
         labelText: label,
+        hintText: hint,
         prefixIcon: Icon(icon),
-      ),
-    );
-  }
-
-  Widget _counterCard({
-    required ThemeData theme,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required int value,
-    required int min,
-    required int max,
-    required ValueChanged<int> onChanged,
-  }) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(icon, color: theme.colorScheme.primary, size: 28),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: theme.textTheme.titleMedium),
-                  Text(subtitle, style: theme.textTheme.bodyMedium),
-                ],
-              ),
-            ),
-            IconButton.filledTonal(
-              onPressed: value > min ? () => onChanged(value - 1) : null,
-              icon: const Icon(Icons.remove_rounded),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                '$value',
-                style: theme.textTheme.headlineMedium,
-              ),
-            ),
-            IconButton.filledTonal(
-              onPressed: value < max ? () => onChanged(value + 1) : null,
-              icon: const Icon(Icons.add_rounded),
-            ),
-          ],
-        ),
+        suffixText: _currency.symbol,
       ),
     );
   }

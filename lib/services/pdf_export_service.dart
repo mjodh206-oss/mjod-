@@ -58,7 +58,7 @@ class PdfExportService {
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
                 pw.Text(
-                  'تطبيق رَتِّبْ — التقرير المالي الشهري',
+                  'تطبيق BNB — التقرير المالي الشهري',
                   style: pw.TextStyle(
                     fontSize: 20,
                     fontWeight: pw.FontWeight.bold,
@@ -67,7 +67,7 @@ class PdfExportService {
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  'فلوسك بتستاهل خطة  |  تاريخ التقرير: ${ArabicFormatters.formatDateAr(DateTime.now())}',
+                  'راتبك مرتب وحياتك أسهل  |  تاريخ التقرير: ${ArabicFormatters.formatDateAr(DateTime.now())}',
                   style: const pw.TextStyle(
                     fontSize: 11,
                     color: gold,
@@ -216,7 +216,7 @@ class PdfExportService {
           pw.SizedBox(height: 20),
           pw.Divider(),
           pw.Text(
-            'تم إنشاء التقرير بواسطة تطبيق رَتِّبْ — تنفيذ وتطوير: أمجد حبيب',
+            'تم إنشاء التقرير بواسطة تطبيق BNB — تنفيذ وتطوير: أمجد حبيب',
             style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
           ),
         ],
@@ -225,7 +225,7 @@ class PdfExportService {
 
     final dir = await getTemporaryDirectory();
     final file = File(
-      '${dir.path}/rattib_report_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      '${dir.path}/bnb_report_${DateTime.now().millisecondsSinceEpoch}.pdf',
     );
     await file.writeAsBytes(await pdf.save());
     return file;
@@ -251,7 +251,7 @@ class PdfExportService {
   Future<void> shareFile(File file, {String? text}) async {
     await Share.shareXFiles(
       [XFile(file.path)],
-      text: text ?? 'التقرير المالي من تطبيق رَتِّبْ',
+      text: text ?? 'التقرير المالي من تطبيق BNB',
     );
   }
 }

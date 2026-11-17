@@ -17,7 +17,7 @@ class AboutScreen extends StatelessWidget {
           const Center(child: RattibLogo(size: 112)),
           const SizedBox(height: 16),
           Text(
-            'رَتِّبْ',
+            'BNB',
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineLarge?.copyWith(
               color: theme.colorScheme.primary,
@@ -26,7 +26,7 @@ class AboutScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'فلوسك بتستاهل خطة',
+            'راتبك مرتب.. وحياتك أسهل',
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.secondary,
@@ -109,7 +109,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   title: const Text('ويدجت الشاشة الرئيسية'),
                   subtitle: const Text(
-                    'اضغط مطولاً على شاشة هاتفك الرئيسية ← الأدوات المصغرة (Widgets) ← اختر «رَتِّبْ» لمتابعة المتبقي من راتبك مباشرة.',
+                    'اضغط مطولاً على شاشة هاتفك الرئيسية ← الأدوات المصغرة (Widgets) ← اختر «BNB» لمتابعة المتبقي من راتبك مباشرة.',
                   ),
                 ),
               ],

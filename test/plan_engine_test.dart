@@ -35,6 +35,64 @@ void main() {
       expect(plan.annualSavingsPotential, greaterThan(0));
     });
 
+    test('all 4 ready presets produce valid 100% plans and daily allowance', () {
+      const profile = SalaryProfile(
+        monthlySalary: 1500000,
+        currencyCode: 'SYP',
+        isRenting: true,
+        rentAmount: 350000,
+        debtsMonthlyPayment: 150000,
+      );
+
+      final balanced = PlanEngine.generatePresetPlan(
+        profile: profile,
+        preset: PlanPreset.balanced,
+      );
+      final strong = PlanEngine.generatePresetPlan(
+        profile: profile,
+        preset: PlanPreset.strongSaving,
+      );
+      final essentials = PlanEngine.generatePresetPlan(
+        profile: profile,
+        preset: PlanPreset.essentialsFirst,
+      );
+      final debtFirst = PlanEngine.generatePresetPlan(
+        profile: profile,
+        preset: PlanPreset.debtPayoff,
+      );
+
+      for (final p in [balanced, strong, essentials, debtFirst]) {
+        final sum = p.necessitiesPct +
+            p.wantsPct +
+            p.savingsPct +
+            p.debtsPct +
+            p.emergencyPct;
+        expect(sum, closeTo(100.0, 0.2));
+      }
+
+      expect(strong.savingsPct, greaterThan(balanced.savingsPct));
+      expect(essentials.necessitiesPct, greaterThan(balanced.necessitiesPct));
+      expect(debtFirst.debtsPct, greaterThanOrEqualTo(balanced.debtsPct));
+
+      final daily = PlanEngine.dailySafeSpend(
+        profile: profile,
+        plan: balanced,
+        spentByBucket: const {},
+        daysLeft: 20,
+      );
+      expect(daily, greaterThan(0));
+
+      final steps = PlanEngine.buildSalaryActionPlan(
+        profile: profile,
+        plan: balanced,
+        spentByBucket: const {},
+        currency: AppCurrencies.byCode('SYP'),
+        daysLeft: 20,
+      );
+      expect(steps.length, greaterThanOrEqualTo(4));
+      expect(steps.first.stepNumber, 1);
+    });
+
     test('slider rebalancing preserves 100% sum and updates live', () {
       const profile = SalaryProfile(
         monthlySalary: 1000,

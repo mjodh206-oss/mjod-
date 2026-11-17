@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _scaleAnim;
   late final Animation<double> _glowAnim;
 
-  static const String _fullTitle = 'رَتِّبْ';
+  static const String _fullTitle = 'BNB';
   int _typedLength = 0;
   bool _showSubtitle = false;
   Timer? _typeTimer;
@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _iconController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1300),
     );
     _scaleAnim = Tween<double>(begin: 0.45, end: 1.0).animate(
       CurvedAnimation(parent: _iconController, curve: Curves.easeOutBack),
@@ -56,15 +56,15 @@ class _SplashScreenState extends State<SplashScreen>
 
     _coinsController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 1500),
     );
 
     _iconController.forward();
     _coinsController.forward();
     widget.controller.sound.playSplashIntro();
 
-    // Typewriter animation for "رَتِّبْ"
-    _typeTimer = Timer.periodic(const Duration(milliseconds: 110), (timer) {
+    // Typewriter animation for "BNB"
+    _typeTimer = Timer.periodic(const Duration(milliseconds: 140), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
@@ -80,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
     });
 
     if (widget.autoNavigate) {
-      _navTimer = Timer(const Duration(milliseconds: 2450), _navigateNext);
+      _navTimer = Timer(const Duration(milliseconds: 2050), _navigateNext);
     }
   }
 
@@ -215,7 +215,7 @@ class _SplashScreenState extends State<SplashScreen>
                       opacity: _showSubtitle ? 1.0 : 0.0,
                       duration: const Duration(milliseconds: 500),
                       child: const Text(
-                        'فلوسك بتستاهل خطة',
+                        'راتبك مرتب.. وحياتك أسهل',
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 18,

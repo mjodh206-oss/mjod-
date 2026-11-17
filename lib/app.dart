@@ -22,7 +22,7 @@ class RattibApp extends StatelessWidget {
       builder: (context, _) {
         final s = controller.settings;
         return MaterialApp(
-          title: 'رَتِّبْ',
+          title: 'BNB',
           debugShowCheckedModeBanner: false,
           locale: const Locale('ar'),
           supportedLocales: const [Locale('ar')],

@@ -48,48 +48,48 @@ class AppCategories {
   static const List<BucketMeta> buckets = [
     BucketMeta(
       bucket: BudgetBucket.necessities,
-      titleAr: 'ضروريات',
-      subtitleAr: 'السكن، الأكل، الفواتير، المواصلات',
+      titleAr: 'البيت والأساسيات',
+      subtitleAr: 'الإيجار، الأكل، الفواتير والمواصلات',
       color: Color(0xFF0E9F6E),
       icon: Icons.home_rounded,
       ruleDescriptionAr:
-          'القاعدة الذهبية توصي بألا تتجاوز الضروريات 50% إلى 55% من دخلك الشهري حتى يبقى لك هامش للادخار والراحة.',
+          'هذا المبلغ مخصص للأساسيات اللي ما بتستغني عنها (سكن، أكل، كهرباء، مواصلات). يفضّل ما يتعدى 50% إلى 55% من راتبك.',
     ),
     BucketMeta(
       bucket: BudgetBucket.wants,
-      titleAr: 'احتياجات مرنة',
-      subtitleAr: 'خروجات، هدايا، تسوق، ترفيه',
+      titleAr: 'مصروفك الشخصي',
+      subtitleAr: 'الطلبات، الطلعات، المشتريات والترفيه',
       color: Color(0xFFF59E0B),
       icon: Icons.shopping_bag_rounded,
       ruleDescriptionAr:
-          'قاعدة 50/30/20 تخصص حتى 30% للرغبات والرفاهية، ويمكن تقليصها مؤقتاً لتسريع الادخار أو سداد الديون.',
+          'مبلغ تصرفه على نفسك وعائلتك بالراحة بدون ما يأثر على البيت أو التوفير. لو احتجت توفّر أكثر، هذا أول بند تقدر تخفف منه.',
     ),
     BucketMeta(
       bucket: BudgetBucket.savings,
-      titleAr: 'ادخار',
-      subtitleAr: 'استثمار، أهداف مستقبلية، شراء',
+      titleAr: 'التوفير والادخار',
+      subtitleAr: 'مبلغ تحجزه لأهدافك ومستقبلك',
       color: Color(0xFF0EA5E9),
       icon: Icons.savings_rounded,
       ruleDescriptionAr:
-          'ادفع لنفسك أولاً! تخصيص 10% على الأقل للادخار يصنع فارقاً ضخماً خلال سنة واحدة.',
+          'أفضل عادة مالية: خذ مبلغ التوفير أول ما ينزل راتبك وحطه على جنب قبل ما تبدأ الصرف.',
     ),
     BucketMeta(
       bucket: BudgetBucket.debts,
-      titleAr: 'ديون وأقساط',
-      subtitleAr: 'سداد قروض، أقساط شهرية، ذمم',
+      titleAr: 'الديون والأقساط',
+      subtitleAr: 'سداد القروض والأقساط الشهرية',
       color: Color(0xFFEF4444),
       icon: Icons.credit_score_rounded,
       ruleDescriptionAr:
-          'سداد الديون أولاً يرفع صحتك المالية ويحرّر راتبك. جرب طريقة كرة الثلج أو الانهيار الجليدي.',
+          'كل ما خلّصت دين أسرع، كل ما تحرّر راتبك وزاد المبلغ اللي بيبقى معك آخر الشهر.',
     ),
     BucketMeta(
       bucket: BudgetBucket.emergency,
-      titleAr: 'طوارئ',
-      subtitleAr: 'صندوق أمان للأزمات والمفاجآت',
+      titleAr: 'صندوق الطوارئ',
+      subtitleAr: 'احتياطي أمان لأي ظرف مفاجئ',
       color: Color(0xFFD4AF37),
       icon: Icons.shield_rounded,
       ruleDescriptionAr:
-          'صندوق الطوارئ المثالي يغطي 3 إلى 6 أشهر من مصاريفك الأساسية ليحميك من أي ظرف طارئ.',
+          'مبلغ احتياطي بتحفظه للطوارئ (مرض، تصليح مفاجئ، أو أي ظرف) حتى ما تضطر تستدين.',
     ),
   ];
 
@@ -100,14 +100,14 @@ class AppCategories {
   static const List<ExpenseCategory> expenseCategories = [
     ExpenseCategory(
       id: 'food',
-      nameAr: 'طعام وبقالة',
+      nameAr: 'أكل وبقالة',
       icon: Icons.restaurant_rounded,
       color: Color(0xFF10B981),
       bucket: BudgetBucket.necessities,
     ),
     ExpenseCategory(
       id: 'housing',
-      nameAr: 'سكن وإيجار',
+      nameAr: 'إيجار وسكن',
       icon: Icons.apartment_rounded,
       color: Color(0xFF059669),
       bucket: BudgetBucket.necessities,
@@ -121,14 +121,14 @@ class AppCategories {
     ),
     ExpenseCategory(
       id: 'transport',
-      nameAr: 'مواصلات وبنزين',
+      nameAr: 'مواصلات',
       icon: Icons.directions_car_rounded,
       color: Color(0xFF0D9488),
       bucket: BudgetBucket.necessities,
     ),
     ExpenseCategory(
       id: 'telecom',
-      nameAr: 'اتصالات وإنترنت',
+      nameAr: 'نت وموبايل',
       icon: Icons.wifi_rounded,
       color: Color(0xFF0891B2),
       bucket: BudgetBucket.necessities,
@@ -142,7 +142,7 @@ class AppCategories {
     ),
     ExpenseCategory(
       id: 'shopping',
-      nameAr: 'تسوق وترفيه',
+      nameAr: 'شخصي وطلعات',
       icon: Icons.shopping_bag_rounded,
       color: Color(0xFFF59E0B),
       bucket: BudgetBucket.wants,
@@ -156,17 +156,17 @@ class AppCategories {
     ),
     ExpenseCategory(
       id: 'debt',
-      nameAr: 'قسط أو دين',
+      nameAr: 'دين أو قسط',
       icon: Icons.payments_rounded,
       color: Color(0xFFEF4444),
       bucket: BudgetBucket.debts,
     ),
     ExpenseCategory(
-      id: 'emergency_save',
-      nameAr: 'صندوق الطوارئ',
-      icon: Icons.shield_rounded,
-      color: Color(0xFFD4AF37),
-      bucket: BudgetBucket.emergency,
+      id: 'savings_deposit',
+      nameAr: 'تحويل للتوفير',
+      icon: Icons.savings_rounded,
+      color: Color(0xFF0EA5E9),
+      bucket: BudgetBucket.savings,
     ),
   ];
 

@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="رَتِّبْ • المتبقي من الشهر"
+            android:text="BNB • المتبقي من الشهر"
             android:textColor="#F5C443"
             android:textSize="13sp"
             android:textStyle="bold" />

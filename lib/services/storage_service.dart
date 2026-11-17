@@ -151,8 +151,8 @@ class StorageService {
 
   Future<void> importBackupJson(String rawJson) async {
     final map = jsonDecode(rawJson) as Map<String, dynamic>;
-    if (map['app'] != 'rattib') {
-      throw const FormatException('ملف النسخة الاحتياطية غير صالح لتطبيق رَتِّبْ.');
+    if (map['app'] != 'rattib' && map['app'] != 'bnb') {
+      throw const FormatException('ملف النسخة الاحتياطية غير صالح لتطبيق BNB.');
     }
     if (map['settings'] is Map<String, dynamic>) {
       await saveSettings(

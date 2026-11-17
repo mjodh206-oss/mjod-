@@ -343,7 +343,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'حدد المبلغ والمدة وسيحسب رَتِّبْ الادخار الشهري تلقائياً',
+                            'حدد المبلغ والمدة وسيحسب BNB كم تحفظ بالشهر تلقائياً',
                             style: theme.textTheme.bodyMedium,
                           ),
                         ],

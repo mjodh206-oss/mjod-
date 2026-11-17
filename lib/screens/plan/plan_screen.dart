@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/categories.dart';
+import '../../core/constants/financial_tips_data.dart';
 import '../../core/utils/arabic_formatters.dart';
 import '../../core/utils/page_transitions.dart';
+import '../../services/plan_engine.dart';
 import '../../state/app_controller.dart';
 import '../../widgets/animated_counter.dart';
 import '../../widgets/budget_donut_chart.dart';
 import '../../widgets/category_progress_bar.dart';
+import '../advice/advice_screen.dart';
 import '../setup/setup_wizard_screen.dart';
 import 'bucket_detail_sheet.dart';
 
@@ -21,6 +24,7 @@ class PlanScreen extends StatefulWidget {
 
 class _PlanScreenState extends State<PlanScreen> {
   bool _showSliders = false;
+  PlanPreset _selectedPreset = PlanPreset.balanced;
 
   Color _healthColor(int score) {
     if (score >= 85) return const Color(0xFF10B981);
@@ -40,16 +44,33 @@ class _PlanScreenState extends State<PlanScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: FilledButton.icon(
-            onPressed: () {
-              Navigator.of(context).push(
-                SmoothPageRoute(
-                  builder: (_) => SetupWizardScreen(controller: c),
-                ),
-              );
-            },
-            icon: const Icon(Icons.auto_awesome_rounded),
-            label: const Text('أنشئ خطة راتبك الآن'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.account_balance_wallet_rounded,
+                size: 64,
+                color: Color(0xFF0E9F6E),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'أدخل راتبك لنجهّز خطتك بثانية',
+                style: theme.textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    SmoothPageRoute(
+                      builder: (_) => SetupWizardScreen(controller: c),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.auto_awesome_rounded),
+                label: const Text('اكتب راتبك الآن'),
+              ),
+            ],
           ),
         ),
       );
@@ -58,8 +79,23 @@ class _PlanScreenState extends State<PlanScreen> {
     final currency = c.currency;
     final spentByBucket = c.spentByBucketCurrentCycle;
     final remaining = c.remainingCurrentCycle;
+    final daysLeft = c.daysUntilSalary;
+    final dailyAllowed = c.dailySafeSpend;
+    final weeklyAllowed = c.weeklySafeSpend;
+    final actionSteps = PlanEngine.buildSalaryActionPlan(
+      profile: profile,
+      plan: plan,
+      spentByBucket: spentByBucket,
+      currency: currency,
+      daysLeft: daysLeft,
+    );
+    final smartAdvice = PlanEngine.generateSmartAdvice(
+      profile: profile,
+      plan: plan,
+      spentByBucket: spentByBucket,
+      currency: currency,
+    );
 
-    // Detect any over-budget alerts for prominent banner
     final overBuckets = AppCategories.buckets.where((b) {
       final planned = plan.amountFor(b.bucket);
       final spent = spentByBucket[b.bucket] ?? 0;
@@ -71,7 +107,7 @@ class _PlanScreenState extends State<PlanScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
-        // Top Emerald-Gold Salary Hero Card
+        // 1. Hero Salary & Daily Allowance Card
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -87,7 +123,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF063C2B).withValues(alpha: 0.25),
+                color: const Color(0xFF063C2B).withValues(alpha: 0.22),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
@@ -103,7 +139,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'إجمالي الدخل الشهري',
+                          'راتبك الشهري',
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             color: Color(0xFFD7F3E6),
@@ -112,21 +148,26 @@ class _PlanScreenState extends State<PlanScreen> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          ArabicFormatters.formatMoney(
-                            profile.totalMonthlyIncome,
-                            currency,
-                          ),
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            ArabicFormatters.formatMoney(
+                              profile.totalMonthlyIncome,
+                              currency,
+                            ),
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
@@ -147,82 +188,98 @@ class _PlanScreenState extends State<PlanScreen> {
                       );
                     },
                     icon: const Icon(Icons.edit_rounded, size: 17),
-                    label: const Text('تعديل'),
+                    label: const Text('تعديل الراتب'),
                   ),
                 ],
               ),
               const SizedBox(height: 14),
+              // Daily safe spend box — the #1 easiest metric for every user
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.22),
-                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.black.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'المتبقي من الشهر',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              color: Color(0xFFF5C443),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: AlignmentDirectional.centerStart,
-                            child: Text(
-                              ArabicFormatters.formatMoney(remaining, currency),
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'مسموح تصرف باليوم',
+                                style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  color: Color(0xFFF5C443),
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: AlignmentDirectional.centerStart,
+                                child: Text(
+                                  ArabicFormatters.formatMoney(
+                                    dailyAllowed,
+                                    currency,
+                                  ),
+                                  style: const TextStyle(
+                                    fontFamily: 'Cairo',
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'المتبقي ($daysLeft يوم للراتب)',
+                                style: const TextStyle(
+                                  fontFamily: 'Cairo',
+                                  color: Color(0xFFD7F3E6),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: Text(
+                                  ArabicFormatters.formatMoney(
+                                    remaining,
+                                    currency,
+                                  ),
+                                  style: const TextStyle(
+                                    fontFamily: 'Cairo',
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'المصروف حتى الآن',
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              color: Color(0xFFD7F3E6),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: AlignmentDirectional.centerEnd,
-                            child: Text(
-                              ArabicFormatters.formatMoney(
-                                c.totalSpentCurrentCycle,
-                                currency,
-                              ),
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'يعني حوالي ${ArabicFormatters.formatCompactMoney(weeklyAllowed, currency)} بالأسبوع للأكل والمصروف الشخصي حتى ما ينقطع راتبك قبل آخر الشهر.',
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        color: Color(0xFFE5F7EE),
+                        fontSize: 12,
+                        height: 1.45,
                       ),
                     ),
                   ],
@@ -253,12 +310,10 @@ class _PlanScreenState extends State<PlanScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'تنبيه: تجاوزت ميزانية ${overBuckets.map((b) => b.titleAr).join('، ')}. راجع المصاريف أو عدّل النسب.',
-                    style: const TextStyle(
-                      fontFamily: 'Cairo',
-                      color: Color(0xFFDC2626),
+                    'انتبه: تجاوزت الحد المخصص في ${overBuckets.map((e) => e.titleAr).join('، ')}. خفف الصرف شوي هالأسبوع.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFFB91C1C),
                       fontWeight: FontWeight.w700,
-                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -269,23 +324,269 @@ class _PlanScreenState extends State<PlanScreen> {
 
         const SizedBox(height: 14),
 
-        // Donut Chart Card
+        // 2. Ready Plan Style Switcher (4 presets tailored to salary)
+        Text(
+          'اختر خطتك الجاهزة بناءً على راتبك',
+          style: theme.textTheme.titleLarge,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'بدّل بين الخطط بضغطة وحدة وشوف الأرقام تتحدث فوراً',
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 44,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: PlanPreset.values.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, idx) {
+              final preset = PlanPreset.values[idx];
+              final selected = _selectedPreset == preset;
+              return ChoiceChip(
+                label: Text(preset.shortAr),
+                selected: selected,
+                onSelected: (_) {
+                  setState(() => _selectedPreset = preset);
+                  c.applyPresetPlan(preset);
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            '${_selectedPreset.titleAr}: ${_selectedPreset.descriptionAr}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // 3. Step-by-Step Salary Action Plan (the real plan!)
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'خطتك خطوة بخطوة أول ما ينزل الراتب',
+                style: theme.textTheme.titleLarge,
+              ),
+            ),
+            Flexible(
+              child: Text(
+                'اضغط للتفاصيل',
+                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        ...actionSteps.map((step) {
+          final meta = AppCategories.metaFor(step.bucket);
+          final ratio = step.monthlyAmount > 0
+              ? (step.spentAmount / step.monthlyAmount)
+              : 0.0;
+          final remainingInStep = step.monthlyAmount - step.spentAmount;
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Card(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => showBucketDetailSheet(
+                  context: context,
+                  meta: meta,
+                  plan: plan,
+                  spent: step.spentAmount,
+                  currency: currency,
+                  bucketExpenses: c.currentCycleExpenses
+                      .where((e) => e.bucket == step.bucket)
+                      .toList(),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 17,
+                            backgroundColor: meta.color,
+                            child: Text(
+                              '${step.stepNumber}',
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              step.titleAr,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                ArabicFormatters.formatMoney(
+                                  step.monthlyAmount,
+                                  currency,
+                                ),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: meta.color,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              Text(
+                                '${step.percentage.toStringAsFixed(0)}%',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        step.instructionAr,
+                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
+                      ),
+                      const SizedBox(height: 10),
+                      CategoryProgressBar(ratio: ratio, height: 8),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'المصروف: ${ArabicFormatters.formatCompactMoney(step.spentAmount, currency)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              remainingInStep >= 0
+                                  ? 'باقي: ${ArabicFormatters.formatCompactMoney(remainingInStep, currency)}'
+                                  : 'زيادة: ${ArabicFormatters.formatCompactMoney(remainingInStep.abs(), currency)}',
+                              textAlign: TextAlign.end,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: remainingInStep >= 0
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+
+        const SizedBox(height: 8),
+
+        // 4. Annual Savings Card ("كم ممكن توفر بالسنة؟")
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                const Color(0xFF0E9F6E).withValues(alpha: 0.14),
+              ],
+            ),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.auto_graph_rounded,
+                  color: Color(0xFFB8860B),
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'كم ممكن توفر بالسنة؟',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    AnimatedNumberText(
+                      value: plan.annualSavingsPotential,
+                      formatter: (v) =>
+                          ArabicFormatters.formatMoney(v, currency),
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      'إذا التزمت بتوفير ${ArabicFormatters.formatCompactMoney(plan.amountFor(BudgetBucket.savings) + plan.amountFor(BudgetBucket.emergency), currency)} كل شهر',
+                      style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // 5. Simple Visual Chart + Health Score + Optional Manual Sliders
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.pie_chart_rounded,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'توزيع راتبك الشهري',
+                        'شكل توزيع راتبك',
                         style: theme.textTheme.titleLarge,
                       ),
                     ),
@@ -296,12 +597,13 @@ class _PlanScreenState extends State<PlanScreen> {
                         _showSliders
                             ? Icons.expand_less_rounded
                             : Icons.tune_rounded,
+                        size: 18,
                       ),
-                      label: Text(_showSliders ? 'إخفاء النسب' : 'تعديل النسب'),
+                      label: Text(_showSliders ? 'إخفاء' : 'تعديل يدوي'),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 BudgetDonutChart(
                   plan: plan,
                   currency: currency,
@@ -319,10 +621,8 @@ class _PlanScreenState extends State<PlanScreen> {
                     );
                   },
                 ),
-
-                // Live Sliders section
                 AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 280),
+                  duration: const Duration(milliseconds: 260),
                   crossFadeState: _showSliders
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
@@ -335,7 +635,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'حرّك المنزلقات — الرسم يتحدث لحظياً',
+                              'حرّك لتعديل النسب كما يناسبك',
                               style: theme.textTheme.titleMedium,
                             ),
                           ),
@@ -353,11 +653,7 @@ class _PlanScreenState extends State<PlanScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(
-                                  meta.icon,
-                                  size: 18,
-                                  color: meta.color,
-                                ),
+                                Icon(meta.icon, size: 18, color: meta.color),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
@@ -405,276 +701,90 @@ class _PlanScreenState extends State<PlanScreen> {
 
         const SizedBox(height: 12),
 
-        // Salary Health Score + Annual Savings Row/Cards
+        // 6. Health Score + Key Tip + Link to Debt & Challenge screen
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Row(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
-                  width: 78,
-                  height: 78,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      TweenAnimationBuilder<double>(
-                        tween: Tween<double>(
-                          begin: 0,
-                          end: plan.healthScore / 100.0,
-                        ),
-                        duration: const Duration(milliseconds: 700),
-                        builder: (context, val, _) {
-                          return CircularProgressIndicator(
-                            value: val,
-                            strokeWidth: 8,
-                            backgroundColor:
-                                healthColor.withValues(alpha: 0.16),
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(healthColor),
-                            strokeCap: StrokeCap.round,
-                          );
-                        },
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          TweenAnimationBuilder<double>(
+                            tween: Tween<double>(
+                              begin: 0,
+                              end: plan.healthScore.toDouble(),
+                            ),
+                            duration: const Duration(milliseconds: 800),
+                            builder: (context, value, _) {
+                              return CircularProgressIndicator(
+                                value: value / 100,
+                                strokeWidth: 7,
+                                backgroundColor:
+                                    healthColor.withValues(alpha: 0.15),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(healthColor),
+                              );
+                            },
+                          ),
+                          Text(
+                            '${plan.healthScore}',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: healthColor,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${plan.healthScore}',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: healthColor,
-                        ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'صحة خطة راتبك: ${plan.healthLabelAr}',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            smartAdvice.isNotEmpty
+                                ? smartAdvice.first.titleAr
+                                : FinancialTipsData.tipOfToday(),
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'مؤشر صحة راتبك من 100',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        plan.healthLabelAr,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: healthColor,
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      SmoothPageRoute(
+                        builder: (_) => Scaffold(
+                          appBar: AppBar(
+                            title: const Text('النصائح وخطة الديون'),
+                          ),
+                          body: AdviceScreen(controller: c),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'مبني على قاعدة 50/30/20، ضغط السكن، الديون والادخار.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
+                  icon: const Icon(Icons.tips_and_updates_rounded),
+                  label: const Text('عرض النصائح، خطة سداد الديون وتحدي الـ 30 يوم'),
                 ),
               ],
             ),
           ),
         ),
-
-        const SizedBox(height: 12),
-
-        // "كم ممكن توفر بالسنة؟" Card with animated rolling number
-        Card(
-          color: theme.colorScheme.secondary.withValues(alpha: 0.13),
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.secondary,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: const Icon(
-                    Icons.auto_graph_rounded,
-                    color: Color(0xFF1F1703),
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'كم ممكن توفر بالسنة؟',
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 2),
-                      AnimatedNumberText(
-                        value: plan.annualSavingsPotential,
-                        formatter: (v) =>
-                            ArabicFormatters.formatMoney(v, currency),
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'وخلال 3 سنوات: ${ArabicFormatters.formatCompactMoney(plan.annualSavingsPotential * 3, currency)} (ادخار + طوارئ)',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text('تفاصيل كل بند', style: theme.textTheme.titleLarge),
-              ),
-              Flexible(
-                child: Text(
-                  'المس أي بطاقة للتفاصيل',
-                  textAlign: TextAlign.end,
-                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        // 5 Interactive Category Cards
-        ...AppCategories.buckets.map((meta) {
-          final pct = plan.percentageFor(meta.bucket);
-          final planned = plan.amountFor(meta.bucket);
-          final spent = spentByBucket[meta.bucket] ?? 0.0;
-          final ratio = planned > 0 ? (spent / planned) : 0.0;
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Card(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () => showBucketDetailSheet(
-                  context: context,
-                  meta: meta,
-                  plan: plan,
-                  spent: spent,
-                  currency: currency,
-                  bucketExpenses: c.currentCycleExpenses
-                      .where((e) => e.bucket == meta.bucket)
-                      .toList(),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: meta.color.withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Icon(
-                              meta.icon,
-                              color: meta.color,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  meta.titleAr,
-                                  style: theme.textTheme.titleMedium,
-                                ),
-                                Text(
-                                  meta.subtitleAr,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                ArabicFormatters.formatMoney(planned, currency),
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: meta.color,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              Text(
-                                '${pct.toStringAsFixed(0)}%',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      CategoryProgressBar(ratio: ratio, height: 8),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'المصروف: ${ArabicFormatters.formatMoney(spent, currency)}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              planned - spent >= 0
-                                  ? 'متبقي: ${ArabicFormatters.formatMoney(planned - spent, currency)}'
-                                  : 'تجاوز: ${ArabicFormatters.formatMoney((planned - spent).abs(), currency)}',
-                              textAlign: TextAlign.end,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: planned - spent >= 0
-                                    ? const Color(0xFF10B981)
-                                    : const Color(0xFFEF4444),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
       ],
     );
   }

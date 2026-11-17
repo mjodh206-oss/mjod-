@@ -89,24 +89,24 @@ jobs:
           APK="build/app/outputs/apk/release/app-release.apk"
           "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -v 4 "$APK" | tail -n 10 | tee -a "$RUNNER_TEMP/ci.log"
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK" 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
-          cp "$APK" Rattib.apk
-          sha256sum Rattib.apk | tee -a "$RUNNER_TEMP/ci.log"
+          cp "$APK" BNB.apk
+          sha256sum BNB.apk | tee -a "$RUNNER_TEMP/ci.log"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Rattib-APK
-          path: Rattib.apk
+          name: BNB-APK
+          path: BNB.apk
 
       - name: Publish GitHub Release with direct APK download
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="rattib-v1.0.${{ github.run_number }}"
-          gh release create "$TAG" Rattib.apk \
+          TAG="bnb-v1.0.${{ github.run_number }}"
+          gh release create "$TAG" BNB.apk \
             --target "${{ github.sha }}" \
-            --title "رَتِّبْ — لتنظيم الراتب ($TAG)" \
-            --notes "تطبيق رَتِّبْ لتنظيم الراتب والميزانية الشخصية (أندرويد 6.0 فما فوق) — تنفيذ وتطوير: أمجد حبيب. حمّل ملف Rattib.apk مباشرة وثبّته على هاتفك."
-          echo "DIRECT_DOWNLOAD=https://github.com/${{ github.repository }}/releases/download/$TAG/Rattib.apk"
+            --title "BNB — لتنظيم الراتب ($TAG)" \
+            --notes "تطبيق BNB لتنظيم الراتب والميزانية الشخصية (أندرويد 6.0 فما فوق) — تنفيذ وتطوير: أمجد حبيب. حمّل ملف BNB.apk مباشرة وثبّته على هاتفك."
+          echo "DIRECT_DOWNLOAD=https://github.com/${{ github.repository }}/releases/download/$TAG/BNB.apk"
 
       - name: Emit diagnostics on failure
         if: failure()

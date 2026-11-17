@@ -23,20 +23,20 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   static const _slides = [
     (
-      title: 'اكتب راتبك',
-      subtitle: 'أدخل راتبك الشهري بالعملة التي تتعامل بها، حتى لو مع دخل إضافي.',
+      title: 'اكتب راتبك فقط',
+      subtitle: 'اختر عملتك واكتب راتبك الشهري خلال 5 ثوانٍ، بدون أي تعقيد أو حسابات صعبة.',
       lottie: 'assets/lottie/onboarding_pen.json',
       fallbackIcon: Icons.edit_note_rounded,
     ),
     (
-      title: 'جاوب كم سؤال',
-      subtitle: 'أسئلة بسيطة وسريعة عن السكن، العائلة، والالتزامات بدون أي تعقيد.',
+      title: 'خطتك بتجهز تلقائياً',
+      subtitle: 'BNB بيقسم راتبك فوراً: بيت وأكل، مصروفك الشخصي، وتوفير مضمون من أول يوم.',
       lottie: 'assets/lottie/onboarding_questions.json',
-      fallbackIcon: Icons.quiz_rounded,
+      fallbackIcon: Icons.auto_awesome_rounded,
     ),
     (
-      title: 'خذ خطتك جاهزة',
-      subtitle: 'خلال ثوانٍ تحصل على خطة 50/30/20 مخصصة لك ونصائح ذكية لتوفير أكثر.',
+      title: 'اعرف كم تصرف باليوم',
+      subtitle: 'بتشوف قدامك كم مسموح تصرف كل يوم وأسبوع حتى يكفيك الراتب لآخر الشهر وتوفّر كمان.',
       lottie: 'assets/lottie/onboarding_chart.json',
       fallbackIcon: Icons.pie_chart_rounded,
     ),
@@ -86,7 +86,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'رَتِّبْ',
+                    'BNB',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w800,

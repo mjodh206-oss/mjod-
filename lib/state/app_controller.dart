@@ -169,6 +169,37 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> applyPresetPlan(PlanPreset preset) async {
+    final p = _profile;
+    if (p == null) return;
+    _plan = PlanEngine.generatePresetPlan(profile: p, preset: preset);
+    _recomputeHealthWithRealSpending();
+    await storage.savePlan(_plan!);
+    await _evaluateBadges();
+    await _syncWidgetOnly();
+    notifyListeners();
+  }
+
+  int get daysUntilSalary {
+    final p = _profile;
+    if (p == null) return 30;
+    return ArabicFormatters.daysUntilSalary(p.salaryDay);
+  }
+
+  double get dailySafeSpend {
+    final p = _profile;
+    final pl = _plan;
+    if (p == null || pl == null) return 0.0;
+    return PlanEngine.dailySafeSpend(
+      profile: p,
+      plan: pl,
+      spentByBucket: spentByBucketCurrentCycle,
+      daysLeft: daysUntilSalary,
+    );
+  }
+
+  double get weeklySafeSpend => dailySafeSpend * 7.0;
+
   List<ExpenseItem> get currentCycleExpenses {
     final p = _profile;
     if (p == null) return _expenses;
@@ -432,7 +463,7 @@ class AppController extends ChangeNotifier {
     );
     await pdfExport.shareFile(
       file,
-      text: 'تقرير ميزانية تطبيق رَتِّبْ (${ArabicFormatters.formatDateAr(DateTime.now())})',
+      text: 'تقرير ميزانية تطبيق BNB (${ArabicFormatters.formatDateAr(DateTime.now())})',
     );
     return file;
   }
@@ -441,12 +472,12 @@ class AppController extends ChangeNotifier {
     final jsonStr = storage.exportBackupJson();
     final dir = await getTemporaryDirectory();
     final file = File(
-      '${dir.path}/rattib_backup_${DateTime.now().millisecondsSinceEpoch}.json',
+      '${dir.path}/bnb_backup_${DateTime.now().millisecondsSinceEpoch}.json',
     );
     await file.writeAsString(jsonStr, encoding: utf8);
     await pdfExport.shareFile(
       file,
-      text: 'نسخة احتياطية لبيانات تطبيق رَتِّبْ',
+      text: 'نسخة احتياطية لبيانات تطبيق BNB',
     );
     return file;
   }
@@ -557,9 +588,9 @@ class AppController extends ChangeNotifier {
     if (p == null) {
       await widgetSync.updateWidget(
         remainingText: 'ابدأ خطتك الآن',
-        daysLeftText: 'تطبيق رَتِّبْ',
+        daysLeftText: 'تطبيق BNB',
         progressPercent: 100,
-        subtitleText: 'فلوسك بتستاهل خطة',
+        subtitleText: 'راتبك مرتب.. وحياتك أسهل',
       );
       return;
     }

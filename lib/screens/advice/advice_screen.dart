@@ -336,11 +336,11 @@ class _AdviceScreenState extends State<AdviceScreen> {
                   segments: const [
                     ButtonSegment(
                       value: DebtStrategy.snowball,
-                      label: Text('كرة الثلج (الأصغر أولاً)'),
+                      label: Text('خلّص الأصغر أولاً'),
                     ),
                     ButtonSegment(
                       value: DebtStrategy.avalanche,
-                      label: Text('الانهيار الجليدي (الأعلى فائدة)'),
+                      label: Text('الأعلى فائدة أولاً'),
                     ),
                   ],
                   selected: {strategy},
@@ -349,8 +349,8 @@ class _AdviceScreenState extends State<AdviceScreen> {
                 const SizedBox(height: 10),
                 Text(
                   strategy == DebtStrategy.snowball
-                      ? 'كرة الثلج: تسدد أصغر دين أولاً لتنتهي منه بسرعة وتشعر بحماس الإنجاز ثم تنقل قسطه للدين التالي.'
-                      : 'الانهيار الجليدي: تسدد الدين صاحب أعلى نسبة فائدة أولاً لتوفر أكبر مبلغ ممكن على المدى الطويل.',
+                      ? 'طريقة «الأصغر أولاً»: بتخلّص أصغر دين بسرعة حتى يقل عدد الديون وتتحمس تكمل الباقي.'
+                      : 'طريقة «الأعلى فائدة أولاً»: بتبدأ بالدين اللي بياخد فوائد أكثر حتى توفّر أكبر مبلغ ممكن.',
                   style: theme.textTheme.bodyMedium,
                 ),
                 if (c.debts.isNotEmpty) ...[

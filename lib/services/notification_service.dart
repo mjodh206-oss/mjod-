@@ -16,7 +16,7 @@ class NotificationService {
   bool _initialized = false;
 
   static const String _channelId = 'rattib_reminders';
-  static const String _channelName = 'تنبيهات رَتِّبْ المالية';
+  static const String _channelName = 'تنبيهات BNB المالية';
   static const String _channelDesc =
       'تذكير يوم الراتب، المصاريف اليومية، الأقساط وتنبيهات الميزانية';
 
@@ -91,7 +91,7 @@ class NotificationService {
           id: 101,
           title: 'نزل الراتب! خلينا نوزعه 💰',
           body:
-              'افتح رَتِّبْ الآن وراجع خطتك الشهرية لـ ${ArabicFormatters.formatMoney(profile.totalMonthlyIncome, currency)}.',
+              'افتح BNB الآن وراجع خطتك الشهرية لـ ${ArabicFormatters.formatMoney(profile.totalMonthlyIncome, currency)}.',
           localTarget: nextSalary,
           match: DateTimeComponents.dayOfMonthAndTime,
         );
@@ -104,7 +104,7 @@ class NotificationService {
         );
         await _scheduleSafe(
           id: 102,
-          title: 'تذكير مسائي من رَتِّبْ 📝',
+          title: 'تذكير مسائي من BNB 📝',
           body: 'سجّل مصاريف اليوم في 3 ثوانٍ لتبقى ميزانيتك متوازنة.',
           localTarget: nextEvening,
           match: DateTimeComponents.time,
@@ -178,7 +178,7 @@ class NotificationService {
       await _plugin.show(
         999,
         'نزل الراتب! خلينا نوزعه 💰',
-        'الإشعارات في رَتِّبْ تعمل بنجاح — فلوسك بتستاهل خطة!',
+        'الإشعارات في BNB تعمل بنجاح — راتبك مرتب وحياتك أسهل!',
         _details,
       );
     } catch (_) {}

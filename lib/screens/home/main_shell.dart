@@ -4,7 +4,6 @@ import '../../core/constants/financial_tips_data.dart';
 import '../../core/utils/arabic_formatters.dart';
 import '../../state/app_controller.dart';
 import '../../widgets/quick_expense_sheet.dart';
-import '../advice/advice_screen.dart';
 import '../expenses/expenses_screen.dart';
 import '../goals/goals_screen.dart';
 import '../more/more_screen.dart';
@@ -82,16 +81,14 @@ class _MainShellState extends State<MainShell> {
           PlanScreen(controller: c),
           ExpensesScreen(controller: c),
           GoalsScreen(controller: c),
-          AdviceScreen(controller: c),
           MoreScreen(controller: c),
         ];
 
         const titles = [
-          'خطة راتبك',
-          'متابعة المصاريف',
-          'الأهداف المالية',
-          'النصائح الذكية',
-          'المزيد والإضافات',
+          'BNB · خطتي',
+          'مصاريفي',
+          'أهدافي',
+          'المزيد والإعدادات',
         ];
 
         return Scaffold(
@@ -178,7 +175,7 @@ class _MainShellState extends State<MainShell> {
             foregroundColor: const Color(0xFF1A1302),
             icon: const Icon(Icons.add_rounded, size: 26),
             label: const Text(
-              'مصروف',
+              'سجّل مصروف',
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w800,
@@ -192,22 +189,17 @@ class _MainShellState extends State<MainShell> {
               NavigationDestination(
                 icon: Icon(Icons.pie_chart_outline_rounded),
                 selectedIcon: Icon(Icons.pie_chart_rounded),
-                label: 'الخطة',
+                label: 'خطتي',
               ),
               NavigationDestination(
                 icon: Icon(Icons.receipt_long_outlined),
                 selectedIcon: Icon(Icons.receipt_long_rounded),
-                label: 'المصاريف',
+                label: 'مصاريفي',
               ),
               NavigationDestination(
                 icon: Icon(Icons.flag_outlined),
                 selectedIcon: Icon(Icons.flag_rounded),
-                label: 'الأهداف',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.tips_and_updates_outlined),
-                selectedIcon: Icon(Icons.tips_and_updates_rounded),
-                label: 'النصائح',
+                label: 'أهدافي',
               ),
               NavigationDestination(
                 icon: Icon(Icons.grid_view_outlined),

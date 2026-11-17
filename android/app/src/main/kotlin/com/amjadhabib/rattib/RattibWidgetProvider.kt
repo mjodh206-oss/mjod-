@@ -42,8 +42,8 @@ class RattibWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int
         ) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val remaining = prefs.getString(KEY_REMAINING, "افتح رَتِّبْ لإعداد خطتك") ?: "افتح رَتِّبْ لإعداد خطتك"
-            val daysLeft = prefs.getString(KEY_DAYS_LEFT, "فلوسك بتستاهل خطة") ?: "فلوسك بتستاهل خطة"
+            val remaining = prefs.getString(KEY_REMAINING, "افتح BNB لإعداد خطتك") ?: "افتح BNB لإعداد خطتك"
+            val daysLeft = prefs.getString(KEY_DAYS_LEFT, "راتبك مرتب وحياتك أسهل") ?: "راتبك مرتب وحياتك أسهل"
             val progress = prefs.getInt(KEY_PROGRESS, 100).coerceIn(0, 100)
             val subtitle = prefs.getString(KEY_SUBTITLE, "تنفيذ وتطوير: أمجد حبيب") ?: "تنفيذ وتطوير: أمجد حبيب"
 

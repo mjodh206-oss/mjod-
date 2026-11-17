@@ -60,8 +60,252 @@ class DebtSimulationResult {
   final List<DebtPayoffStep> steps;
 }
 
+enum PlanPreset {
+  balanced(
+    titleAr: 'متوازنة 50/30/20',
+    shortAr: 'متوازنة',
+    descriptionAr: 'نصف الراتب للبيت والأساسيات، جزء لمصروفك الشخصي، والباقي توفير وطوارئ.',
+  ),
+  strongSaving(
+    titleAr: 'توفير قوي',
+    shortAr: 'توفير قوي',
+    descriptionAr: 'تقلل المصروف الشخصي وترفع التوفير لأعلى نسبة لتصل لأهدافك بسرعة.',
+  ),
+  essentialsFirst(
+    titleAr: 'الأولوية للبيت',
+    shortAr: 'أساسيات أولاً',
+    descriptionAr: 'مناسبة للرواتب المضغوطة أو الإيجار العالي: تغطي الأساسيات أولاً مع هامش أمان.',
+  ),
+  debtPayoff(
+    titleAr: 'تصفية الديون',
+    shortAr: 'سداد الديون',
+    descriptionAr: 'توجّه أكبر قدر ممكن لسداد الديون والأقساط حتى يتحرر راتبك بالكامل.',
+  );
+
+  const PlanPreset({
+    required this.titleAr,
+    required this.shortAr,
+    required this.descriptionAr,
+  });
+
+  final String titleAr;
+  final String shortAr;
+  final String descriptionAr;
+}
+
+class SalaryActionStep {
+  const SalaryActionStep({
+    required this.stepNumber,
+    required this.titleAr,
+    required this.instructionAr,
+    required this.bucket,
+    required this.monthlyAmount,
+    required this.dailyAllowance,
+    required this.spentAmount,
+    required this.percentage,
+  });
+
+  final int stepNumber;
+  final String titleAr;
+  final String instructionAr;
+  final BudgetBucket bucket;
+  final double monthlyAmount;
+  final double? dailyAllowance;
+  final double spentAmount;
+  final double percentage;
+}
+
 class PlanEngine {
   PlanEngine._();
+
+  static BudgetPlan generatePresetPlan({
+    required SalaryProfile profile,
+    required PlanPreset preset,
+  }) {
+    final income = math.max(profile.totalMonthlyIncome, 1.0);
+    final hasDebt = profile.totalDebtAndInstallments > 0;
+    final fixedFloor = ((profile.totalFixedNonDebt / income) * 100.0).clamp(0.0, 70.0);
+
+    late List<double> raw;
+    switch (preset) {
+      case PlanPreset.balanced:
+        final nec = math.max(50.0, fixedFloor + 8.0).clamp(45.0, 62.0);
+        final debts = hasDebt
+            ? ((profile.totalDebtAndInstallments / income) * 100.0).clamp(5.0, 22.0)
+            : 0.0;
+        final rem = (100.0 - nec - debts).clamp(10.0, 55.0);
+        final wants = (rem * 0.56).clamp(10.0, 32.0);
+        final wealth = (rem - wants).clamp(5.0, 35.0);
+        raw = [nec, wants, wealth * 0.65, debts, wealth * 0.35];
+      case PlanPreset.strongSaving:
+        final nec = math.max(45.0, fixedFloor + 6.0).clamp(42.0, 60.0);
+        final debts = hasDebt
+            ? ((profile.totalDebtAndInstallments / income) * 100.0).clamp(5.0, 20.0)
+            : 0.0;
+        final rem = (100.0 - nec - debts).clamp(10.0, 58.0);
+        final wants = (rem * 0.32).clamp(8.0, 20.0);
+        final wealth = (rem - wants).clamp(10.0, 45.0);
+        raw = [nec, wants, wealth * 0.72, debts, wealth * 0.28];
+      case PlanPreset.essentialsFirst:
+        final nec = math.max(62.0, fixedFloor + 12.0).clamp(58.0, 75.0);
+        final debts = hasDebt
+            ? ((profile.totalDebtAndInstallments / income) * 100.0).clamp(4.0, 18.0)
+            : 0.0;
+        final rem = (100.0 - nec - debts).clamp(8.0, 42.0);
+        final wants = (rem * 0.55).clamp(5.0, 22.0);
+        final wealth = (rem - wants).clamp(4.0, 20.0);
+        raw = [nec, wants, wealth * 0.45, debts, wealth * 0.55];
+      case PlanPreset.debtPayoff:
+        final nec = math.max(48.0, fixedFloor + 6.0).clamp(42.0, 60.0);
+        final rawDebt = (profile.totalDebtAndInstallments / income) * 100.0;
+        final debts = math.max(hasDebt ? rawDebt + 10.0 : 20.0, 18.0).clamp(15.0, 36.0);
+        final rem = (100.0 - nec - debts).clamp(8.0, 42.0);
+        final wants = (rem * 0.45).clamp(6.0, 20.0);
+        final wealth = (rem - wants).clamp(5.0, 24.0);
+        raw = [nec, wants, wealth * 0.55, debts, wealth * 0.45];
+    }
+
+    final normalized = _normalizeTo100(raw);
+    final draft = BudgetPlan(
+      totalIncome: profile.totalMonthlyIncome,
+      necessitiesPct: normalized[0],
+      wantsPct: normalized[1],
+      savingsPct: normalized[2],
+      debtsPct: normalized[3],
+      emergencyPct: normalized[4],
+      healthScore: 0,
+      healthLabelAr: '',
+      isCustomized: true,
+    );
+    final score = calculateHealthScore(profile, draft);
+    return draft.copyWith(
+      healthScore: score,
+      healthLabelAr: healthLabelForScore(score),
+    );
+  }
+
+  static double dailySafeSpend({
+    required SalaryProfile profile,
+    required BudgetPlan plan,
+    required Map<BudgetBucket, double> spentByBucket,
+    required int daysLeft,
+  }) {
+    // Available day-to-day living money = (Necessities - rent - already spent in necessities)
+    // + (Wants - already spent in wants), spread over remaining days to payday
+    final necBudget = plan.amountFor(BudgetBucket.necessities);
+    final wantsBudget = plan.amountFor(BudgetBucket.wants);
+    final rent = profile.isRenting ? profile.rentAmount : 0.0;
+    final necSpent = spentByBucket[BudgetBucket.necessities] ?? 0.0;
+    final wantsSpent = spentByBucket[BudgetBucket.wants] ?? 0.0;
+
+    final necLivingLeft = math.max(0.0, (necBudget - rent) - math.max(0.0, necSpent - rent));
+    final wantsLeft = math.max(0.0, wantsBudget - wantsSpent);
+    final spendableLeft = necLivingLeft + wantsLeft;
+
+    final days = math.max(daysLeft, 1);
+    return spendableLeft / days;
+  }
+
+  static List<SalaryActionStep> buildSalaryActionPlan({
+    required SalaryProfile profile,
+    required BudgetPlan plan,
+    required Map<BudgetBucket, double> spentByBucket,
+    required AppCurrency currency,
+    required int daysLeft,
+  }) {
+    final steps = <SalaryActionStep>[];
+    int num = 1;
+
+    final savAmt = plan.amountFor(BudgetBucket.savings);
+    if (savAmt > 0) {
+      steps.add(
+        SalaryActionStep(
+          stepNumber: num++,
+          titleAr: 'أول ما ينزل الراتب: حط التوفير على جنب',
+          instructionAr:
+              'خذ ${ArabicFormatters.formatMoney(savAmt, currency)} مباشرة للتوفير — لو التزمت فيها بتصير ${ArabicFormatters.formatMoney(savAmt * 12, currency)} بعد سنة!',
+          bucket: BudgetBucket.savings,
+          monthlyAmount: savAmt,
+          dailyAllowance: null,
+          spentAmount: spentByBucket[BudgetBucket.savings] ?? 0.0,
+          percentage: plan.savingsPct,
+        ),
+      );
+    }
+
+    final emgAmt = plan.amountFor(BudgetBucket.emergency);
+    if (emgAmt > 0) {
+      steps.add(
+        SalaryActionStep(
+          stepNumber: num++,
+          titleAr: 'احفظ مبلغ الطوارئ لأي ظرف مفاجئ',
+          instructionAr:
+              'اترك ${ArabicFormatters.formatMoney(emgAmt, currency)} في مكان منفصل ما تلمسه إلا للضرورة القصوى.',
+          bucket: BudgetBucket.emergency,
+          monthlyAmount: emgAmt,
+          dailyAllowance: null,
+          spentAmount: spentByBucket[BudgetBucket.emergency] ?? 0.0,
+          percentage: plan.emergencyPct,
+        ),
+      );
+    }
+
+    final necAmt = plan.amountFor(BudgetBucket.necessities);
+    final rent = profile.isRenting ? profile.rentAmount : 0.0;
+    final necLiving = math.max(0.0, necAmt - rent);
+    final necDaily = necLiving / 30.0;
+    steps.add(
+      SalaryActionStep(
+        stepNumber: num++,
+        titleAr: 'مصروف البيت والأكل والفواتير',
+        instructionAr: profile.isRenting && rent > 0
+            ? 'ادفع الإيجار (${ArabicFormatters.formatCompactMoney(rent, currency)}) والباقي ${ArabicFormatters.formatCompactMoney(necLiving, currency)} للأكل والفواتير (حوالي ${ArabicFormatters.formatCompactMoney(necDaily, currency)} باليوم).'
+            : 'خصص هذا المبلغ للأكل والفواتير والمواصلات طوال الشهر (بمعدل ${ArabicFormatters.formatCompactMoney(necDaily, currency)} باليوم).',
+        bucket: BudgetBucket.necessities,
+        monthlyAmount: necAmt,
+        dailyAllowance: necDaily,
+        spentAmount: spentByBucket[BudgetBucket.necessities] ?? 0.0,
+        percentage: plan.necessitiesPct,
+      ),
+    );
+
+    final wantsAmt = plan.amountFor(BudgetBucket.wants);
+    final wantsDaily = wantsAmt / 30.0;
+    if (wantsAmt > 0) {
+      steps.add(
+        SalaryActionStep(
+          stepNumber: num++,
+          titleAr: 'مصروفك الشخصي والطلعات',
+          instructionAr:
+              'عندك ${ArabicFormatters.formatCompactMoney(wantsDaily, currency)} باليوم (أو ${ArabicFormatters.formatCompactMoney(wantsAmt / 4.0, currency)} بالأسبوع) تصرفها على نفسك بدون ما تخرب الخطة.',
+          bucket: BudgetBucket.wants,
+          monthlyAmount: wantsAmt,
+          dailyAllowance: wantsDaily,
+          spentAmount: spentByBucket[BudgetBucket.wants] ?? 0.0,
+          percentage: plan.wantsPct,
+        ),
+      );
+    }
+
+    final debtAmt = plan.amountFor(BudgetBucket.debts);
+    if (debtAmt > 0) {
+      steps.add(
+        SalaryActionStep(
+          stepNumber: num++,
+          titleAr: 'سداد الديون والأقساط',
+          instructionAr:
+              'سدد ${ArabicFormatters.formatMoney(debtAmt, currency)} هذا الشهر لتتخلص من التزاماتك أسرع.',
+          bucket: BudgetBucket.debts,
+          monthlyAmount: debtAmt,
+          dailyAllowance: null,
+          spentAmount: spentByBucket[BudgetBucket.debts] ?? 0.0,
+          percentage: plan.debtsPct,
+        ),
+      );
+    }
+
+    return steps;
+  }
 
   static BudgetPlan generatePlan(SalaryProfile profile) {
     final income = math.max(profile.totalMonthlyIncome, 1.0);

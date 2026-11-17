@@ -18,7 +18,7 @@ class SecurityService {
   Future<bool> authenticateWithBiometrics() async {
     try {
       return await _auth.authenticate(
-        localizedReason: 'تحقق من هويتك لفتح تطبيق رَتِّبْ',
+        localizedReason: 'تحقق من هويتك لفتح تطبيق BNB',
         options: const AuthenticationOptions(
           biometricOnly: false,
           stickyAuth: true,

@@ -95,7 +95,7 @@ class _LockScreenState extends State<LockScreen> {
               const RattibLogo(size: 86),
               const SizedBox(height: 18),
               Text(
-                'تطبيق رَتِّبْ مقفل للخصوصية',
+                'تطبيق BNB مقفل للخصوصية',
                 style: theme.textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),

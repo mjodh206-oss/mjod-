@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../state/app_controller.dart';
+import '../advice/advice_screen.dart';
 import '../setup/setup_wizard_screen.dart';
 import 'about_screen.dart';
 import 'badges_screen.dart';
@@ -221,6 +222,41 @@ class _MoreScreenState extends State<MoreScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
+        Card(
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            leading: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.tips_and_updates_rounded,
+                color: theme.colorScheme.primary,
+                size: 26,
+              ),
+            ),
+            title: const Text('النصائح وخطة سداد الديون'),
+            subtitle: const Text(
+              'نصيحة اليوم، حساب تسكير الديون، وتحدي الـ 30 يوم',
+            ),
+            trailing: const Icon(Icons.chevron_left_rounded),
+            onTap: () => Navigator.of(context).push(
+              SmoothPageRoute(
+                builder: (_) => Scaffold(
+                  appBar: AppBar(title: const Text('النصائح وخطة الديون')),
+                  body: AdviceScreen(controller: c),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+
         // Tools & Extras Grid
         Row(
           children: [
