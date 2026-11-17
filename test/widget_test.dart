@@ -211,7 +211,9 @@ void main() {
         250,
         scrollable: find.descendant(
           of: find.byType(PlanScreen),
-          matching: find.byType(Scrollable),
+          matching: find.byWidgetPredicate(
+            (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+          ),
         ),
       );
       expect(find.text('كم ممكن توفر بالسنة؟'), findsOneWidget);
