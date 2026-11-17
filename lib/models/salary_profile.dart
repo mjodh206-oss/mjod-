@@ -5,6 +5,21 @@ enum PrimaryFinancialGoal {
   emergencyFund,
 }
 
+extension PrimaryFinancialGoalX on PrimaryFinancialGoal {
+  String get labelAr {
+    switch (this) {
+      case PrimaryFinancialGoal.saving:
+        return 'أزيد التوفير';
+      case PrimaryFinancialGoal.debtPayoff:
+        return 'أسدد ديوني أسرع';
+      case PrimaryFinancialGoal.purchase:
+        return 'أجمع لهدف أو شراء';
+      case PrimaryFinancialGoal.emergencyFund:
+        return 'أبني احتياطي للطوارئ';
+    }
+  }
+}
+
 class SalaryProfile {
   const SalaryProfile({
     required this.monthlySalary,
