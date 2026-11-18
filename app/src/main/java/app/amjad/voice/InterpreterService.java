@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.media.AudioDeviceInfo;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -26,14 +28,15 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.SystemClock;
 import com.neovisionaries.ws.client.WebSocket;
+import com.neovisionaries.ws.client.OpeningHandshakeException;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
-import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +55,8 @@ public final class InterpreterService extends Service {
     private final ByteArrayOutputStream response=new ByteArrayOutputStream();
     private JSONObject opts=new JSONObject();
     private AudioManager audio;
+    private AudioFocusRequest focus;
+    private volatile long localPromptUntil;
     private int previousMode;
     private boolean previousSpeaker;
     private boolean running, push, released, opened, ready, outputAllowed, savedTooLong, routeApplied;
@@ -66,9 +71,7 @@ public final class InterpreterService extends Service {
     static String value(Context context,String name){
         Resources r=context.getResources();int id=r.getIdentifier(name,"string",context.getPackageName());return id==0?"":r.getString(id).trim();
     }
-    static boolean endpointUsable(Context c){
-        try{URI u=new URI(value(c,"relay_url"));return "wss".equalsIgnoreCase(u.getScheme())&&u.getHost()!=null&&u.getUserInfo()==null&&u.getQuery()==null&&u.getFragment()==null&&"/relay".equals(u.getPath())&&value(c,"relay_token").matches("[A-Za-z0-9_-]{24,256}");}catch(Exception e){return false;}
-    }
+    static boolean endpointUsable(Context c){return RelayProfile.current(c)!=null;}
     @Override public IBinder onBind(Intent intent){return null;}
     @Override public void onCreate(){super.onCreate();instance=this;audio=getSystemService(AudioManager.class);}
     @Override public int onStartCommand(Intent intent,int flags,int id){
@@ -78,8 +81,13 @@ public final class InterpreterService extends Service {
         try{
             Notification note=notification();
             if(Build.VERSION.SDK_INT>=29)startForeground(12,note,ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);else startForeground(12,note);
-            opts=parse(intent.getStringExtra("options"));push=intent.getBooleanExtra("push",false)&&"push".equals(opts.optString("mode"));
-            running=true;previousMode=audio.getMode();previousSpeaker=audio.isSpeakerphoneOn();routeApplied=true;applyRoute();
+            opts=parse(intent.getStringExtra("options"));tunePlayback();push=intent.getBooleanExtra("push",false)&&"push".equals(opts.optString("mode"));
+            running=true;
+            focus=new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+                .setOnAudioFocusChangeListener(change->{if(change==AudioManager.AUDIOFOCUS_LOSS||change==AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)requestStop();},main).build();
+            if(audio.requestAudioFocus(focus)!=AudioManager.AUDIOFOCUS_REQUEST_GRANTED){fatal("الصوت مشغول الآن. أوقف المكالمة أو التطبيق الآخر وحاول مجدداً.");return START_NOT_STICKY;}
+            previousMode=audio.getMode();previousSpeaker=audio.isSpeakerphoneOn();routeApplied=true;applyRoute();
             setState("connecting");setQuality("weak");connect();
             if(push)beginCapture();
         }catch(RuntimeException e){fatal("تعذّر بدء جلسة الميكروفون.");}
@@ -108,9 +116,10 @@ public final class InterpreterService extends Service {
         if(!running)return;
         try{
             final AtomicInteger pending=new AtomicInteger();
-            final WebSocket ws=new WebSocketFactory().setConnectionTimeout(6000).setSocketTimeout(35_000).createSocket(value(this,"relay_url"));
+            RelayProfile relay=RelayProfile.current(this);if(relay==null){fatal("انتهى التفعيل. افتح رابط تفعيل جديداً.");return;}
+            final WebSocket ws=new WebSocketFactory().setConnectionTimeout(6000).setSocketTimeout(35_000).createSocket(relay.url);
             socket=ws;sendQueue=pending;opened=false;ready=false;
-            ws.addHeader("Authorization","Bearer "+value(this,"relay_token"));
+            ws.addHeader("Authorization","Bearer "+relay.token);
             ws.addListener(new WebSocketAdapter(){
                 @Override public void onConnected(WebSocket w,Map<String,List<String>> headers){main.post(()->{
                     if(socket!=w||!running){w.disconnect();return;}opened=true;send(msg("start","options",opts,"push",push));
@@ -120,7 +129,7 @@ public final class InterpreterService extends Service {
                 @Override public void onTextMessage(WebSocket w,String text){if(text.length()<=4096) main.post(()->{if(socket==w)event(parse(text));});}
                 @Override public void onBinaryMessage(WebSocket w,byte[] pcm){if(pcm.length<=500_000)main.post(()->{if(socket==w&&outputAllowed)play(pcm);});}
                 @Override public void onFrameSent(WebSocket w,WebSocketFrame frame){if(frame.isBinaryFrame())pending.decrementAndGet();}
-                @Override public void onConnectError(WebSocket w,WebSocketException e){main.post(()->{if(socket==w)retry("network");});}
+                @Override public void onConnectError(WebSocket w,WebSocketException e){main.post(()->{if(socket==w){if(e instanceof OpeningHandshakeException&&((OpeningHandshakeException)e).getStatusLine()!=null&&((OpeningHandshakeException)e).getStatusLine().getStatusCode()==401)fatal("انتهى تفعيل الترجمة أو لم يعد صالحاً. اطلب رابطاً جديداً.");else retry("network");}});}
                 @Override public void onDisconnected(WebSocket w,WebSocketFrame server,WebSocketFrame client,boolean byServer){main.post(()->{if(socket==w)retry("network");});}
             });
             ws.connectAsynchronously();arm(11_000,()->retry("network"));
@@ -161,7 +170,7 @@ public final class InterpreterService extends Service {
             configure(updated.toString());prompt(names[next]);return;
         }
         if(action.equals("slow")||action.equals("fast")){
-            try{opts.put("speed",action);}catch(Exception ignored){}if(listener!=null)listener.command(action);
+            try{opts.put("speed",action);}catch(Exception ignored){}tunePlayback();if(listener!=null)listener.command(action);
             send(msg("configure","options",opts));
         }
     }
@@ -171,7 +180,7 @@ public final class InterpreterService extends Service {
         if(frameCounter++%3==0)level(rms(pcm));
     }
     private void interrupt(){
-        if(item!=null&&!item.isEmpty())send(msg("truncate","item",item,"ms",output.playedMillis()));
+        if(item!=null&&item.startsWith("item_"))send(msg("truncate","item",item,"ms",output.playedMillis()));
         item=null;outputAllowed=false;output.clear();response.reset();level(0);
     }
     void repeat(){
@@ -183,11 +192,15 @@ public final class InterpreterService extends Service {
     void configure(String config){
         JSONObject next=parse(config);boolean routeChanged=!next.optString("route").equals(opts.optString("route"));
         boolean fresh=!next.optString("other").equals(opts.optString("other"))||!next.optString("voice").equals(opts.optString("voice"));
-        opts=next;
+        opts=next;tunePlayback();
         if(routeChanged)applyRoute();
         if(!running)return;
         if(fresh&&!push){resetConnection();attempt=0;setState("connecting");setQuality("weak");connect();}
         else if(ready&&!fresh)send(msg("configure","options",opts));
+    }
+    private void tunePlayback(){
+        String s=opts.optString("speed"),p=opts.optString("pitch");
+        output.tune("slow".equals(s)?.86f:"fast".equals(s)?1.13f:1f,"low".equals(p)?.94f:"high".equals(p)?1.06f:1f);
     }
     private void applyRoute(){
         try{
@@ -221,11 +234,14 @@ public final class InterpreterService extends Service {
                 int n=capture.read(buffer,0,buffer.length,AudioRecord.READ_BLOCKING);
                 if(n<0){main.post(()->{if(recordingId==generation)fatal("انقطع الميكروفون. حاول بدء الجلسة مجدداً.");});break;}
                 if(n<2)continue;
-                byte[] pcm=Arrays.copyOf(buffer,n&~1);double a=rms(pcm);
+                byte[] pcm=Arrays.copyOf(buffer,n&~1);
+                if(SystemClock.elapsedRealtime()<localPromptUntil)Arrays.fill(pcm,(byte)0);
+                double a=rms(pcm);
                 main.post(()->{if(recordingId!=generation||!running||released)return;if(!"speaking".equals(phase)&&frameCounter++%2==0)level(a);sendPcm(pcm);});
             }
         }finally{for(AudioEffect f:effects)if(f!=null)f.release();capture.release();}
     }
+    void localPrompt(boolean speaking){localPromptUntil=SystemClock.elapsedRealtime()+(speaking?18_000:160);}
     private static double rms(byte[] data){double sum=0;int samples=data.length/2;if(samples==0)return 0;for(int i=0;i<data.length-1;i+=2){double x=(short)((data[i]&255)|(data[i+1]<<8))/32768.0;sum+=x*x;}return Math.min(1,Math.sqrt(sum/samples)*5.5);}
     private void sendPcm(byte[] pcm){
         if(!opened||socket==null){if(push){if(firstFrames.size()>=45){fatal("الاتصال ضعيف. حاول مرة ثانية.");return;}firstFrames.addLast(pcm);}return;}
@@ -256,6 +272,7 @@ public final class InterpreterService extends Service {
     @Override public void onDestroy(){
         running=false;resetConnection();lastAudio=null;
         if(routeApplied)try{if(Build.VERSION.SDK_INT>=31)audio.clearCommunicationDevice();else audio.setSpeakerphoneOn(previousSpeaker);audio.setMode(previousMode);}catch(RuntimeException ignored){}
+        if(focus!=null)audio.abandonAudioFocusRequest(focus);
         stopForeground(STOP_FOREGROUND_REMOVE);
         if(instance==this)instance=null;super.onDestroy();
     }

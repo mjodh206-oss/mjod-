@@ -60,3 +60,35 @@ test('blank push and malformed PCM fail safely',()=>{
   const b=start();b.client.emit('message',Buffer.alloc(1279),true);
   assert.equal(b.client.closeCode,1008);assert.equal(b.upstream.readyState,3);
 });
+
+test('directed mode emits translated PCM while microphone frames are still arriving',()=>{
+  const client=new FakeSocket(),upstream=new FakeSocket();let url;
+  bridge(client,{model:'test',apiKey:'test',connect:u=>{url=u;return upstream;}});
+  client.incoming({type:'start',options:{other:'fr',mode:'stream'}});
+  assert.match(url,/\/realtime\/translations\?model=gpt-realtime-translate$/);
+  upstream.emit('open');
+  assert.equal(upstream.messages[0].session.audio.output.language,'fr');
+  assert.equal(upstream.messages[0].session.instructions,undefined);
+  upstream.incoming({type:'session.updated'});
+  client.emit('message',Buffer.alloc(1280),true);
+  assert.equal(upstream.messages.at(-1).type,'session.input_audio_buffer.append');
+  const voice=Buffer.alloc(9600);for(let i=0;i<voice.length;i+=2)voice.writeInt16LE(i%4===0?2400:-2400,i);
+  upstream.incoming({type:'session.output_transcript.delta',delta:'not visible'});
+  upstream.incoming({type:'session.output_audio.delta',delta:voice.toString('base64')});
+  assert.deepEqual(client.messages,[{type:'ready'},{type:'speaking',item:'stream_1'},voice]);
+  client.emit('message',Buffer.alloc(1280),true);
+  const quiet=Buffer.alloc(9600).toString('base64');
+  for(let i=0;i<3;i++)upstream.incoming({type:'session.output_audio.delta',delta:quiet});
+  assert.deepEqual(client.messages.at(-1),{type:'done',complete:true});
+  assert.ok(!upstream.messages.some(msg=>msg.type==='response.create'));
+  client.close();
+});
+
+test('unsupported directed output falls back to bidirectional interpretation',()=>{
+  const client=new FakeSocket(),upstream=new FakeSocket();let url;
+  bridge(client,{model:'test',apiKey:'test',connect:u=>{url=u;return upstream;}});
+  client.incoming({type:'start',options:{other:'tr',mode:'stream'}});
+  assert.match(url,/\/realtime\?model=test$/);
+  upstream.emit('open');assert.match(upstream.messages[0].session.instructions,/Turkish/);
+  client.close();
+});

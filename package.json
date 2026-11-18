@@ -1,9 +1,17 @@
 {
   "name": "instant-voice-interpreter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "scripts": {"start": "node server/index.mjs", "test": "node --test"},
-  "engines": {"node": ">=20"},
-  "dependencies": {"ws": "8.21.1"}
+  "scripts": {
+    "start": "node server/index.mjs",
+    "test": "node --test",
+    "issue-link": "node server/issue-link.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ws": "8.21.1"
+  }
 }

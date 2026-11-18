@@ -3,7 +3,8 @@ const $ = id => document.getElementById(id);
 const native = window.VoiceApp;
 const credit = 'تم تطوير وتنفيذ هذا التطبيق بواسطة أمجد حبيب';
 const langs = {ar:'العربية',en:'الإنجليزية',tr:'التركية',fr:'الفرنسية',de:'الألمانية',zh:'الصينية الماندرين'};
-const modes = {live:['timeline','محادثة مستمرة'], face:['people','وجهاً لوجه'], push:['hand','اضغط باستمرار للتحدث'], travel:['travel','وضع السفر'], business:['case','وضع الأعمال'], medical:['medical','الوضع الطبي']};
+const streamTargets=['en','fr','de','zh'];
+const modes = {stream:['wave','بث متزامن من العربية إلى اللغة الأخرى'],live:['timeline','محادثة مستمرة'], face:['people','وجهاً لوجه'], push:['hand','اضغط باستمرار للتحدث'], travel:['travel','وضع السفر'], business:['case','وضع الأعمال'], medical:['medical','الوضع الطبي']};
 const defaults = {other:'en',reverse:false,mode:'live',voice:'auto',speed:'normal',pitch:'normal',route:'speaker'};
 let opts = {...defaults};
 try {
@@ -14,7 +15,7 @@ try {
 let active=false, amplitude=0, kind='idle', focusBack, previewStream, previewAudio, previewReading, previewRun=0, pushHeld=false;
 const mic = $('micButton'), canvas=$('visual'), ctx=canvas.getContext('2d');
 const stateNames={idle:'جاهز',connecting:'جارٍ الاتصال',listening:'أستمع إليك',translating:'جارٍ الترجمة',speaking:'النطق',error:'تعذّر بدء الترجمة'};
-const quick=['live','face','push','travel'];
+const quick=['live','stream','push','travel'];
 const icon = i => `<svg aria-hidden="true"><use href="#${i}"/></svg>`;
 const buzz = () => { if(!native && navigator.vibrate) navigator.vibrate(14); };
 function say(text) {
@@ -39,11 +40,16 @@ window.studio = {
   state, level: n=>{amplitude=Math.max(0,Math.min(1,Number(n)||0));},
   quality: q=>{if(['good','weak','off'].includes(q)) $('connection').dataset.quality=q;},
   command: cmd=>{ if(cmd.startsWith('language:') && ['en','tr','fr','de','zh'].includes(cmd.slice(9))){opts.other=cmd.slice(9);save(false);} if(cmd==='slow' || cmd==='fast'){opts.speed=cmd; save(false);} },
+  pair: showPair,
   back: ()=>{if(!$('sheetLayer').hidden){closeSheet();return true;} return false;}
 };
 function save(sync=true){try{localStorage.setItem('voice-settings', JSON.stringify(opts));}catch(_){} if(sync && native) native.configure(JSON.stringify(opts)); render();}
 function swap(speak=true){opts.reverse=!opts.reverse;save();if(speak) say(`${langs[opts.reverse?opts.other:'ar']}، ${langs[opts.reverse?'ar':opts.other]}`);}
-function chooseMode(key){if(opts.mode!==key && (active || pushHeld)) halt(); opts.mode=key; save(); state(kind); say(modes[key][1]);}
+function chooseMode(key){
+  if(key==='stream' && !streamTargets.includes(opts.other)){say('البث المتزامن بهذا الوضع لا يدعم التركية. استخدم وضع المحادثة المستمرة للترجمة التركية.');return false;}
+  if(opts.mode!==key && (active || pushHeld)) halt();opts.mode=key;save();state(kind);
+  say(key==='stream'?`بث متزامن من العربية إلى ${langs[opts.other]}. يتبع الصوت أسلوب المتحدث.`:modes[key][1]);return true;
+}
 function button(svg,label,action,classes='icon-button',selected){const b=document.createElement('button'); b.className=classes;b.type='button';b.setAttribute('aria-label',label);if(selected!==undefined)b.setAttribute('aria-pressed',String(selected));b.innerHTML=icon(svg);b.addEventListener('click',action);return b;}
 function render(){
   const ids=opts.reverse?[opts.other,'ar']:['ar',opts.other];
@@ -56,14 +62,21 @@ function render(){
 }
 function closeSheet(){ $('sheetLayer').hidden=true; $('app').removeAttribute('inert');$('app').removeAttribute('aria-hidden'); if(focusBack && focusBack.isConnected)focusBack.focus(); }
 function show(label,content){const visible=!$('sheetLayer').hidden; if(!visible) focusBack=document.activeElement;const box=$('sheetContent');box.textContent='';content(box);$('sheet').setAttribute('aria-label',label);$('sheetLayer').hidden=false;$('app').setAttribute('inert','');$('app').setAttribute('aria-hidden','true');$('closeSheet').focus();}
-function languages(){show('اختيار اللغة',box=>{const grid=document.createElement('div');grid.className='sheet-grid'; for(const code of Object.keys(langs).filter(x=>x!=='ar')){const b=button('wave',langs[code],()=>{opts.other=code;save();closeSheet();say(langs[code]);},'icon-button',code===opts.other);b.innerHTML=`<span class="flag" data-flag="${code}"></span>`;grid.append(b);}box.append(grid);});}
+function languages(){show('اختيار اللغة',box=>{const grid=document.createElement('div');grid.className='sheet-grid'; for(const code of Object.keys(langs).filter(x=>x!=='ar')){const b=button('wave',langs[code],()=>{opts.other=code;if(opts.mode==='stream'&&!streamTargets.includes(code)){if(active)halt();opts.mode='live';save();closeSheet();say('التركية، وضع المحادثة المستمرة');return;}save();closeSheet();say(langs[code]);},'icon-button',code===opts.other);b.innerHTML=`<span class="flag" data-flag="${code}"></span>`;grid.append(b);}box.append(grid);});}
 function settings(){show('الإعدادات',box=>{
   const groups=[['wave','الصوت','voice',[['timeline','تلقائي','auto'],['mic','صوت رجالي','male'],['speaker','صوت نسائي','female']]],['play','السرعة','speed',[['slow','بطيء','slow'],['play','عادي','normal'],['fast','سريع','fast']]],['pitch','طبقة الصوت','pitch',[['slow','طبقة منخفضة','low'],['timeline','طبقة عادية','normal'],['fast','طبقة مرتفعة','high']]],['headphones','مخرج الصوت','route',[['speaker','مكبر الصوت','speaker'],['headphones','سماعات الرأس','headphones']]]];
   for(const [symbol,title,key,items] of groups){const r=document.createElement('div');r.className='row';r.setAttribute('role','group');r.setAttribute('aria-label',title);r.innerHTML=icon(symbol);r.firstChild.classList.add('row-icon');for(const [sym,label,value] of items){const b=button(sym,label,()=>{opts[key]=value;save();for(const peer of r.querySelectorAll('button'))peer.setAttribute('aria-pressed',String(peer===b));say(label);},'mode',opts[key]===value);r.append(b);}box.append(r);}
-  const tools=document.createElement('div');tools.className='sheet-tools';tools.append(button('swap','اللغات',languages),button('people','أوضاع المحادثة',allModes),button('info','حول التطبيق',about));box.append(tools);
+  const tools=document.createElement('div');tools.className='sheet-tools';tools.append(button('swap','اللغات',languages),button('people','أوضاع المحادثة',allModes),button('info','حول التطبيق',about));if(native)tools.append(button('shield','إلغاء ربط خادم الترجمة',unlink));box.append(tools);
 });}
-function allModes(){show('أوضاع المحادثة',box=>{const grid=document.createElement('div');grid.className='sheet-grid';for(const key of Object.keys(modes))grid.append(button(...modes[key],()=>{chooseMode(key);closeSheet();},'icon-button',opts.mode===key));box.append(grid);});}
+function allModes(){show('أوضاع المحادثة',box=>{const grid=document.createElement('div');grid.className='sheet-grid';for(const key of Object.keys(modes))grid.append(button(...modes[key],()=>{if(chooseMode(key))closeSheet();},'icon-button',opts.mode===key));box.append(grid);});}
 function about(){show('حول التطبيق',box=>{const a=document.createElement('div');a.className='about';a.innerHTML=`<img src="mark.svg" alt=""><p>${credit}</p>`;a.append(button('speaker','استمع للحقوق',()=>say(credit)),button('shield','استمع لملخص الخصوصية',()=>say('يُرسل صوتك إلى خادم الترجمة أثناء الجلسة فقط، ولا يحفظ التطبيق تسجيلات على جهازك. أوقف الميكروفون متى شئت.')));box.append(a);});}
+function showPair(challenge,host){
+  const guide=`خادم الترجمة: ${host}. يُرسل صوت المحادثة إلى هذا الخادم عند الترجمة. تابع فقط إذا كنت تثق به.`;
+  show('تأكيد ربط خادم الترجمة',box=>{const row=document.createElement('div');row.className='sheet-tools';
+    row.append(button('speaker','استمع إلى شرح الربط',()=>say(guide)),button('shield','أوافق على ربط الخادم',()=>{native.pair(challenge);closeSheet();}));box.append(row);});
+  say(guide);
+}
+function unlink(){show('تأكيد إلغاء الربط',box=>{const r=document.createElement('div');r.className='sheet-tools';r.append(button('close','إلغاء ربط الخادم',()=>{native.unlink();halt();closeSheet();}));box.append(r);});say('اضغط علامة الإغلاق في وسط اللوحة لتأكيد إلغاء ربط خادم الترجمة.');}
 function consent(){show('إذن الميكروفون',box=>{const row=document.createElement('div');row.className='sheet-tools';row.append(button('speaker','استمع إلى سبب طلب الإذن',permissionGuide),button('mic','متابعة إلى إذن الميكروفون',()=>{closeSheet();native.requestMic();}));box.append(row);});permissionGuide();}
 function permissionGuide(){say('لبدء الترجمة، نحتاج إذن الميكروفون لإرسال صوتك إلى خادم الترجمة. لا يحفظ التطبيق تسجيلات على جهازك. اضغط رمز الميكروفون مرة أخرى للمتابعة.');}
 function route(){opts.route=opts.route==='speaker'?'headphones':'speaker';save();say(opts.route==='speaker'?'مكبر الصوت':'سماعات الرأس عند توصيلها');}

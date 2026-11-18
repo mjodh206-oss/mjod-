@@ -3,6 +3,7 @@ package app.amjad.voice;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
+import android.media.PlaybackParams;
 import android.os.Handler;
 import java.util.ArrayDeque;
 
@@ -15,6 +16,7 @@ final class PcmOutput {
     private AudioTrack track;
     private int queued, offset, written;
     private boolean started;
+    private float speed=1f, pitch=1f;
     private Runnable completed;
     private final Runnable drain=this::pump;
 
@@ -32,19 +34,26 @@ final class PcmOutput {
         queue.addLast(pcm);queued+=pcm.length;
         schedule(0);return true;
     }
+    void tune(float speed,float pitch){
+        this.speed=speed;this.pitch=pitch;
+        if(started&&track!=null)applyTuning();
+    }
+    private void applyTuning(){
+        try{track.setPlaybackParams(new PlaybackParams().allowDefaults().setSpeed(speed).setPitch(pitch));}catch(RuntimeException ignored){}
+    }
     int playedMillis(){if(track==null)return 0;return (int)((track.getPlaybackHeadPosition()&0xffffffffL)*1000/RATE);}
     void finish(Runnable done){completed=done;schedule(0);}
     private void schedule(long delay){handler.removeCallbacks(drain);handler.postDelayed(drain,delay);}
     private void pump(){
         try{
             if(track!=null){
-                if(started||queued>=1920||completed!=null){
+                if(started||queued>=4800||completed!=null){
                     for(int i=0;i<8&&!queue.isEmpty();i++){
                         byte[] head=queue.peekFirst();int n=track.write(head,offset,head.length-offset,AudioTrack.WRITE_NON_BLOCKING);
                         if(n<0)throw new IllegalStateException();if(n==0)break;
                         written+=n;queued-=n;offset+=n;if(offset==head.length){offset=0;queue.removeFirst();}
                     }
-                    if(!started&&written>0){track.play();started=true;}
+                    if(!started&&written>0){track.play();started=true;if(speed!=1f||pitch!=1f)applyTuning();}
                 }
                 if(!queue.isEmpty()||(completed!=null && (track.getPlaybackHeadPosition()&0xffffffffL)<written/2)){schedule(15);return;}
             }

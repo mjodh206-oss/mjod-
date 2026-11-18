@@ -1,0 +1,8 @@
+.git
+.env*
+node_modules
+build
+app/build
+artifacts
+*.jks
+*.keystore

@@ -47,3 +47,4 @@ svg{display:block;width:23px;height:23px;fill:none;stroke:currentColor;stroke-wi
 @media(max-width:360px){.app{padding:0 12px;--orb:122px}.mode{width:35px}.dock .tool{width:36px}.languages{gap:6px}}
 @media(max-height:620px) and (orientation:landscape){.app{--orb:106px}.top,.dock{height:65px}.sound-stage{height:230px;min-height:230px}.languages{margin-top:3px}.language{height:56px}.studio{padding-bottom:11px}.mic svg{width:37px;height:37px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+.pair-screen{min-height:100vh;display:grid;place-content:center;justify-items:center;gap:30px}.pair-screen>img{width:58px}.pair-open{display:grid;place-items:center;text-decoration:none;width:108px;height:108px}.pair-open svg{width:35px;height:35px}.pair-open[aria-disabled=true]{opacity:.4;pointer-events:none}
