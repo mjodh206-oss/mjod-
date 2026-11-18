@@ -69,7 +69,7 @@ function settings(){show('الإعدادات',box=>{
   const tools=document.createElement('div');tools.className='sheet-tools';tools.append(button('swap','اللغات',languages),button('people','أوضاع المحادثة',allModes),button('info','حول التطبيق',about));if(native)tools.append(button('shield','إلغاء ربط خادم الترجمة',unlink));box.append(tools);
 });}
 function allModes(){show('أوضاع المحادثة',box=>{const grid=document.createElement('div');grid.className='sheet-grid';for(const key of Object.keys(modes))grid.append(button(...modes[key],()=>{if(chooseMode(key))closeSheet();},'icon-button',opts.mode===key));box.append(grid);});}
-function about(){show('حول التطبيق',box=>{const a=document.createElement('div');a.className='about';a.innerHTML=`<img src="mark.svg" alt=""><p>${credit}</p>`;a.append(button('speaker','استمع للحقوق',()=>say(credit)),button('shield','استمع لملخص الخصوصية',()=>say('يُرسل صوتك إلى خادم الترجمة أثناء الجلسة فقط، ولا يحفظ التطبيق تسجيلات على جهازك. أوقف الميكروفون متى شئت.')));box.append(a);});}
+function about(){show('حول التطبيق',box=>{const a=document.createElement('div');a.className='about';a.innerHTML=`<img src="mark.svg" alt=""><p>${credit}</p>`;a.append(button('speaker','استمع للحقوق',()=>say(credit)),button('wave','استمع إلى مصدر الصوت',()=>say('يتوفر صوت الترجمة من إليفن لابز عند استخدام الخادم المخصص.')),button('shield','استمع لملخص الخصوصية',()=>say('يُرسل صوتك إلى خادم الترجمة أثناء الجلسة فقط، ولا يحفظ التطبيق تسجيلات على جهازك. أوقف الميكروفون متى شئت.')));box.append(a);});}
 function showPair(challenge,host){
   const guide=`خادم الترجمة: ${host}. يُرسل صوت المحادثة إلى هذا الخادم عند الترجمة. تابع فقط إذا كنت تثق به.`;
   show('تأكيد ربط خادم الترجمة',box=>{const row=document.createElement('div');row.className='sheet-tools';

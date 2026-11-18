@@ -140,7 +140,8 @@ public final class InterpreterService extends Service {
     private void event(JSONObject event){
         switch(event.optString("type")){
             case "ready": ready=true;disarm();setQuality("good");
-                if(!released){setState("listening");if(!push)beginCapture();buzz();}else arm(30_000,()->fatal("تأخرت الترجمة. حاول مرة ثانية."));break;
+                if(!released){setState("listening");if(!push)beginCapture();buzz();
+                    if("eleven".equals(event.optString("engine"))&&"stream".equals(opts.optString("mode")))prompt("في الخطة المجانية، تبدأ الترجمة بعد وقفة قصيرة في الكلام.");}else arm(30_000,()->fatal("تأخرت الترجمة. حاول مرة ثانية."));break;
             case "quality": String q=event.optString("quality");if(q.equals("good")||q.equals("weak"))setQuality(q);break;
             case "interrupt": interrupt();break;
             case "listening":setState("listening");break;
@@ -151,7 +152,9 @@ public final class InterpreterService extends Service {
                 if(!event.optBoolean("complete")){interrupt();if(push)requestStop();break;}
                 if(!savedTooLong&&response.size()>0)lastAudio=response.toByteArray();
                 outputAllowed=false;output.finish(()->{item=null;response.reset();level(0);buzz();if(push)requestStop();else setState("listening");});break;
-            case "empty":prompt("ما سمعتك، ممكن تعيد؟");if(push)requestStop();else setState("listening");break;
+            case "clarify":
+            case "empty":prompt("ما سمعتك بوضوح، ممكن تعيد؟");if(push)requestStop();else setState("listening");break;
+            case "unsupported":prompt("اللغة المسموعة ليست إحدى اللغتين المختارتين.");if(push)requestStop();else setState("listening");break;
             case "problem":retry(event.optString("reason"));break;
             case "command":applyCommand(event.optString("action"));break;
         }
@@ -254,6 +257,7 @@ public final class InterpreterService extends Service {
     private void retry(String reason){
         if(!running)return;
         if("ended".equals(reason)){prompt("انتهت الجلسة. المس الميكروفون لبدء جلسة جديدة.");requestStop();return;}
+        if("quota".equals(reason)){fatal("تم بلوغ حد الاستخدام المجاني. جرّب لاحقاً بعد تجدد الرصيد.");return;}
         if("upstream".equals(reason)||"protocol".equals(reason)){fatal("خدمة الترجمة غير متاحة الآن. حاول لاحقاً.");return;}
         if(push||attempt>=5){fatal("الاتصال ضعيف، حاول مرة ثانية.");return;}
         resetConnection();setState("connecting");setQuality("weak");

@@ -28,7 +28,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      - run: gradle --no-daemon :app:assembleDebug :app:lintDebug
+      - name: Build and lint Android
+        shell: bash
+        run: |
+          set -o pipefail
+          if ! gradle --console=plain --no-daemon :app:assembleDebug :app:lintDebug 2>&1 | tee "$RUNNER_TEMP/android-build.log"; then
+            while IFS= read -r entry; do printf '::error::%s\n' "${entry//\%/%25}"; done < <(tail -55 "$RUNNER_TEMP/android-build.log" | grep -E 'Error:|error:|^> |^FAILURE' | head -10)
+            exit 1
+          fi
       - run: $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v4
         with:

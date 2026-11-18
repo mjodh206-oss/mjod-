@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: instant-voice-interpreter
+    runtime: node
+    plan: free
+    region: frankfurt
+    autoDeployTrigger: off
+    buildCommand: npm ci --omit=dev --ignore-scripts
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.3
+      - key: RELAY_ENGINE
+        value: eleven
+      - key: RELAY_MAX_SESSIONS
+        value: '1'
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: RELAY_PROVISIONING_SECRET
+        generateValue: true
+      - key: RELAY_OPERATOR_PASSWORD
+        generateValue: true
