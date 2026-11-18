@@ -4,6 +4,7 @@ import 'package:rattib/core/constants/currencies.dart';
 import 'package:rattib/core/utils/arabic_formatters.dart';
 import 'package:rattib/models/debt_item.dart';
 import 'package:rattib/models/salary_profile.dart';
+import 'package:rattib/services/ai_advisor_service.dart';
 import 'package:rattib/services/plan_engine.dart';
 
 void main() {
@@ -177,6 +178,63 @@ void main() {
         avalanche.totalInterestPaid,
         lessThan(snowball.totalInterestPaid),
       );
+    });
+
+    test('exactMoneySplit sums cleanly to exact salary without rounding mismatch', () {
+      const profile = SalaryProfile(
+        monthlySalary: 6000,
+        currencyCode: 'SYP',
+      );
+      final currency = AppCurrencies.byCode('SYP');
+      final plan = PlanEngine.generatePlan(profile);
+      final splits = PlanEngine.exactMoneySplit(
+        plan: plan,
+        currency: currency,
+      );
+      final totalSum =
+          splits.values.fold<double>(0.0, (sum, v) => sum + v);
+
+      expect(totalSum, 6000.0);
+
+      final steps = PlanEngine.buildSalaryActionPlan(
+        profile: profile,
+        plan: plan,
+        spentByBucket: const {},
+        currency: currency,
+        daysLeft: 13,
+      );
+      final stepsSum =
+          steps.fold<double>(0.0, (sum, s) => sum + s.monthlyAmount);
+      expect(stepsSum, 6000.0);
+    });
+
+    test('AiAdvisorService computes affordability in money amounts cleanly', () async {
+      const profile = SalaryProfile(
+        monthlySalary: 6000,
+        currencyCode: 'SYP',
+      );
+      final currency = AppCurrencies.byCode('SYP');
+      final plan = PlanEngine.generatePlan(profile);
+      final advisor = AiAdvisorService();
+
+      final result = await advisor.analyze(
+        profile: profile,
+        plan: plan,
+        currency: currency,
+        spentByBucket: const {},
+        totalSpentCycle: 0,
+        dailySafeSpend: 250,
+        daysLeft: 13,
+        goals: const [],
+        debts: const [],
+        userQuestion: 'أشتري غرض بـ 500؟',
+        allowCloud: false,
+      );
+
+      expect(result.isFromCloudAi, isFalse);
+      expect(result.message, contains('500'));
+      expect(result.message, contains('ل.س'));
+      expect(result.message.contains('%'), isFalse);
     });
 
     test('ArabicFormatters calculates days until salary accurately', () {

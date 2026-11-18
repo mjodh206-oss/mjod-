@@ -62,24 +62,24 @@ class DebtSimulationResult {
 
 enum PlanPreset {
   balanced(
-    titleAr: 'متوازنة 50/30/20',
+    titleAr: 'خطة متوازنة',
     shortAr: 'متوازنة',
-    descriptionAr: 'نصف الراتب للبيت والأساسيات، جزء لمصروفك الشخصي، والباقي توفير وطوارئ.',
+    descriptionAr: 'تغطي البيت والأكل، تترك لك مصروفاً مريحاً، وتوفّر جزءاً جيداً كل شهر.',
   ),
   strongSaving(
-    titleAr: 'توفير قوي',
-    shortAr: 'توفير قوي',
-    descriptionAr: 'تقلل المصروف الشخصي وترفع التوفير لأعلى نسبة لتصل لأهدافك بسرعة.',
+    titleAr: 'توفير أكبر',
+    shortAr: 'توفير أكبر',
+    descriptionAr: 'تقلل المصروف الشخصي وترفع التوفير لأعلى مبلغ لتصل لأهدافك بسرعة.',
   ),
   essentialsFirst(
-    titleAr: 'الأولوية للبيت',
-    shortAr: 'أساسيات أولاً',
-    descriptionAr: 'مناسبة للرواتب المضغوطة أو الإيجار العالي: تغطي الأساسيات أولاً مع هامش أمان.',
+    titleAr: 'للبيت أكثر',
+    shortAr: 'للبيت أكثر',
+    descriptionAr: 'مناسبة للرواتب المضغوطة أو الإيجار العالي: تغطي البيت والفواتير أولاً بأمان.',
   ),
   debtPayoff(
-    titleAr: 'تصفية الديون',
-    shortAr: 'سداد الديون',
-    descriptionAr: 'توجّه أكبر قدر ممكن لسداد الديون والأقساط حتى يتحرر راتبك بالكامل.',
+    titleAr: 'تسكير الديون',
+    shortAr: 'تسكير الديون',
+    descriptionAr: 'توجّه أكبر مبلغ لسداد الديون والأقساط حتى يصفى راتبك بالكامل.',
   );
 
   const PlanPreset({
@@ -184,21 +184,86 @@ class PlanEngine {
     );
   }
 
+  static Map<BudgetBucket, double> exactMoneySplit({
+    required BudgetPlan plan,
+    required AppCurrency currency,
+  }) {
+    final total = math.max(plan.totalIncome, 0.0);
+    final result = <BudgetBucket, double>{};
+    if (total <= 0) {
+      for (final b in BudgetBucket.values) {
+        result[b] = 0.0;
+      }
+      return result;
+    }
+
+    final factor = currency.allowDecimals ? 100.0 : 1.0;
+    final totalUnits = (total * factor).round();
+
+    BudgetBucket largestBucket = BudgetBucket.necessities;
+    double largestPct = -1;
+    int assignedUnits = 0;
+
+    for (final b in BudgetBucket.values) {
+      final pct = plan.percentageFor(b);
+      if (pct <= 0.01) {
+        result[b] = 0.0;
+        continue;
+      }
+      if (pct > largestPct) {
+        largestPct = pct;
+        largestBucket = b;
+      }
+      final units = ((total * (pct / 100.0)) * factor).round();
+      result[b] = units / factor;
+      assignedUnits += units;
+    }
+
+    final diffUnits = totalUnits - assignedUnits;
+    if (diffUnits != 0) {
+      final adjusted = ((result[largestBucket]! * factor).round() + diffUnits)
+          .clamp(0, totalUnits);
+      result[largestBucket] = adjusted / factor;
+    }
+    return result;
+  }
+
+  static BudgetPlan rebalanceFromAmount({
+    required SalaryProfile profile,
+    required BudgetPlan current,
+    required BudgetBucket changedBucket,
+    required double newAmount,
+  }) {
+    final income = math.max(profile.totalMonthlyIncome, 1.0);
+    final pct = ((newAmount / income) * 100.0).clamp(0.0, 85.0);
+    return rebalanceFromSlider(
+      profile: profile,
+      current: current,
+      changedBucket: changedBucket,
+      newPercentage: pct,
+    );
+  }
+
   static double dailySafeSpend({
     required SalaryProfile profile,
     required BudgetPlan plan,
     required Map<BudgetBucket, double> spentByBucket,
     required int daysLeft,
+    AppCurrency? currency,
   }) {
-    // Available day-to-day living money = (Necessities - rent - already spent in necessities)
-    // + (Wants - already spent in wants), spread over remaining days to payday
-    final necBudget = plan.amountFor(BudgetBucket.necessities);
-    final wantsBudget = plan.amountFor(BudgetBucket.wants);
+    final splits = currency != null
+        ? exactMoneySplit(plan: plan, currency: currency)
+        : null;
+    final necBudget = splits?[BudgetBucket.necessities] ??
+        plan.amountFor(BudgetBucket.necessities);
+    final wantsBudget =
+        splits?[BudgetBucket.wants] ?? plan.amountFor(BudgetBucket.wants);
     final rent = profile.isRenting ? profile.rentAmount : 0.0;
     final necSpent = spentByBucket[BudgetBucket.necessities] ?? 0.0;
     final wantsSpent = spentByBucket[BudgetBucket.wants] ?? 0.0;
 
-    final necLivingLeft = math.max(0.0, (necBudget - rent) - math.max(0.0, necSpent - rent));
+    final necLivingLeft =
+        math.max(0.0, (necBudget - rent) - math.max(0.0, necSpent - rent));
     final wantsLeft = math.max(0.0, wantsBudget - wantsSpent);
     final spendableLeft = necLivingLeft + wantsLeft;
 
@@ -213,17 +278,18 @@ class PlanEngine {
     required AppCurrency currency,
     required int daysLeft,
   }) {
+    final splits = exactMoneySplit(plan: plan, currency: currency);
     final steps = <SalaryActionStep>[];
     int num = 1;
 
-    final savAmt = plan.amountFor(BudgetBucket.savings);
+    final savAmt = splits[BudgetBucket.savings] ?? 0.0;
     if (savAmt > 0) {
       steps.add(
         SalaryActionStep(
           stepNumber: num++,
-          titleAr: 'أول ما ينزل الراتب: حط التوفير على جنب',
+          titleAr: 'التوفير والادخار (حطه على جنب أولاً)',
           instructionAr:
-              'خذ ${ArabicFormatters.formatMoney(savAmt, currency)} مباشرة للتوفير — لو التزمت فيها بتصير ${ArabicFormatters.formatMoney(savAmt * 12, currency)} بعد سنة!',
+              'خبّي ${ArabicFormatters.formatMoney(savAmt, currency)} فور نزول الراتب — بالسنة بتصير ${ArabicFormatters.formatMoney(savAmt * 12, currency)}.',
           bucket: BudgetBucket.savings,
           monthlyAmount: savAmt,
           dailyAllowance: null,
@@ -233,14 +299,14 @@ class PlanEngine {
       );
     }
 
-    final emgAmt = plan.amountFor(BudgetBucket.emergency);
+    final emgAmt = splits[BudgetBucket.emergency] ?? 0.0;
     if (emgAmt > 0) {
       steps.add(
         SalaryActionStep(
           stepNumber: num++,
-          titleAr: 'احفظ مبلغ الطوارئ لأي ظرف مفاجئ',
+          titleAr: 'صندوق الطوارئ (احتياط الأمان)',
           instructionAr:
-              'اترك ${ArabicFormatters.formatMoney(emgAmt, currency)} في مكان منفصل ما تلمسه إلا للضرورة القصوى.',
+              'اترك ${ArabicFormatters.formatMoney(emgAmt, currency)} لظرف مفاجئ لا سمح الله.',
           bucket: BudgetBucket.emergency,
           monthlyAmount: emgAmt,
           dailyAllowance: null,
@@ -250,17 +316,17 @@ class PlanEngine {
       );
     }
 
-    final necAmt = plan.amountFor(BudgetBucket.necessities);
+    final necAmt = splits[BudgetBucket.necessities] ?? 0.0;
     final rent = profile.isRenting ? profile.rentAmount : 0.0;
     final necLiving = math.max(0.0, necAmt - rent);
     final necDaily = necLiving / 30.0;
     steps.add(
       SalaryActionStep(
         stepNumber: num++,
-        titleAr: 'مصروف البيت والأكل والفواتير',
+        titleAr: 'البيت والأكل والفواتير',
         instructionAr: profile.isRenting && rent > 0
-            ? 'ادفع الإيجار (${ArabicFormatters.formatCompactMoney(rent, currency)}) والباقي ${ArabicFormatters.formatCompactMoney(necLiving, currency)} للأكل والفواتير (حوالي ${ArabicFormatters.formatCompactMoney(necDaily, currency)} باليوم).'
-            : 'خصص هذا المبلغ للأكل والفواتير والمواصلات طوال الشهر (بمعدل ${ArabicFormatters.formatCompactMoney(necDaily, currency)} باليوم).',
+            ? 'ادفع الإيجار (${ArabicFormatters.formatMoney(rent, currency)}) والباقي ${ArabicFormatters.formatMoney(necLiving, currency)} للأكل والفواتير.'
+            : 'للأكل والفواتير والمواصلات طوال الشهر (بحدود ${ArabicFormatters.formatMoney(necDaily, currency)} باليوم).',
         bucket: BudgetBucket.necessities,
         monthlyAmount: necAmt,
         dailyAllowance: necDaily,
@@ -269,7 +335,7 @@ class PlanEngine {
       ),
     );
 
-    final wantsAmt = plan.amountFor(BudgetBucket.wants);
+    final wantsAmt = splits[BudgetBucket.wants] ?? 0.0;
     final wantsDaily = wantsAmt / 30.0;
     if (wantsAmt > 0) {
       steps.add(
@@ -277,7 +343,7 @@ class PlanEngine {
           stepNumber: num++,
           titleAr: 'مصروفك الشخصي والطلعات',
           instructionAr:
-              'عندك ${ArabicFormatters.formatCompactMoney(wantsDaily, currency)} باليوم (أو ${ArabicFormatters.formatCompactMoney(wantsAmt / 4.0, currency)} بالأسبوع) تصرفها على نفسك بدون ما تخرب الخطة.',
+              'إلك ${ArabicFormatters.formatMoney(wantsDaily, currency)} باليوم (أو ${ArabicFormatters.formatMoney(wantsAmt / 4.0, currency)} بالأسبوع) تصرفها على راحتك.',
           bucket: BudgetBucket.wants,
           monthlyAmount: wantsAmt,
           dailyAllowance: wantsDaily,
@@ -287,14 +353,14 @@ class PlanEngine {
       );
     }
 
-    final debtAmt = plan.amountFor(BudgetBucket.debts);
+    final debtAmt = splits[BudgetBucket.debts] ?? 0.0;
     if (debtAmt > 0) {
       steps.add(
         SalaryActionStep(
           stepNumber: num++,
           titleAr: 'سداد الديون والأقساط',
           instructionAr:
-              'سدد ${ArabicFormatters.formatMoney(debtAmt, currency)} هذا الشهر لتتخلص من التزاماتك أسرع.',
+              'سدد ${ArabicFormatters.formatMoney(debtAmt, currency)} هذا الشهر لتخفف التزاماتك أسرع.',
           bucket: BudgetBucket.debts,
           monthlyAmount: debtAmt,
           dailyAllowance: null,
@@ -622,11 +688,11 @@ class PlanEngine {
           id: 'debt_strategy',
           titleAr: 'خطة تسريع سداد الديون أولاً',
           bodyAr:
-              'الديون والأقساط تستهلك ${plan.debtsPct.toStringAsFixed(1)}% من دخلك (${ArabicFormatters.formatMoney(plan.amountFor(BudgetBucket.debts), currency)} شهرياً).',
+              'أنت تدفع ${ArabicFormatters.formatMoney(plan.amountFor(BudgetBucket.debts), currency)} شهرياً للديون والأقساط من أصل راتبك.',
           actionStepsAr: [
-            'استخدم «كرة الثلج» بسداد أصغر دين أولاً لتحصل على دافع سريع.',
-            'أو اختر «الانهيار الجليدي» بسداد الدين الأعلى فائدة لتوفير أكثر.',
-            'جرّب حاسبة سداد الديون بالأسفل لترى تاريخ تحررك من الديون!',
+            'ابدأ بسداد أصغر دين أولاً حتى تختفي الأقساط الصغيرة بسرعة.',
+            'أو ركّز على الدين الأعلى فائدة لتوفير أكبر مبلغ ممكن.',
+            'جرّب حاسبة الديون بالأسفل لترى متى تنتهي منها بالكامل.',
           ],
           severity: plan.debtsPct > 30
               ? AdviceSeverity.warning
@@ -645,10 +711,10 @@ class PlanEngine {
           id: 'emergency_fund',
           titleAr: 'ابنِ صندوق طوارئ يحميك من المفاجآت',
           bodyAr:
-              'الهدف الآمن لصندوق الطوارئ هو تغطية 3 أشهر من الضروريات (${ArabicFormatters.formatMoney(target3Months, currency)}).',
+              'الهدف الآمن لصندوق الطوارئ هو تجميع ما يكفي مصاريف 3 أشهر (${ArabicFormatters.formatMoney(target3Months, currency)}).',
           actionStepsAr: [
-            'خصّص ${plan.emergencyPct.toStringAsFixed(0)}% شهرياً (${ArabicFormatters.formatMoney(plan.amountFor(BudgetBucket.emergency), currency)}) للطوارئ.',
-            'احتفظ بمبلغ الطوارئ منفصلاً عن مصروف الجيب اليومي.',
+            'خبّي ${ArabicFormatters.formatMoney(plan.amountFor(BudgetBucket.emergency), currency)} كل شهر للطوارئ فقط.',
+            'احتفظ بمبلغ الطوارئ منفصلاً عن مصروفك اليومي.',
           ],
           severity: AdviceSeverity.info,
           bucket: BudgetBucket.emergency,
@@ -658,15 +724,17 @@ class PlanEngine {
 
     // Positive reinforcement when savings + emergency >= 20%
     if (plan.savingsPct + plan.emergencyPct >= 20) {
+      final totalMonthlySaved =
+          plan.amountFor(BudgetBucket.savings) + plan.amountFor(BudgetBucket.emergency);
       advice.add(
         SmartAdviceItem(
           id: 'strong_saving',
-          titleAr: 'معدل ادخارك قوي ومطابق لقاعدة 50/30/20 🎯',
+          titleAr: 'مبلغ التوفير الشهري عندك ممتاز 🎯',
           bodyAr:
-              'أنت تدخر وتؤمّن مستقبلك بنسبة ${(plan.savingsPct + plan.emergencyPct).toStringAsFixed(0)}% من دخلك، أي ما يعادل ${ArabicFormatters.formatMoney(plan.annualSavingsPotential, currency)} سنوياً!',
+              'أنت تحفظ ${ArabicFormatters.formatMoney(totalMonthlySaved, currency)} كل شهر للتوفير والطوارئ — يعني ${ArabicFormatters.formatMoney(plan.annualSavingsPotential, currency)} خلال سنة كاملة!',
           actionStepsAr: [
-            'اربط جزءاً من هذا الادخار بهدف واضح داخل قسم الأهداف.',
-            'استمر على الالتزام الأسبوعي لتحصد الشارات الذهبية.',
+            'اربط هذا المبلغ بهدف واضح في قسم الأهداف حتى تظل متحمساً.',
+            'استمر بالتزامك لتحصد الشارات الذهبية.',
           ],
           severity: AdviceSeverity.positive,
           bucket: BudgetBucket.savings,

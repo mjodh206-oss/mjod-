@@ -24,8 +24,8 @@ class AppCurrencies {
       code: 'SYP',
       nameAr: 'ليرة سورية',
       symbol: 'ل.س',
-      sampleSalary: 1500000,
-      quickAmounts: [500000, 1000000, 2000000, 3500000],
+      sampleSalary: 10000,
+      quickAmounts: [5000, 10000, 1000000, 2000000],
     ),
     AppCurrency(
       code: 'USD',

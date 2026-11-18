@@ -5,6 +5,7 @@ import '../core/constants/categories.dart';
 import '../core/constants/currencies.dart';
 import '../core/utils/arabic_formatters.dart';
 import '../models/budget_plan.dart';
+import '../services/plan_engine.dart';
 
 class BudgetDonutChart extends StatefulWidget {
   const BudgetDonutChart({
@@ -36,10 +37,28 @@ class _BudgetDonutChartState extends State<BudgetDonutChart> {
     });
   }
 
+  String _sliceMoneyLabel(double amount) {
+    final abs = amount.abs();
+    if (abs >= 1000000) {
+      return '${(abs / 1000000).toStringAsFixed(1)}M';
+    }
+    if (abs >= 10000) {
+      return '${(abs / 1000).toStringAsFixed(0)}K';
+    }
+    return ArabicFormatters.formatNumber(
+      amount,
+      allowDecimals: widget.currency.allowDecimals,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final splits = PlanEngine.exactMoneySplit(
+      plan: widget.plan,
+      currency: widget.currency,
+    );
     final activeBuckets = AppCategories.buckets
-        .where((b) => widget.plan.percentageFor(b.bucket) > 0.4)
+        .where((b) => (splits[b.bucket] ?? 0.0) > 0)
         .toList();
 
     final selectedMeta = (_touchedIndex >= 0 && _touchedIndex < activeBuckets.length)
@@ -49,7 +68,7 @@ class _BudgetDonutChartState extends State<BudgetDonutChart> {
     return Column(
       children: [
         SizedBox(
-          height: 235,
+          height: 225,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -64,7 +83,7 @@ class _BudgetDonutChartState extends State<BudgetDonutChart> {
                     PieChartData(
                       startDegreeOffset: -90,
                       sectionsSpace: 3,
-                      centerSpaceRadius: 62,
+                      centerSpaceRadius: 60,
                       pieTouchData: PieTouchData(
                         touchCallback: (event, response) {
                           if (!event.isInterestedForInteractions ||
@@ -84,16 +103,17 @@ class _BudgetDonutChartState extends State<BudgetDonutChart> {
                       ),
                       sections: List.generate(activeBuckets.length, (i) {
                         final meta = activeBuckets[i];
+                        final amount = splits[meta.bucket] ?? 0.0;
                         final pct = widget.plan.percentageFor(meta.bucket);
                         final isTouched = i == _touchedIndex;
                         return PieChartSectionData(
                           color: meta.color,
-                          value: _appeared ? pct : (i == 0 ? 100 : 0.1),
-                          title: pct >= 7 ? '${pct.round()}%' : '',
+                          value: _appeared ? mathMax(amount, 0.1) : (i == 0 ? 100 : 0.1),
+                          title: pct >= 9 ? _sliceMoneyLabel(amount) : '',
                           radius: isTouched ? 52 : 44,
                           titleStyle: const TextStyle(
                             fontFamily: 'Cairo',
-                            fontSize: 12.5,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                           ),
@@ -106,31 +126,31 @@ class _BudgetDonutChartState extends State<BudgetDonutChart> {
                 ),
               ),
               SizedBox(
-                width: 112,
+                width: 110,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      selectedMeta?.titleAr ?? 'الدخل الشهري',
+                      selectedMeta?.titleAr ?? 'إجمالي راتبك',
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 11.5,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      ArabicFormatters.formatCompactMoney(
+                      ArabicFormatters.formatMoney(
                         selectedMeta != null
-                            ? widget.plan.amountFor(selectedMeta.bucket)
+                            ? (splits[selectedMeta.bucket] ?? 0.0)
                             : widget.plan.totalIncome,
                         widget.currency,
                       ),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontSize: 14,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w800,
                           ),
                     ),
@@ -141,43 +161,49 @@ class _BudgetDonutChartState extends State<BudgetDonutChart> {
           ),
         ),
         const SizedBox(height: 10),
-        Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: AppCategories.buckets.map((b) {
-            final pct = widget.plan.percentageFor(b.bucket);
-            return InkWell(
-              onTap: () => widget.onBucketTap?.call(b.bucket),
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: b.color,
-                        shape: BoxShape.circle,
-                      ),
+        ...activeBuckets.map((b) {
+          final amount = splits[b.bucket] ?? 0.0;
+          return InkWell(
+            onTap: () => widget.onBucketTap?.call(b.bucket),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              child: Row(
+                children: [
+                  Container(
+                    width: 11,
+                    height: 11,
+                    decoration: BoxDecoration(
+                      color: b.color,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${b.titleAr} (${pct.round()}%)',
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      b.titleAr,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                           ),
                     ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    ArabicFormatters.formatMoney(amount, widget.currency),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: b.color,
+                        ),
+                  ),
+                ],
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        }),
       ],
     );
   }
+
+  double mathMax(double a, double b) => a > b ? a : b;
 }

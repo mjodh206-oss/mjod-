@@ -3,9 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rattib/app.dart';
+import 'package:rattib/core/constants/categories.dart';
+import 'package:rattib/core/constants/currencies.dart';
 import 'package:rattib/models/app_settings.dart';
+import 'package:rattib/models/budget_plan.dart';
 import 'package:rattib/models/debt_item.dart';
 import 'package:rattib/models/salary_profile.dart';
+import 'package:rattib/models/savings_goal.dart';
 import 'package:rattib/screens/expenses/expenses_screen.dart';
 import 'package:rattib/screens/home/main_shell.dart';
 import 'package:rattib/screens/more/about_screen.dart';
@@ -13,6 +17,7 @@ import 'package:rattib/screens/more/more_screen.dart';
 import 'package:rattib/screens/plan/plan_screen.dart';
 import 'package:rattib/screens/setup/setup_wizard_screen.dart';
 import 'package:rattib/screens/splash/splash_screen.dart';
+import 'package:rattib/services/ai_advisor_service.dart';
 import 'package:rattib/services/notification_service.dart';
 import 'package:rattib/services/pdf_export_service.dart';
 import 'package:rattib/services/plan_engine.dart';
@@ -63,6 +68,37 @@ class _TestNotificationService extends NotificationService {
   }) async {}
 }
 
+class _TestAiAdvisorService extends AiAdvisorService {
+  @override
+  Future<AiAdviceResult> analyze({
+    required SalaryProfile profile,
+    required BudgetPlan plan,
+    required AppCurrency currency,
+    required Map<BudgetBucket, double> spentByBucket,
+    required double totalSpentCycle,
+    required double dailySafeSpend,
+    required int daysLeft,
+    required List<SavingsGoal> goals,
+    required List<DebtItem> debts,
+    String? userQuestion,
+    bool allowCloud = true,
+  }) {
+    return super.analyze(
+      profile: profile,
+      plan: plan,
+      currency: currency,
+      spentByBucket: spentByBucket,
+      totalSpentCycle: totalSpentCycle,
+      dailySafeSpend: dailySafeSpend,
+      daysLeft: daysLeft,
+      goals: goals,
+      debts: debts,
+      userQuestion: userQuestion,
+      allowCloud: false,
+    );
+  }
+}
+
 void main() {
   late Directory tmpDir;
   late StorageService storage;
@@ -79,6 +115,7 @@ void main() {
       security: SecurityService(),
       widgetSync: WidgetSyncService(),
       pdfExport: PdfExportService(),
+      aiAdvisor: _TestAiAdvisorService(),
     );
     await controller.initialize();
   });
@@ -114,7 +151,7 @@ void main() {
     expect(find.text('تنفيذ وتطوير أمجد حبيب'), findsOneWidget);
   });
 
-  testWidgets('AboutScreen shows BNB, developer attribution and offline promise', (
+  testWidgets('AboutScreen shows BNB, developer attribution and AI info', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -126,7 +163,7 @@ void main() {
     await tester.pump();
     expect(find.text('BNB'), findsOneWidget);
     expect(find.text('تنفيذ وتطوير: أمجد حبيب'), findsOneWidget);
-    expect(find.text('يعمل بدون إنترنت بالكامل'), findsOneWidget);
+    expect(find.text('سريع وآمن + ذكاء اصطناعي مجاني'), findsOneWidget);
   });
 
   testWidgets('SetupWizardScreen provides fast 2-step flow and instant plan', (
@@ -156,7 +193,7 @@ void main() {
   });
 
   testWidgets(
-    'MainShell renders simplified BNB plan, presets, and 4 tabs cleanly',
+    'MainShell shows money amounts, AI advisor, and 4 tabs without overflow',
     timeout: const Timeout(Duration(seconds: 45)),
     (tester) async {
       tester.view.physicalSize = const Size(1080, 2340);
@@ -169,10 +206,9 @@ void main() {
       await tester.runAsync(() async {
         await controller.saveWizardProfile(
           const SalaryProfile(
-            monthlySalary: 1500000,
+            monthlySalary: 6000,
             currencyCode: 'SYP',
-            isRenting: true,
-            rentAmount: 400000,
+            isRenting: false,
             salaryDay: 1,
           ),
         );
@@ -192,8 +228,7 @@ void main() {
 
       expect(find.text('راتبك الشهري'), findsOneWidget);
       expect(find.text('مسموح تصرف باليوم'), findsOneWidget);
-      expect(find.text('اختر خطتك الجاهزة بناءً على راتبك'), findsOneWidget);
-      expect(find.text('خطتك خطوة بخطوة أول ما ينزل الراتب'), findsOneWidget);
+      expect(find.text('تقسيم راتبك بالمصاري'), findsOneWidget);
 
       final initialSavings = controller.plan!.savingsPct;
       await tester.runAsync(() async {
@@ -206,17 +241,34 @@ void main() {
       );
       expect(controller.plan!.savingsPct, greaterThan(initialSavings));
 
-      await tester.scrollUntilVisible(
-        find.text('كم ممكن توفر بالسنة؟'),
-        250,
-        scrollable: find.descendant(
-          of: find.byType(PlanScreen),
-          matching: find.byWidgetPredicate(
-            (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
-          ),
+      final planVerticalScroll = find.descendant(
+        of: find.byType(PlanScreen),
+        matching: find.byWidgetPredicate(
+          (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
         ),
       );
-      expect(find.text('كم ممكن توفر بالسنة؟'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('المستشار الذكي بالذكاء الاصطناعي'),
+        250,
+        scrollable: planVerticalScroll,
+      );
+      expect(find.text('المستشار الذكي بالذكاء الاصطناعي'), findsOneWidget);
+
+      await tester.tap(find.text('حلّل راتبي وأعطني خطة مجاناً'));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 10),
+      );
+      expect(controller.latestAiResult, isNotNull);
+
+      await tester.scrollUntilVisible(
+        find.text('كم بتوفّر بعد سنة؟'),
+        250,
+        scrollable: planVerticalScroll,
+      );
+      expect(find.text('كم بتوفّر بعد سنة؟'), findsOneWidget);
 
       await tester.tap(find.text('مصاريفي'));
       await tester.pumpAndSettle(

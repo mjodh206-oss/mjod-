@@ -81,7 +81,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         : c.expenses.where((e) => e.bucket == _selectedBucketFilter).toList();
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 116),
       children: [
         // Quick summary bar
         Card(
@@ -93,7 +93,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('إجمالي مصاريف الدورة', style: theme.textTheme.bodyMedium),
+                      Text('مصروفك هالشهر حتى الآن', style: theme.textTheme.bodyMedium),
                       const SizedBox(height: 2),
                       Text(
                         ArabicFormatters.formatMoney(
@@ -114,7 +114,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   ),
                   onPressed: () => showQuickExpenseSheet(context, c),
                   icon: const Icon(Icons.add_rounded),
-                  label: const Text('إضافة بـ3 ثوانٍ'),
+                  label: const Text('أضف مصروف'),
                 ),
               ],
             ),
@@ -131,10 +131,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('استهلاك بنود الميزانية', style: theme.textTheme.titleLarge),
+                  Text('صرفك من كل ظرف', style: theme.textTheme.titleLarge),
                   const SizedBox(height: 12),
-                  ...AppCategories.buckets.map((b) {
-                    final planned = plan.amountFor(b.bucket);
+                  ...AppCategories.buckets
+                      .where((b) => (c.exactPlanMoney[b.bucket] ?? 0.0) > 0)
+                      .map((b) {
+                    final planned = c.exactPlanMoney[b.bucket] ?? 0.0;
                     final spent = spentByBucket[b.bucket] ?? 0.0;
                     final ratio = planned > 0 ? (spent / planned) : 0.0;
                     return Padding(

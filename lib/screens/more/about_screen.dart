@@ -87,18 +87,18 @@ class AboutScreen extends StatelessWidget {
             child: Column(
               children: [
                 const ListTile(
-                  leading: Icon(Icons.wifi_off_rounded, color: Color(0xFF10B981)),
-                  title: Text('يعمل بدون إنترنت بالكامل'),
+                  leading: Icon(Icons.auto_awesome_rounded, color: Color(0xFF10B981)),
+                  title: Text('سريع وآمن + ذكاء اصطناعي مجاني'),
                   subtitle: Text(
-                    'جميع بياناتك وخططك محفوظة محلياً على هاتفك فقط لخصوصية وأمان كاملين.',
+                    'جميع بياناتك محفوظة على هاتفك فقط بدون حسابات أو اشتراكات، مع مستشار ذكاء اصطناعي مجاني عند توفر الإنترنت.',
                   ),
                 ),
                 const Divider(height: 1),
                 const ListTile(
-                  leading: Icon(Icons.rule_rounded, color: Color(0xFFD4AF37)),
-                  title: Text('مبني على قواعد مالية مجرّبة'),
+                  leading: Icon(Icons.payments_rounded, color: Color(0xFFD4AF37)),
+                  title: Text('خطة عملية بالمصاري لا بالنسب'),
                   subtitle: Text(
-                    'قاعدة 50/30/20، صندوق الطوارئ، واستراتيجيتا كرة الثلج والانهيار الجليدي للديون.',
+                    'يعرض لك مباشرة المبلغ المسموح صرفه يومياً وما تضعه في كل ظرف فور نزول راتبك.',
                   ),
                 ),
                 const Divider(height: 1),

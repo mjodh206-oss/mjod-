@@ -7,21 +7,29 @@ import '../state/app_controller.dart';
 
 Future<void> showQuickExpenseSheet(
   BuildContext context,
-  AppController controller,
-) async {
+  AppController controller, {
+  String? initialCategoryId,
+}) async {
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (ctx) => _QuickExpenseSheet(controller: controller),
+    builder: (ctx) => _QuickExpenseSheet(
+      controller: controller,
+      initialCategoryId: initialCategoryId,
+    ),
   );
 }
 
 class _QuickExpenseSheet extends StatefulWidget {
-  const _QuickExpenseSheet({required this.controller});
+  const _QuickExpenseSheet({
+    required this.controller,
+    this.initialCategoryId,
+  });
 
   final AppController controller;
+  final String? initialCategoryId;
 
   @override
   State<_QuickExpenseSheet> createState() => _QuickExpenseSheetState();
@@ -30,14 +38,30 @@ class _QuickExpenseSheet extends StatefulWidget {
 class _QuickExpenseSheetState extends State<_QuickExpenseSheet> {
   final TextEditingController _amountCtrl = TextEditingController();
   final TextEditingController _noteCtrl = TextEditingController();
-  String _selectedCategoryId = AppCategories.expenseCategories.first.id;
+  late String _selectedCategoryId;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategoryId =
+        widget.initialCategoryId ?? AppCategories.expenseCategories.first.id;
+  }
 
   @override
   void dispose() {
     _amountCtrl.dispose();
     _noteCtrl.dispose();
     super.dispose();
+  }
+
+  List<double> _smartQuickChips(double salary) {
+    if (salary >= 5000000) return [100000, 250000, 500000, 1000000];
+    if (salary >= 500000) return [10000, 25000, 50000, 100000];
+    if (salary >= 50000) return [500, 1000, 2500, 5000];
+    if (salary >= 10000) return [100, 250, 500, 1000];
+    if (salary >= 3000) return [25, 50, 100, 250];
+    return [5, 10, 25, 50];
   }
 
   Future<void> _save() async {
@@ -86,8 +110,11 @@ class _QuickExpenseSheetState extends State<_QuickExpenseSheet> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            'تم تسجيل ${ArabicFormatters.formatMoney(amount, currency)} في 3 ثوانٍ ✓',
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+            'تم خصم ${ArabicFormatters.formatMoney(amount, currency)} ✓',
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       );
@@ -96,15 +123,19 @@ class _QuickExpenseSheetState extends State<_QuickExpenseSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final currency = widget.controller.currency;
+    final c = widget.controller;
+    final currency = c.currency;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final theme = Theme.of(context);
 
-    final quickChips = currency.sampleSalary >= 100000
-        ? [10000.0, 25000.0, 50000.0, 100000.0]
-        : (currency.sampleSalary >= 5000
-            ? [50.0, 100.0, 250.0, 500.0]
-            : [5.0, 15.0, 30.0, 50.0]);
+    final salary = c.profile?.totalMonthlyIncome ?? currency.sampleSalary;
+    final quickChips = _smartQuickChips(salary);
+
+    final selectedCat = AppCategories.categoryById(_selectedCategoryId);
+    final bucketMeta = AppCategories.bucketMeta(selectedCat.bucket);
+    final plannedBucket = c.exactPlanMoney[selectedCat.bucket] ?? 0.0;
+    final spentBucket = c.spentByBucketCurrentCycle[selectedCat.bucket] ?? 0.0;
+    final leftBucket = plannedBucket - spentBucket;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 14, 20, 20 + bottomInset),
@@ -137,7 +168,7 @@ class _QuickExpenseSheetState extends State<_QuickExpenseSheet> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'إضافة مصروف سريع',
+                  'سجّل مصروف سريع',
                   style: theme.textTheme.titleLarge,
                 ),
                 const Spacer(),
@@ -203,9 +234,42 @@ class _QuickExpenseSheetState extends State<_QuickExpenseSheet> {
               }).toList(),
             ),
             const SizedBox(height: 14),
-            Text(
-              'اختر الفئة',
-              style: theme.textTheme.titleMedium,
+            Row(
+              children: [
+                Text('اختر الفئة', style: theme.textTheme.titleMedium),
+                const Spacer(),
+                if (plannedBucket > 0)
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (leftBucket >= 0
+                                ? bucketMeta.color
+                                : const Color(0xFFDC2626))
+                            .withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        leftBucket >= 0
+                            ? 'باقي بـ«${bucketMeta.titleAr}»: ${ArabicFormatters.formatMoney(leftBucket, currency)}'
+                            : 'تجاوزت بـ ${ArabicFormatters.formatMoney(leftBucket.abs(), currency)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: leftBucket >= 0
+                              ? bucketMeta.color
+                              : const Color(0xFFDC2626),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             SizedBox(

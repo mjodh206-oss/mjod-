@@ -49,7 +49,6 @@ class _BucketDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final planned = plan.amountFor(meta.bucket);
-    final pct = plan.percentageFor(meta.bucket);
     final remaining = planned - spent;
     final ratio = planned > 0 ? (spent / planned) : 0.0;
 
@@ -91,7 +90,7 @@ class _BucketDetailSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${meta.titleAr} (${pct.toStringAsFixed(1)}%)',
+                        meta.titleAr,
                         style: theme.textTheme.titleLarge,
                       ),
                       Text(meta.subtitleAr, style: theme.textTheme.bodyMedium),

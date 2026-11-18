@@ -173,9 +173,9 @@ class _MainShellState extends State<MainShell> {
             onPressed: () => showQuickExpenseSheet(context, c),
             backgroundColor: theme.colorScheme.secondary,
             foregroundColor: const Color(0xFF1A1302),
-            icon: const Icon(Icons.add_rounded, size: 26),
+            icon: const Icon(Icons.add_rounded, size: 22),
             label: const Text(
-              'سجّل مصروف',
+              'مصروف',
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w800,

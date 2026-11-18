@@ -325,7 +325,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return Stack(
       children: [
         ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 116),
           children: [
             Card(
               color: theme.colorScheme.primary.withValues(alpha: 0.08),

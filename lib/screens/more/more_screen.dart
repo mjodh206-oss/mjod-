@@ -220,7 +220,7 @@ class _MoreScreenState extends State<MoreScreen> {
     final theme = Theme.of(context);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 116),
       children: [
         Card(
           child: ListTile(

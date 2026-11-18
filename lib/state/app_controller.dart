@@ -13,6 +13,7 @@ import '../models/debt_item.dart';
 import '../models/expense_item.dart';
 import '../models/salary_profile.dart';
 import '../models/savings_goal.dart';
+import '../services/ai_advisor_service.dart';
 import '../services/notification_service.dart';
 import '../services/pdf_export_service.dart';
 import '../services/plan_engine.dart';
@@ -41,7 +42,8 @@ class AppController extends ChangeNotifier {
     required this.security,
     required this.widgetSync,
     required this.pdfExport,
-  });
+    AiAdvisorService? aiAdvisor,
+  }) : aiAdvisor = aiAdvisor ?? AiAdvisorService();
 
   final StorageService storage;
   final SoundService sound;
@@ -49,6 +51,7 @@ class AppController extends ChangeNotifier {
   final SecurityService security;
   final WidgetSyncService widgetSync;
   final PdfExportService pdfExport;
+  final AiAdvisorService aiAdvisor;
 
   AppSettings _settings = const AppSettings();
   SalaryProfile? _profile;
@@ -58,6 +61,8 @@ class AppController extends ChangeNotifier {
   List<DebtItem> _debts = [];
   bool _isLocked = false;
   String? _pendingBadgeBanner;
+  AiAdviceResult? _latestAiResult;
+  bool _isAiLoading = false;
 
   AppSettings get settings => _settings;
   SalaryProfile? get profile => _profile;
@@ -67,6 +72,16 @@ class AppController extends ChangeNotifier {
   List<DebtItem> get debts => List.unmodifiable(_debts);
   bool get isLocked => _isLocked;
   String? get pendingBadgeBanner => _pendingBadgeBanner;
+  AiAdviceResult? get latestAiResult => _latestAiResult;
+  bool get isAiLoading => _isAiLoading;
+
+  Map<BudgetBucket, double> get exactPlanMoney {
+    final pl = _plan;
+    if (pl == null) {
+      return {for (final b in BudgetBucket.values) b: 0.0};
+    }
+    return PlanEngine.exactMoneySplit(plan: pl, currency: currency);
+  }
 
   AppCurrency get currency =>
       AppCurrencies.byCode(_profile?.currencyCode ?? 'SYP');
@@ -180,6 +195,75 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updatePlanAmount(BudgetBucket bucket, double newAmount) async {
+    final p = _profile;
+    final currentPlan = _plan;
+    if (p == null || currentPlan == null) return;
+
+    _plan = PlanEngine.rebalanceFromAmount(
+      profile: p,
+      current: currentPlan,
+      changedBucket: bucket,
+      newAmount: newAmount,
+    );
+    _recomputeHealthWithRealSpending();
+    await storage.savePlan(_plan!);
+    await _evaluateBadges();
+    await _syncWidgetOnly();
+    notifyListeners();
+  }
+
+  Future<void> quickEditSalary({
+    required double salary,
+    String? currencyCode,
+    bool? isRenting,
+    double? rentAmount,
+    double? debtsAmount,
+  }) async {
+    final old = _profile;
+    if (old == null) return;
+    final updated = old.copyWith(
+      monthlySalary: salary,
+      currencyCode: currencyCode ?? old.currencyCode,
+      isRenting: isRenting ?? old.isRenting,
+      rentAmount: rentAmount ?? old.rentAmount,
+      debtsMonthlyPayment: debtsAmount ?? old.debtsMonthlyPayment,
+    );
+    _profile = updated;
+    _plan = PlanEngine.generatePlan(updated);
+    _latestAiResult = null;
+    await storage.saveProfile(updated);
+    await storage.savePlan(_plan!);
+    await _syncExternalIntegrations();
+    notifyListeners();
+  }
+
+  Future<void> askAiAdvisor({String? question}) async {
+    final p = _profile;
+    final pl = _plan;
+    if (p == null || pl == null || _isAiLoading) return;
+
+    _isAiLoading = true;
+    notifyListeners();
+    try {
+      _latestAiResult = await aiAdvisor.analyze(
+        profile: p,
+        plan: pl,
+        currency: currency,
+        spentByBucket: spentByBucketCurrentCycle,
+        totalSpentCycle: totalSpentCurrentCycle,
+        dailySafeSpend: dailySafeSpend,
+        daysLeft: daysUntilSalary,
+        goals: _goals,
+        debts: _debts,
+        userQuestion: question,
+      );
+    } finally {
+      _isAiLoading = false;
+      notifyListeners();
+    }
+  }
+
   int get daysUntilSalary {
     final p = _profile;
     if (p == null) return 30;
@@ -195,6 +279,7 @@ class AppController extends ChangeNotifier {
       plan: pl,
       spentByBucket: spentByBucketCurrentCycle,
       daysLeft: daysUntilSalary,
+      currency: currency,
     );
   }
 
