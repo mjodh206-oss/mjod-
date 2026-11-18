@@ -310,9 +310,10 @@ class _PlanScreenState extends State<PlanScreen> {
                             color: Colors.white.withValues(alpha: 0.85),
                           ),
                         ),
-                        AnimatedMoneyCounter(
+                        AnimatedNumberText(
                           value: profile.totalMonthlyIncome,
-                          currency: currency,
+                          formatter: (v) =>
+                              ArabicFormatters.formatMoney(v, currency),
                           style: const TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 22,

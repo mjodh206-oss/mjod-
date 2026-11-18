@@ -170,6 +170,13 @@ class AppCategories {
     ),
   ];
 
+  static BucketMeta bucketMeta(BudgetBucket bucket) {
+    return buckets.firstWhere(
+      (b) => b.bucket == bucket,
+      orElse: () => buckets.first,
+    );
+  }
+
   static ExpenseCategory categoryById(String id) {
     return expenseCategories.firstWhere(
       (c) => c.id == id,
