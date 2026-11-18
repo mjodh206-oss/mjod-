@@ -248,12 +248,20 @@ void main() {
         ),
       );
 
+      final chartToggle = find.text('الرسم الدائري وتعديل المبالغ يدوياً');
       await tester.scrollUntilVisible(
-        find.text('الرسم الدائري وتعديل المبالغ يدوياً'),
+        chartToggle,
         250,
         scrollable: planVerticalScroll,
       );
-      await tester.tap(find.text('الرسم الدائري وتعديل المبالغ يدوياً'));
+      await tester.ensureVisible(chartToggle);
+      await tester.drag(planVerticalScroll, const Offset(0, -160));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 10),
+      );
+      await tester.tap(chartToggle);
       await tester.pumpAndSettle(
         const Duration(milliseconds: 100),
         EnginePhase.sendSemanticsUpdate,
@@ -261,14 +269,22 @@ void main() {
       );
       expect(find.text('إجمالي راتبك'), findsOneWidget);
 
+      final aiBtn = find.text('حلّل راتبي وأعطني خطة مجاناً');
       await tester.scrollUntilVisible(
-        find.text('المستشار الذكي بالذكاء الاصطناعي'),
+        aiBtn,
         250,
         scrollable: planVerticalScroll,
       );
+      await tester.ensureVisible(aiBtn);
+      await tester.drag(planVerticalScroll, const Offset(0, -160));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 10),
+      );
       expect(find.text('المستشار الذكي بالذكاء الاصطناعي'), findsOneWidget);
 
-      await tester.tap(find.text('حلّل راتبي وأعطني خطة مجاناً'));
+      await tester.tap(aiBtn);
       await tester.pumpAndSettle(
         const Duration(milliseconds: 100),
         EnginePhase.sendSemanticsUpdate,

@@ -365,16 +365,20 @@ class _PlanScreenState extends State<PlanScreen> {
                           size: 18,
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          'مسموح تصرف باليوم',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white.withValues(alpha: 0.92),
+                        Expanded(
+                          child: Text(
+                            'مسموح تصرف باليوم',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white.withValues(alpha: 0.92),
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -602,15 +606,19 @@ class _PlanScreenState extends State<PlanScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Text(
-                        'إجمالي التوزيع',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                      const Expanded(
+                        child: Text(
+                          'إجمالي التوزيع',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       Text(
                         ArabicFormatters.formatMoney(
                           profile.totalMonthlyIncome,

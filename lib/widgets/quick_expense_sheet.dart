@@ -167,11 +167,14 @@ class _QuickExpenseSheetState extends State<_QuickExpenseSheet> {
                   size: 26,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'سجّل مصروف سريع',
-                  style: theme.textTheme.titleLarge,
+                Expanded(
+                  child: Text(
+                    'سجّل مصروف سريع',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleLarge,
+                  ),
                 ),
-                const Spacer(),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close_rounded),
