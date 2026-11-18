@@ -249,6 +249,19 @@ void main() {
       );
 
       await tester.scrollUntilVisible(
+        find.text('الرسم الدائري وتعديل المبالغ يدوياً'),
+        250,
+        scrollable: planVerticalScroll,
+      );
+      await tester.tap(find.text('الرسم الدائري وتعديل المبالغ يدوياً'));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 10),
+      );
+      expect(find.text('إجمالي راتبك'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
         find.text('المستشار الذكي بالذكاء الاصطناعي'),
         250,
         scrollable: planVerticalScroll,

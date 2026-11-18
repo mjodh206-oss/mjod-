@@ -358,15 +358,25 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
                   ),
                   if (_step == 0 && !widget.isEditing) ...[
                     const SizedBox(height: 8),
-                    TextButton.icon(
+                    TextButton(
                       onPressed: _saving ? null : _instantPlanFromStep1,
-                      icon: const Icon(Icons.bolt_rounded, size: 19),
-                      label: const Text(
-                        'احسب خطتي فوراً بدون أسئلة إضافية',
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.bolt_rounded, size: 19),
+                          SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              'احسب خطتي فوراً بدون أسئلة إضافية',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

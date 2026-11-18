@@ -627,19 +627,29 @@ class _PlanScreenState extends State<PlanScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                TextButton.icon(
+                TextButton(
                   onPressed: () => setState(
                     () => _showChartAndSliders = !_showChartAndSliders,
                   ),
-                  icon: Icon(
-                    _showChartAndSliders
-                        ? Icons.expand_less_rounded
-                        : Icons.pie_chart_outline_rounded,
-                  ),
-                  label: Text(
-                    _showChartAndSliders
-                        ? 'إخفاء الرسم والتعديل اليدوي'
-                        : 'عرض الرسم الدائري أو تعديل المبالغ يدوياً',
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _showChartAndSliders
+                            ? Icons.expand_less_rounded
+                            : Icons.pie_chart_outline_rounded,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _showChartAndSliders
+                              ? 'إخفاء الرسم والتعديل'
+                              : 'الرسم الدائري وتعديل المبالغ يدوياً',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (_showChartAndSliders) ...[
@@ -768,7 +778,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                OutlinedButton.icon(
+                OutlinedButton(
                   onPressed: () {
                     Navigator.of(context).push(
                       SmoothPageRoute(
@@ -781,9 +791,19 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.tips_and_updates_rounded),
-                  label: const Text(
-                    'النصائح، تسكير الديون وتحدي 30 يوم',
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.tips_and_updates_rounded),
+                      SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'النصائح، تسكير الديون وتحدي 30 يوم',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -844,22 +864,32 @@ class _PlanScreenState extends State<PlanScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            FilledButton.icon(
+            FilledButton(
               onPressed: loading ? null : () => _sendAiQuestion(''),
-              icon: loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.psychology_rounded),
-              label: Text(
-                loading
-                    ? 'جاري التحليل الذكي لراتبك...'
-                    : 'حلّل راتبي وأعطني خطة مجاناً',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  loading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.psychology_rounded),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      loading
+                          ? 'جاري التحليل الذكي لراتبك...'
+                          : 'حلّل راتبي وأعطني خطة مجاناً',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 10),
