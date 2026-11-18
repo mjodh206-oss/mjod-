@@ -1,0 +1,12 @@
+node_modules/
+.gradle/
+build/
+local.properties
+.env
+*.jks
+*.keystore
+artifacts/*.aab
+
+# Downloadables are hosted as release assets.
+artifacts/*.apk
+artifacts/*.zip

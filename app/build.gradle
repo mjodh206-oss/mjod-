@@ -1,0 +1,58 @@
+plugins { id 'com.android.application' }
+
+def endpoint = System.getenv('ANDROID_RELAY_URL') ?: ''
+def relayToken = System.getenv('ANDROID_RELAY_TOKEN') ?: ''
+if (endpoint || relayToken) {
+    if (!(endpoint ==~ /wss:\/\/[A-Za-z0-9.-]+(:[0-9]+)?\/relay/) || !(relayToken ==~ /[A-Za-z0-9_-]{24,256}/)) {
+        throw new GradleException('Set a wss://…/relay endpoint and an isolated 24–256 character relay token.')
+    }
+}
+
+def signingPath = System.getenv('ANDROID_KEYSTORE_PATH')
+android {
+    namespace 'app.amjad.voice'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'app.amjad.voice'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+    signingConfigs {
+        if (signingPath) {
+            release {
+                storeFile file(signingPath)
+                storePassword System.getenv('ANDROID_STORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release { if (signingPath) signingConfig signingConfigs.release }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    sourceSets.main.res.srcDir layout.buildDirectory.dir('generated/relay-res')
+}
+
+def generateRelaySettings = tasks.register('generateRelaySettings') {
+    inputs.property('relayEndpoint', endpoint)
+    inputs.property('relayToken', relayToken)
+    def target = layout.buildDirectory.file('generated/relay-res/values/relay.xml')
+    outputs.file(target)
+    doLast {
+        def res = target.get().asFile
+        res.parentFile.mkdirs()
+        res.text = """<resources>
+    <string name="relay_url" translatable="false">${endpoint}</string>
+    <string name="relay_token" translatable="false">${relayToken}</string>
+</resources>"""
+    }
+}
+tasks.named('preBuild').configure { dependsOn generateRelaySettings }
+
+dependencies { implementation 'com.neovisionaries:nv-websocket-client:2.14' }
