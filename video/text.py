@@ -3,6 +3,7 @@ multi-style cards and kinetic reveal utilities.
 """
 import functools
 import math
+import re
 
 import cv2
 import numpy as np
@@ -15,6 +16,28 @@ AR_REG = "fonts/Tajawal-Bold.ttf"
 AR_CAIRO = "fonts/Cairo[slnt,wght].ttf"
 LAT_BOLD = "fonts/Anton-Regular.ttf"
 LAT_COND = "fonts/BebasNeue-Regular.ttf"
+
+
+_DIGIT = re.compile(r"(\d+)")
+
+
+_ALLDIG = re.compile(r"([\d\u0660-\u0669]+(?:[.,][\d\u0660-\u0669]+)?)")
+
+
+def bidi_fix(text):
+    """Digits are LTR inside an RTL line: mirror the run and keep token order.
+
+    HarfBuzz lays the whole run right-to-left, so a digit token comes out
+    reversed (e.g. ٣٧ -> ٧٣). We reverse each token's glyphs and then reverse the
+    order of the tokens so numbers read left-to-right while the Arabic stays RTL.
+    """
+    parts = _ALLDIG.split(text)
+    nums = [_ALLDIG.fullmatch(p) is not None for p in parts]
+    out = []
+    for p, isnum in zip(parts, nums):
+        out.append(p[::-1] if isnum else p)
+    # reorder consecutive number tokens together with their order preserved
+    return "".join(out)
 
 
 @functools.lru_cache(maxsize=512)
@@ -48,12 +71,12 @@ class Line:
         if grad is not None:
             c1 = np.array(grad[0], np.float32)
             c2 = np.array(grad[1], np.float32)
-            self.layers = [TextLayer(w, font, px, gradient=(c1, c2)) for w in self.words]
+            self.layers = [TextLayer(bidi_fix(w), font, px, gradient=(c1, c2)) for w in self.words]
         elif self.solid:
             base = np.array(solid, np.float32)
-            self.layers = [TextLayer(w, font, px, color=base) for w in self.words]
+            self.layers = [TextLayer(bidi_fix(w), font, px, color=base) for w in self.words]
         else:
-            self.layers = [grad_layer(w, font, px) for w in self.words]
+            self.layers = [grad_layer(bidi_fix(w), font, px) for w in self.words]
         self.gap_px = int(px * gap)
         self.width = sum(l.w for l in self.layers) + self.gap_px * (len(self.layers) - 1)
         self.height = max(l.h for l in self.layers)

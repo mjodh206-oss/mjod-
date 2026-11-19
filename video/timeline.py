@@ -6,11 +6,16 @@ Every visual event is anchored to a real audio event so nothing drifts.
 import json
 import os
 
-VO_ANALYSIS = "build/vo_analysis.json"
+from .episodes import get as _get_ep
+
+EP = _get_ep()
+VO_ANALYSIS = EP["analysis"]
+BUILD_DIR = EP["build"]
 SPEED = 1.0           # VO already time-warped with atempo 1.09 (build/vo)
 LEAD_IN = 0.38        # beat before a section's voice starts
 LEAD_OUT = 0.24       # beat after it ends
 HOOK_PRE = 0.28
+EPISODE = int(EP["num"])
 
 with open(VO_ANALYSIS) as f:
     _RAW = json.load(f)
@@ -59,26 +64,33 @@ TIPS = [
 ]
 
 # ------------------------------------------------------------------ build
-t = 0.0
-hook_dur, hook_segs = clip("vo_00_hook")
-hook_start = HOOK_PRE
-add(kind="hook", idx=0, vo="vo_00_hook", start=0.0, vo_start=hook_start,
-    vo_end=hook_start + hook_dur, end=hook_start + hook_dur + 0.20,
-    segs=hook_segs, dur=hook_dur)
-t = hook_start + hook_dur + 0.20
-
-for tip in TIPS:
-    d, segs = clip(tip["vo"])
-    vs = t + LEAD_IN
-    add(kind="tip", idx=tip["n"], start=t, vo_start=vs, vo_end=vs + d,
-        end=vs + d + LEAD_OUT, segs=segs, dur=d, **tip)
-    t = vs + d + LEAD_OUT
-
-out_d, out_segs = clip("vo_08_outro")
 END_HOLD = 2.2
-add(kind="outro", idx=8, vo="vo_08_outro", start=t, vo_start=t + LEAD_IN, vo_end=t + LEAD_IN + out_d,
-    end=t + LEAD_IN + out_d + END_HOLD, segs=out_segs, dur=out_d)
-TOTAL = t + LEAD_IN + out_d + END_HOLD
+
+
+def build_sections(tips=None, hook_vo="vo_00_hook", outro_vo="vo_08_outro"):
+    """Populate SECTIONS for one episode. Returns total duration."""
+    SECTIONS.clear()
+    t = 0.0
+    hook_dur, hook_segs = clip(hook_vo)
+    hook_start = HOOK_PRE
+    add(kind="hook", idx=0, vo=hook_vo, start=0.0, vo_start=hook_start,
+        vo_end=hook_start + hook_dur, end=hook_start + hook_dur + 0.20,
+        segs=hook_segs, dur=hook_dur)
+    t = hook_start + hook_dur + 0.20
+    for tip in (tips or []):
+        d, segs = clip(tip["vo"])
+        vs = t + LEAD_IN
+        add(kind="tip", idx=tip["n"], start=t, vo_start=vs, vo_end=vs + d,
+            end=vs + d + LEAD_OUT, segs=segs, dur=d, **tip)
+        t = vs + d + LEAD_OUT
+    out_d, out_segs = clip(outro_vo)
+    add(kind="outro", idx=len(tips or []) + 1, vo=outro_vo, start=t,
+        vo_start=t + LEAD_IN, vo_end=t + LEAD_IN + out_d,
+        end=t + LEAD_IN + out_d + END_HOLD, segs=out_segs, dur=out_d)
+    return t + LEAD_IN + out_d + END_HOLD
+
+
+TOTAL = build_sections(EP["tips"], EP["hook_vo"], EP["outro_vo"])
 
 # global beats
 IMPACTS = [s["start"] + 0.02 for s in SECTIONS]          # section slams

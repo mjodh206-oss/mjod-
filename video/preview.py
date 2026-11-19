@@ -7,6 +7,8 @@ import numpy as np
 
 from .render import render_frame, SECTIONS
 from .core import FPS
+from .timeline import EP
+import os
 
 
 def sec_at(t):
@@ -16,7 +18,8 @@ def sec_at(t):
     return SECTIONS[-1]
 
 
-def save(times, prefix="build/preview"):
+def save(times, prefix=None):
+    prefix = prefix or (EP["build"] + "/preview")
     os.makedirs(os.path.dirname(prefix) or ".", exist_ok=True)
     panels = []
     for t in times:

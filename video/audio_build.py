@@ -345,14 +345,20 @@ def score(total, sections, bpm=88):
 
 
 # ------------------------------------------------------------------ build
-def build(path_vo="build/vo", out="build/mix.wav"):
-    from video.timeline import SECTIONS, TOTAL, IMPACTS, TRUTH, SPEED
+def build(path_vo=None, out=None):
+    from video.timeline import SECTIONS, TOTAL, IMPACTS, TRUTH, SPEED, EP
 
+    path_vo = path_vo or EP["voice_dir"]
+    out = out or (EP["build"] + "/mix.wav")
+    os.makedirs(EP["build"], exist_ok=True)
+    prefix = EP["prefix"]
     total = TOTAL
     n = int(total * SR) + SR * 2
     vo = np.zeros(n, np.float32)
     for s in SECTIONS:
-        fn = os.path.join(path_vo, s["vo"] + ".wav")
+        fn = os.path.join(path_vo, prefix + "_" + s["vo"].replace("vo_", "") + ".wav")
+        if not os.path.exists(fn):
+            fn = os.path.join(path_vo, s["vo"] + ".wav")
         a, sr = sf.read(fn)
         if a.ndim > 1:
             a = a.mean(1)
@@ -445,18 +451,23 @@ def build(path_vo="build/vo", out="build/mix.wav"):
     mix /= (np.abs(mix).max() + 1e-9) * 1.02
     sf.write(out, mix.astype(np.float32), SR, subtype="PCM_24")
     # stems for inspection
-    sf.write("build/music.wav", (music / (np.abs(music).max() + 1e-9) * 0.8).astype(np.float32), SR)
-    sf.write("build/sfx.wav", (sfx * 0.9).astype(np.float32), SR)
+    sf.write(EP["build"] + "/music.wav",
+             (music / (np.abs(music).max() + 1e-9) * 0.8).astype(np.float32), SR)
+    sf.write(EP["build"] + "/sfx.wav", (sfx * 0.9).astype(np.float32), SR)
     print("wrote", out, "dur", len(mix) / SR)
     return total
 
 
-def build_voice_only(out="build/vo_full.wav"):
-    from video.timeline import SECTIONS, TOTAL
+def build_voice_only(out=None):
+    from video.timeline import SECTIONS, TOTAL, EP
+    out = out or (EP["build"] + "/vo_full.wav")
     n = int(TOTAL * SR) + SR * 2
     vo = np.zeros(n, np.float32)
     for s in SECTIONS:
-        a, sr = sf.read(os.path.join("build/vo", s["vo"] + ".wav"))
+        fn = os.path.join(EP["voice_dir"], EP["prefix"] + "_" + s["vo"].replace("vo_", "") + ".wav")
+        if not os.path.exists(fn):
+            fn = os.path.join(EP["voice_dir"], s["vo"] + ".wav")
+        a, sr = sf.read(fn)
         if a.ndim > 1:
             a = a.mean(1)
         i = int(s["vo_start"] * SR)

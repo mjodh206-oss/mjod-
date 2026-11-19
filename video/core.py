@@ -269,11 +269,20 @@ class TextLayer:
 
         if glow > 0.01:
             sigma = glow_sigma if glow_sigma else max(6, self.px * 0.22)
-            g = fast_glow(mask, sigma)
-            g = np.clip(g * 1.9, 0, 1) * m
-            gm = g[cy0 - y0:cy1 - y0, cx0 - x0:cx1 - x0]
-            gc = np.asarray(glow_color, np.float32) if glow_color is not None else base
-            canvas[cy0:cy1, cx0:cx1] += gc[None, None, :] * (gm * glow * alpha)[..., None]
+            pad = int(sigma * 2.4) + 6
+            # glow needs room around the glyph box, otherwise the falloff is
+            # clipped into a visible rectangle
+            pm = np.pad(mask, ((pad, pad), (pad, pad)), mode="constant")
+            g = fast_glow(pm, sigma)
+            g = np.clip(g * 1.9, 0, 1)
+            gx0, gy0 = x0 - pad, y0 - pad
+            gx1 = min(canvas.shape[1], gx0 + g.shape[1])
+            gy1 = min(canvas.shape[0], gy0 + g.shape[0])
+            if gx1 > max(0, gx0) and gy1 > max(0, gy0):
+                gc0, gcy0 = max(0, gx0), max(0, gy0)
+                gm = g[gcy0 - gy0:gy1 - gy0, gc0 - gx0:gx1 - gx0]
+                gc = np.asarray(glow_color, np.float32) if glow_color is not None else base
+                canvas[gcy0:gy1, gc0:gx1] += gc[None, None, :] * (gm * glow * alpha)[..., None]
 
         a = (m * alpha)[..., None]
         if tint is not None:

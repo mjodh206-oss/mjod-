@@ -25,34 +25,25 @@ from .core import (W, H, FPS, GOLD, GOLD_LIGHT, GOLD_DEEP, IVORY,
 from . import gfx
 from .core import TextLayer
 from .text import Line, layer, grad_layer, number_badge, rule, badge_text
-from .timeline import SECTIONS, TOTAL, align, TRUTH
+from .timeline import SECTIONS, TOTAL, align, TRUTH, EP
 
 VIG = vignette_map(0.70, 1.9)[..., None].astype(np.float32)
 BOUNCE = (1 + 0.055 * np.sin(np.arange(H) / H * np.pi))[:, None, None].astype(np.float32)
 
-TIP_COL = {
-    1: ((255, 214, 130), (255, 140, 40)),
-    2: ((255, 226, 168), (255, 172, 84)),
-    3: ((206, 228, 255), (90, 160, 255)),
-    4: ((255, 226, 180), (255, 186, 96)),
-    5: ((255, 202, 196), (255, 96, 70)),
-    6: ((200, 255, 228), (60, 220, 175)),
-    7: ((255, 236, 218), (255, 74, 28)),
-}
-
-TIP_WORDS = {
-    1: "الأولى، من سقراط: اعرف نفسك. فالحياة التي لا تُفحَص… لا تستحق أن تُعاش.".split(),
-    2: "الثانية، من ماركوس أوريليوس: لديك سلطة على عقلك، لا على ما يحدث لك.".split(),
-    3: "الثالثة، من سينيكا: نحن نتألم في الخيال… أكثر مما نتألم في الواقع. الخوف الذي في رأسك أكبر من كل ما سيحدث لك فعلاً.".split(),
-    4: "الرابعة، من أرسطو: نحن ما نفعله مراراً. فالتميز ليس فعلاً… بل عادة.".split(),
-    5: "الخامسة، من نيتشه: من يملك سبباً يعيش من أجله… يتحمل أي طريقة للحياة.".split(),
-    6: "السادسة، من الإمام علي: قيمة كل امرئ ما يحسن. اسأل نفسك… ماذا تتقن؟".split(),
-    7: "والسابعة، ليست نصيحة… إنها حقيقة. لا أحد قادم لينقذك. من تكون غداً… هو ما تفعله في هذه اللحظة.".split(),
-}
+TIP_COL = {t["n"]: tuple(t["col"]) for t in EP["tips"]}
+TIP_BG = {t["n"]: t.get("bg", 0.72) for t in EP["tips"]}
+TIP_WORDS = {t["n"]: t["words"] for t in EP["tips"]}
+TIP_WHO = {t["n"]: t["who"] for t in EP["tips"]}
+TIP_EN = {t["n"]: t["who_en"] for t in EP["tips"]}
+TIP_Q1 = {t["n"]: t["quote"] for t in EP["tips"]}
+TIP_Q2 = {t["n"]: t["quote2"] for t in EP["tips"]}
+TOP_LABEL = EP["top_label"]
+OUTRO = EP["outro"]
+N_TIPS = len(EP["tips"])
 
 _ALIGN_CACHE = {}
 
-HOOK_WORDS = "توقف سبع جمل فقط غيّرت مصير البشرية والسابعة قد تغيّر حياتك قبل أن ينتهي هذا الفيديو".split()
+HOOK_WORDS = EP["hook_words"]
 
 
 _HOOK_TIMES = {}
@@ -131,77 +122,102 @@ def dust_layer(t, seed=1, alpha=0.5, color=(255, 226, 180)):
     return cv2.resize(dm, (W, H), interpolation=cv2.INTER_LINEAR)
 
 
+def law_frame(canvas, t, hot, active, total, alpha=1.0):
+    """Part‑2 signature: a column of law ticks down both edges (like statute marks)."""
+    if alpha <= 0.01:
+        return canvas
+    x_l, x_r = 54, W - 54
+    for i in range(total):
+        y = H * 0.20 + i * (H * 0.60 / max(1, total - 1))
+        on = (i + 1) == active
+        a = alpha * (0.55 if on else 0.16)
+        col = tuple((np.array(hot) * a).tolist()) if on else tuple((np.array(IVORY) * a).tolist())
+        cv2.line(canvas, (x_l, int(y)), (x_l + (26 if on else 12), int(y)), col, 3, cv2.LINE_AA)
+        cv2.line(canvas, (x_r, int(y)), (x_r - (26 if on else 12), int(y)), col, 3, cv2.LINE_AA)
+    return canvas
+
+
 def top_bar(canvas, idx, alpha=1.0, hot=GOLD):
     if alpha <= 0.01:
         return
     a = alpha
-    lab = layer("7 نصائح غيّرت التاريخ", "fonts/Tajawal-Bold.ttf", 38)
+    lab = layer(TOP_LABEL, "fonts/Tajawal-Bold.ttf", 38)
     lab.stamp_centered(canvas, W / 2, 128, alpha=0.42 * a, color=tuple(hot))
     if idx:
-        n = layer(f"{idx:02d} / 07", "fonts/BebasNeue-Regular.ttf", 40)
+        n = layer(f"{idx:02d} / {N_TIPS:02d}", "fonts/BebasNeue-Regular.ttf", 40)
         n.stamp_centered(canvas, W / 2, 186, alpha=0.55 * a, color=tuple(np.array(hot) * 0.9))
 
 
+def caption_groups(times):
+    """Group words into caption chunks that follow the speaker's own pauses."""
+    groups, cur = [], []
+    for i, (w, a, b) in enumerate(times):
+        if cur and a - times[cur[-1]][2] > 0.30:
+            groups.append(cur)
+            cur = []
+        cur.append(i)
+        if len(cur) >= 5:
+            groups.append(cur)
+            cur = []
+    if cur:
+        groups.append(cur)
+    return groups
+
+
 def caption_block(canvas, t, times, hot, max_lines=3, y=0.775, px=76):
-    """Big karaoke captions for muted viewers: 2-4 words, current word lit."""
+    """Karaoke captions for muted viewers: only spoken words, centred, RTL order."""
     if t < times[0][1] - 0.1:
         return canvas
-    # soft scrim so captions read over anything
-    ys = np.arange(H, dtype=np.float32) / H
-    band = np.exp(-(((ys - y) / 0.075) ** 2))[:, None, None]
-    canvas *= (1 - 0.42 * band)
-    # find index of current word
-    cur = 0
-    for i, (w, a, b) in enumerate(times):
-        if t >= a - 0.02:
-            cur = i
-    # build groups of ~3 words
-    words = [w for (w, a, b) in times]
-    group = 3 if len(words) <= 14 else 4
-    g0 = (cur // group) * group
-    chunk = list(range(g0, min(len(words), g0 + group)))
-    texts = [words[i].strip("….,؟:") for i in chunk]
-    texts = [x for x in texts if x]
-    if not texts:
+    groups = caption_groups(times)
+    if not groups:
         return canvas
-    span = times[min(len(times) - 1, g0 + group - 1)][2] - times[g0][1]
-    appear = smoothstep(times[g0][1] - 0.08, times[g0][1] + 0.10, t)
+    cur = groups[0]
+    for g in groups:
+        if times[g[0]][1] <= t + 0.05:
+            cur = g
+    if t > times[cur[-1]][2] + 0.55:
+        return canvas
+
     f = "fonts/Tajawal-Bold.ttf"
-    # layout: wrap into up to 2 rows
-    rows, cur_row, cur_w = [], [], 0
-    for i, w in zip(chunk, texts):
-        L = layer(w, f, px)
-        if cur_row and cur_w + L.w + 24 > 980:
-            rows.append(cur_row)
-            cur_row, cur_w = [], 0
-        cur_row.append((i, L))
-        cur_w += L.w + 24
-    rows.append(cur_row)
-    total_h = len(rows) * (px + 18)
-    yy = H * y - total_h / 2
-    for row in rows:
-        rw = sum(L.w for _, L in row) + 24 * (len(row) - 1)
-        x = W / 2 - rw / 2
-        row_h = max(L.h for _, L in row)
-        for i, L in row:
-            on = times[i][1] - 0.05 <= t <= times[i][2] + 0.12
-            a = appear * (0.97 if on else 0.66)
-            col = tuple(mix_color(np.array(IVORY), np.array(hot), 0.85)) if on else tuple(IVORY)
-            # place RTL: rightmost first
-            pass
-        # RTL order: reverse x placement
-        x = W / 2 + rw / 2
-        for i, L in row:
-            x -= L.w
-            on = times[i][1] - 0.05 <= t <= times[i][2] + 0.12
-            a = appear * (1.0 if on else 0.74)
-            col = tuple(np.clip(np.array(hot) * 0.62 + np.array([250, 246, 238]) * 0.62,
-                                0, 255).tolist()) if on else tuple((np.array([236, 232, 224])).tolist())
-            L.stamp(canvas, x, yy + (row_h - L.h) / 2, alpha=a, color=col,
-                    glow=0.30 if on else 0.10, glow_sigma=18)
-            x -= 24
-        yy += row_h + 18
+    # only words already spoken (no reading ahead) — shrink to fit width
+    spoken = [(i, times[i][0].strip("….,؟:")) for i in cur if times[i][1] <= t + 0.06]
+    spoken = [(i, w) for i, w in spoken if w]
+    if not spoken:
+        return canvas
+    size = px
+    while size > 40:
+        laid = [(i, layer(w, f, size)) for i, w in spoken]
+        rw = sum(L.w for _, L in laid) + 26 * (len(laid) - 1)
+        if rw <= 960:
+            break
+        size -= 4
+    laid = [(i, layer(w, f, size)) for i, w in spoken]
+    gap = 26
+    rw = sum(L.w for _, L in laid) + gap * (len(laid) - 1)
+    row_h = max(L.h for _, L in laid)
+    appear = smoothstep(times[cur[0]][1] - 0.08, times[cur[0]][1] + 0.10, t)
+    yy = H * y - row_h / 2
+    # RTL: first word sits at the right edge
+    x = W / 2 + rw / 2
+    for i, L in laid:
+        x -= L.w
+        on = times[i][1] - 0.05 <= t <= times[i][2] + 0.16
+        a = appear * (1.0 if on else 0.74)
+        col = tuple(np.clip(np.array(hot) * 0.62 + np.array([250, 246, 238]) * 0.62,
+                            0, 255).tolist()) if on else tuple(np.array([236, 232, 224]).tolist())
+        L.stamp(canvas, x, yy, alpha=a, color=col,
+                glow=0.32 if on else 0.10, glow_sigma=18)
+        x -= gap
     return canvas
+
+
+def caption_scrim(canvas, t, times, y=0.775):
+    """Soft darkening behind the caption band — applied before any type."""
+    if t < times[0][1] - 0.2:
+        return canvas
+    ys = np.arange(H, dtype=np.float32) / H
+    band = np.exp(-(((ys - y) / 0.115) ** 2))[:, None, None]
+    return canvas * (1 - 0.46 * band)
 
 
 def fx_rings(canvas, t, hot, cx=W / 2, cy=None, count=5):
@@ -240,77 +256,74 @@ def fx_dots(canvas, t, hot, step=96):
 
 
 # ------------------------------------------------------------------ scenes
+def hook_times(sec):
+    """Word timings for the hook line (cached per episode)."""
+    k = "hook"
+    if k not in _HOOK_TIMES:
+        _HOOK_TIMES[k] = align(HOOK_WORDS, sec["segs"], sec["vo_start"])
+    return _HOOK_TIMES[k]
+
+
+def _beat_window(times, phrase, t, hold=0.16):
+    """Return (alpha_in, alpha_out, start) for a phrase using real word timings."""
+    words = phrase.split()
+    text = [w for (w, a, b) in times]
+    for i in range(len(text) - len(words) + 1):
+        if [w.strip("….,؟:") for w in text[i:i + len(words)]] != \
+           [w.strip("….,؟:") for w in words]:
+            continue
+        a0 = times[i][1]
+        a1 = times[i + len(words) - 1][2]
+        if t < a0 - 0.10:
+            return 0.0, 0.0, a0
+        if t > a1 + hold:
+            return 0.0, 0.0, a0
+        ina = smoothstep(a0 - 0.10, a0 + 0.05, t)
+        outa = 1 - smoothstep(a1 + 0.02, a1 + hold, t)
+        return ina * outa, 1.0, a0
+    return 0.0, 0.0, None
+
+
 def scene_hook(t, sec):
     p = t - sec["start"]
-    canvas = backdrop(t, sec, hot=(255, 160, 70), intensity=0.95, seed=5)
+    times = hook_times(sec)
+    canvas = backdrop(t, sec, hot=(255, 160, 70), intensity=0.95, seed=5 + int(EP["num"]))
+    canvas = caption_scrim(canvas, t, hook_times(sec))
     canvas += dust_layer(t, seed=4, alpha=0.42)
-    hero(canvas, t, 0, alpha=0.34 * smoothstep(0, 1.2, p), scale=1.15 + 0.06 * math.sin(t * 0.5),
-         color=(255, 190, 105), cy=0.34)
+    hero(canvas, t, 0, alpha=0.34 * smoothstep(0, 1.2, p),
+         scale=1.15 + 0.06 * math.sin(t * 0.5), color=(255, 190, 105), cy=0.34)
     canvas += grid_layer(t, (255, 180, 100), alpha=0.16)
-    # faint numeral watermark
     seven = grad_layer("7", "fonts/Anton-Regular.ttf", 900)
     seven.stamp_centered(canvas, W / 2, H * 0.33, alpha=0.03,
                          color=tuple((np.array(GOLD) * 0.7).tolist()))
 
-    # ---- beat 1: "توقف"
-    if p < 1.2:
-        q = float(np.clip((p - 0.02) / 0.22, 0, 1))
-        sc = 1.0 + 0.5 * (1 - ease_out_cubic(q))
-        a = q * (1 - smoothstep(0.92, 1.2, p))
-        stop = grad_layer("توقف", "fonts/Tajawal-ExtraBold.ttf", 230, stroke=6)
-        stop.stamp_centered(canvas, W / 2, H * 0.44, alpha=a, scale=sc,
-                            glow=0.55, glow_color=(255, 110, 40), glow_sigma=46)
-        if 0.0 < p < 0.5:
-            radial_flash(canvas, W / 2, H * 0.44, 520, (255, 120, 60),
-                         (0.5 - p) / 0.5 * 0.35)
-    # ---- beat 2: "سبع جمل فقط"
-    if 1.05 < p < 3.3:
-        q = smoothstep(1.05, 1.42, p)
-        out = 1 - smoothstep(3.02, 3.3, p)
-        big = grad_layer("سبع جمل", "fonts/Tajawal-ExtraBold.ttf", 200, stroke=6)
-        big.stamp_centered(canvas, W / 2, H * 0.40, alpha=q * out,
-                          glow=0.6, glow_color=(255, 170, 70), glow_sigma=40)
-        sm = layer("فقط", "fonts/Tajawal-Bold.ttf", 100)
-        sm.stamp_centered(canvas, W / 2, H * 0.505, alpha=q * out * 0.92, color=tuple(IVORY))
-    # ---- beat 3
-    if 3.25 < p < 5.5:
-        q = smoothstep(3.3, 3.7, p)
-        out = 1 - smoothstep(5.2, 5.5, p)
-        l = Line("غيّرت مصير البشرية", "fonts/Tajawal-ExtraBold.ttf",
-                 fit_px("غيّرت مصير البشرية", 960, 100, "fonts/Tajawal-ExtraBold.ttf"))
-        l.draw(canvas, W / 2, H * 0.42, alpha=q * out, reveal=(p - 3.3) * 1.7,
-               glow=0.42, glow_color=(255, 160, 60), glow_sigma=30)
-        sub = layer("في تاريخ الكون", "fonts/Tajawal-Bold.ttf", 62)
-        sub.stamp_centered(canvas, W / 2, H * 0.495, alpha=q * out * 0.78, color=tuple(IVORY))
-    # ---- beat 4: "والسابعة؟"
-    if 5.45 < p < 7.1:
-        q = smoothstep(5.5, 5.85, p)
-        out = 1 - smoothstep(6.85, 7.1, p)
-        pulse = 1 + 0.022 * math.sin(p * 9)
-        l = grad_layer("والسابعة؟", "fonts/Tajawal-ExtraBold.ttf", 175, stroke=5)
-        l.stamp_centered(canvas, W / 2, H * 0.42, alpha=q * out, scale=pulse,
-                         glow=0.6, glow_color=(255, 55, 28), glow_sigma=46)
-        det = layer("الشريحة التي لا يتحدث عنها أحد", "fonts/Tajawal-Bold.ttf", 44)
-        det.stamp_centered(canvas, W / 2, H * 0.505, alpha=q * out * 0.6, color=tuple(IVORY))
-    # ---- beat 5: promise
-    if 7.0 < p < 10.5:
-        q = smoothstep(7.05, 7.5, p)
-        out = 1 - smoothstep(10.1, 10.5, p)
-        l1 = Line("قد تغيّر حياتك", "fonts/Tajawal-ExtraBold.ttf", 104)
-        l1.draw(canvas, W / 2, H * 0.40, alpha=q * out, reveal=(p - 7.05) * 1.7,
-                glow=0.45, glow_color=(255, 150, 50), glow_sigma=32)
-        l2 = Line("قبل أن ينتهي هذا الفيديو", "fonts/Tajawal-Bold.ttf", 58)
-        l2.draw(canvas, W / 2, H * 0.49, alpha=q * out * 0.85, reveal=(p - 7.5) * 1.7,
-                color=tuple(IVORY))
-        if p > 8.4:
-            k = smoothstep(8.4, 9.0, p) * out
-            for i in range(3):
-                w = layer("٠١ ٠٢ ٠٣ ٠٤ ٠٥ ٠٦ ٠٧".split()[i], "fonts/Tajawal-Bold.ttf", 40)
-                w.stamp_centered(canvas, W / 2 - 150 + i * 150, H * 0.565,
-                                 alpha=k * 0.5, color=tuple(np.array(GOLD) * 1.1))
-    top_bar(canvas, 0, alpha=smoothstep(0.3, 0.9, p) * (1 - smoothstep(9.9, 10.3, p)))
+    # ---- beats, fully driven by the spoken words
+    for phrase, kind, px in EP["hook_beats"]:
+        a, _, a0 = _beat_window(times, phrase, t, hold=0.22 if kind.startswith("beat") else 0.16)
+        if a <= 0.005 or a0 is None:
+            continue
+        intro = smoothstep(a0 - 0.10, a0 + 0.05, t)
+        if kind in ("beat1", "beat2", "beat2b", "beat3", "beat4"):
+            punch = 1.0 + (0.45 * (1 - ease_out_cubic(intro)) if kind in ("beat1", "beat4") else 0.0)
+            glow_c = (255, 60, 28) if kind == "beat4" else (255, 150, 60)
+            L = grad_layer(phrase, "fonts/Tajawal-ExtraBold.ttf",
+                           fit_px(phrase, 960, px, "fonts/Tajawal-ExtraBold.ttf"), stroke=5)
+            L.stamp_centered(canvas, W / 2, H * 0.50, alpha=a, scale=punch,
+                             glow=0.55, glow_color=glow_c, glow_sigma=38)
+            if kind == "beat1" and t - a0 < 0.45:
+                radial_flash(canvas, W / 2, H * 0.50, 520, (255, 120, 60),
+                             max(0.0, 0.45 - (t - a0)) / 0.45 * 0.35)
+        else:
+            y = H * 0.615 if kind == "sub" else H * 0.68
+            L = layer(phrase, "fonts/Tajawal-Bold.ttf", px)
+            L.stamp_centered(canvas, W / 2, y, alpha=a * 0.9, color=tuple(IVORY))
+
+    if EP["key"] != "p1":
+        law_frame(canvas, t, (255, 170, 70), 0, N_TIPS, alpha=smoothstep(0.5, 1.4, p))
+    top_bar(canvas, 0, alpha=smoothstep(0.3, 0.9, p) *
+            (1 - smoothstep(sec["end"] - 0.4, sec["end"] - 0.05, p)))
     if p > 0.4:
-        caption_block(canvas, t, hook_times(sec), (255, 200, 130), y=0.80, px=74)
+        caption_block(canvas, t, times, (255, 200, 130), y=0.80, px=74)
     return canvas
 
 
@@ -319,10 +332,15 @@ def scene_tip(t, sec):
     idx = sec["idx"]
     vs = sec["vo_start"]
     hot, deep = TIP_COL[idx]
-    final = idx == 7
-    inten = {1: 0.78, 2: 0.82, 3: 0.50, 4: 0.86, 5: 0.66, 6: 0.62, 7: 0.58}[idx]
+    final = idx == N_TIPS
+    inten = TIP_BG.get(idx, 0.72)
     canvas = backdrop(t, sec, hot=hot, intensity=inten,
                       dark=(9, 4, 4) if final else (5, 6, 11))
+    # scrims go down BEFORE any type so they never paint over glyphs
+    ysv = np.arange(H, dtype=np.float32) / H
+    canvas *= (1 - 0.50 * np.exp(-(((ysv - 0.28) / 0.075) ** 2))[:, None, None])
+    canvas *= (1 - 0.30 * np.exp(-(((ysv - 0.515) / 0.085) ** 2))[:, None, None])
+    canvas = caption_scrim(canvas, t, tip_words_times(sec))
     canvas += dust_layer(t, seed=idx, alpha=0.34, color=hot)
     hero(canvas, t, idx, alpha=0.16 + 0.02 * idx, scale=0.72, color=hot, cy=0.225)
     canvas += grid_layer(t, hot, alpha=0.13 if not final else 0.2)
@@ -345,27 +363,26 @@ def scene_tip(t, sec):
     cv2.ellipse(canvas, (int(W / 2), int(H * 0.175)), (rr, rr), 0, 0, 360,
                 tuple((np.array(hot) * 0.16).tolist()), 1, cv2.LINE_AA)
 
-    who = layer(sec["who"], "fonts/Tajawal-ExtraBold.ttf", 86)
+    who = layer(TIP_WHO[idx], "fonts/Tajawal-ExtraBold.ttf", 86)
     wa = smoothstep(0.10, 0.42, p)
     who.stamp_centered(canvas, W / 2, H * 0.335, alpha=wa,
                        color=tuple(hot), glow=0.42, glow_color=deep, glow_sigma=28)
-    en = layer(sec["who_en"], "fonts/BebasNeue-Regular.ttf", 42)
+    en = layer(TIP_EN[idx], "fonts/BebasNeue-Regular.ttf", 42)
     en.stamp_centered(canvas, W / 2, H * 0.335 + 78, alpha=wa * 0.5,
                       color=tuple(mix_color(np.array(IVORY), np.array(hot), 0.4)))
     rule(canvas, W / 2, H * 0.335 + 132, 230, ease_out_cubic(smoothstep(0.22, 0.75, p)),
          alpha=0.7, color=hot, thickness=3)
 
-    ar = ["", "النصيحة الأولى", "النصيحة الثانية", "النصيحة الثالثة", "النصيحة الرابعة",
+    ar = ["", "الأول", "الثاني", "الثالث", "الرابع",
+          "الخامس", "السادس", "السابع"][idx] if EP["key"] == "p2" else \
+         ["", "النصيحة الأولى", "النصيحة الثانية", "النصيحة الثالثة", "النصيحة الرابعة",
           "النصيحة الخامسة", "النصيحة السادسة", "النصيحة السابعة"][idx]
     eye = layer(ar, "fonts/Tajawal-Bold.ttf", 40)
     eye.stamp_centered(canvas, W / 2, 152, alpha=wa * 0.45, color=tuple(hot))
 
     # ---------------- quote: two lines, word-synced reveal
-    ys = np.arange(H, dtype=np.float32) / H
-    band = np.exp(-(((ys - 0.515) / 0.085) ** 2))[:, None, None]
-    canvas *= (1 - 0.26 * band)
     times = tip_words_times(sec)
-    q1, q2 = sec["quote"], sec["quote2"]
+    q1, q2 = TIP_Q1[idx], TIP_Q2[idx]
     f1 = "fonts/Tajawal-ExtraBold.ttf"
     px1 = fit_px(q1, 980, 112, f1, 64)
     ha = np.array(hot, np.float32)
@@ -396,8 +413,10 @@ def scene_tip(t, sec):
         fx_rings(canvas, t * 1.6, hot, cy=H * 0.30, count=6)
     # ---------------- big captions (muted viewers)
     caption_block(canvas, t, times, hot, y=0.775, px=74)
+    if EP["key"] != "p1":
+        law_frame(canvas, t, hot, idx, N_TIPS, alpha=wa)
     # ---------------- bottom progress
-    prog = (idx - 1 + np.clip(p / (sec["end"] - sec["start"]), 0, 1)) / 7
+    prog = (idx - 1 + np.clip(p / (sec["end"] - sec["start"]), 0, 1)) / N_TIPS
     bw = 340
     x0, y0 = int(W / 2 - bw / 2), int(H * 0.885)
     cv2.line(canvas, (x0, y0), (x0 + bw, y0), tuple((np.array(IVORY) * 0.14).tolist()), 3,
@@ -406,7 +425,7 @@ def scene_tip(t, sec):
              3, cv2.LINE_AA)
     cv2.circle(canvas, (x0 + int(bw * prog), y0), 6, tuple((np.array(hot)).tolist()), -1,
                cv2.LINE_AA)
-    lab = layer(f"{idx} / 7", "fonts/BebasNeue-Regular.ttf", 36)
+    lab = layer(f"{idx} / {N_TIPS}", "fonts/BebasNeue-Regular.ttf", 36)
     lab.stamp_centered(canvas, W / 2, y0 + 46, alpha=0.45,
                        color=tuple((np.array(hot) * 0.85).tolist()))
     top_bar(canvas, 0, alpha=0.0)
@@ -443,15 +462,15 @@ def scene_outro(t, sec):
     canvas *= (1 - 0.30 * band)
 
     a1 = smoothstep(0.10, 0.60, p)
-    l1 = Line("احفظ هذه الجمل", "fonts/Tajawal-ExtraBold.ttf", 100)
+    l1 = Line(OUTRO["title"], "fonts/Tajawal-ExtraBold.ttf", 90)
     l1.draw(canvas, W / 2, H * 0.415, alpha=a1, reveal=(p - 0.10) * 1.6, glow=0.45,
             glow_color=(255, 170, 60), glow_sigma=32)
     a2 = smoothstep(1.25, 1.8, p)
-    l2 = Line("شارك الفيديو مع شخص واحد", "fonts/Tajawal-Bold.ttf", 62)
+    l2 = Line(OUTRO["l2"], "fonts/Tajawal-Bold.ttf", 60)
     l2.draw(canvas, W / 2, H * 0.495, alpha=a2 * 0.95, reveal=(p - 1.25) * 1.5,
             color=tuple(IVORY))
     a3 = smoothstep(1.95, 2.5, p)
-    l3 = Line("يحتاج أن يسمعها اليوم", "fonts/Tajawal-Bold.ttf", 62)
+    l3 = Line(OUTRO["l3"], "fonts/Tajawal-Bold.ttf", 60)
     l3.draw(canvas, W / 2, H * 0.55, alpha=a3 * 0.95, reveal=(p - 1.95) * 1.5,
             color=tuple(IVORY))
 
@@ -460,7 +479,7 @@ def scene_outro(t, sec):
     if a4 > 0.01:
         box_a = a4
         bx, by = W / 2, H * 0.655
-        bw, bh = 520, 126
+        bw, bh = 700, 126
         overlay = canvas.copy()
         cv2.rectangle(overlay, (int(bx - bw / 2), int(by - bh / 2)),
                       (int(bx + bw / 2), int(by + bh / 2)), (255, 255, 255), -1)
@@ -468,17 +487,17 @@ def scene_outro(t, sec):
         cv2.rectangle(canvas, (int(bx - bw / 2), int(by - bh / 2)),
                       (int(bx + bw / 2), int(by + bh / 2)), tuple(GOLD.tolist()), 4,
                       cv2.LINE_AA)
-        cta = layer("سأبدأ", "fonts/Tajawal-ExtraBold.ttf", 78)
+        cta = layer(OUTRO["cta"], "fonts/Tajawal-ExtraBold.ttf", 62)
         cta.stamp_centered(canvas, bx, by, alpha=box_a, color=tuple(GOLD_LIGHT),
                            glow=0.4, glow_color=(255, 170, 60), glow_sigma=22)
     a5 = smoothstep(4.6, 5.3, p)
     if a5 > 0.01:
-        cm = layer("اكتب في التعليقات: سأبدأ", "fonts/Tajawal-Bold.ttf", 46)
+        cm = layer(OUTRO["comment"], "fonts/Tajawal-Bold.ttf", 42)
         cm.stamp_centered(canvas, W / 2, H * 0.745, alpha=a5 * 0.72, color=tuple(IVORY))
     # follow cue
     a6 = smoothstep(5.6, 6.2, p)
     if a6 > 0.01:
-        fu = layer("تابع للجزء الثاني", "fonts/Tajawal-Bold.ttf", 42)
+        fu = layer(OUTRO["follow"], "fonts/Tajawal-Bold.ttf", 42)
         fu.stamp_centered(canvas, W / 2, H * 0.815, alpha=a6 * 0.55, color=tuple(GOLD))
     return canvas
 
@@ -559,14 +578,16 @@ _N_FRAMES = 0
 _BOUNDS = []
 
 
-def main(out_path="mjod_video.mp4", workers=2, start=None, end=None,
-         audio="build/mix.wav", crf=18):
+def main(out_path=None, workers=2, start=None, end=None,
+         audio=None, crf=18):
     from multiprocessing import Pool
     global _N_FRAMES, _BOUNDS
     n_frames = int(TOTAL * FPS)
     _N_FRAMES = n_frames
     _BOUNDS = [(s["start"], s["end"], s) for s in SECTIONS]
 
+    out_path = out_path or EP["out"]
+    audio = audio or (EP["build"] + "/mix.wav")
     lo = int(start * FPS) if start is not None else 0
     hi = int(end * FPS) if end is not None else n_frames
 
@@ -599,5 +620,5 @@ if __name__ == "__main__":
     if os.path.exists(ff):
         os.environ["PATH"] = os.path.dirname(ff) + ":" + os.environ["PATH"]
     a, b = (sys.argv[1], sys.argv[2]) if len(sys.argv) > 2 else (None, None)
-    out = sys.argv[3] if len(sys.argv) > 3 else "mjod_video.mp4"
+    out = sys.argv[3] if len(sys.argv) > 3 else None
     main(out_path=out, start=float(a) if a else None, end=float(b) if b else None)
