@@ -90,7 +90,7 @@ class PdfExportService {
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 _metricCell(
-                  'الدخل الشهري',
+                  profile.isWeekly ? 'القبضة الأسبوعية' : 'الدخل الشهري',
                   ArabicFormatters.formatMoney(
                     profile.totalMonthlyIncome,
                     currency,
@@ -101,7 +101,7 @@ class PdfExportService {
                   ArabicFormatters.formatMoney(totalSpent, currency),
                 ),
                 _metricCell(
-                  'المتبقي من الشهر',
+                  profile.isWeekly ? 'المتبقي من الأسبوع' : 'المتبقي من الشهر',
                   ArabicFormatters.formatMoney(remaining, currency),
                 ),
                 _metricCell(
@@ -146,7 +146,7 @@ class PdfExportService {
           pw.SizedBox(height: 16),
 
           pw.Text(
-            'توقعات الادخار السنوي: ${ArabicFormatters.formatMoney(plan.annualSavingsPotential, currency)}',
+            'توقعات الادخار السنوي: ${ArabicFormatters.formatMoney((plan.amountFor(BudgetBucket.savings) + plan.amountFor(BudgetBucket.emergency)) * profile.annualCycles, currency)}',
             style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,

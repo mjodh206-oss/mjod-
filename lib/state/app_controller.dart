@@ -215,6 +215,9 @@ class AppController extends ChangeNotifier {
 
   Future<void> quickEditSalary({
     required double salary,
+    PayFrequency? payFrequency,
+    int? weeklyPayWeekday,
+    int? salaryDay,
     String? currencyCode,
     bool? isRenting,
     double? rentAmount,
@@ -224,6 +227,9 @@ class AppController extends ChangeNotifier {
     if (old == null) return;
     final updated = old.copyWith(
       monthlySalary: salary,
+      payFrequency: payFrequency ?? old.payFrequency,
+      weeklyPayWeekday: weeklyPayWeekday ?? old.weeklyPayWeekday,
+      salaryDay: salaryDay ?? old.salaryDay,
       currencyCode: currencyCode ?? old.currencyCode,
       isRenting: isRenting ?? old.isRenting,
       rentAmount: rentAmount ?? old.rentAmount,
@@ -236,6 +242,14 @@ class AppController extends ChangeNotifier {
     await storage.savePlan(_plan!);
     await _syncExternalIntegrations();
     notifyListeners();
+  }
+
+  Future<void> repeatExpense(ExpenseItem item) async {
+    await addExpense(
+      amount: item.amount,
+      categoryId: item.categoryId,
+      note: item.note,
+    );
   }
 
   Future<void> askAiAdvisor({String? question}) async {
@@ -267,7 +281,7 @@ class AppController extends ChangeNotifier {
   int get daysUntilSalary {
     final p = _profile;
     if (p == null) return 30;
-    return ArabicFormatters.daysUntilSalary(p.salaryDay);
+    return ArabicFormatters.daysUntilPaydayForProfile(p);
   }
 
   double get dailySafeSpend {
@@ -285,10 +299,56 @@ class AppController extends ChangeNotifier {
 
   double get weeklySafeSpend => dailySafeSpend * 7.0;
 
+  double get spentToday {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    return currentCycleExpenses
+        .where((e) => !e.createdAt.isBefore(todayStart))
+        .fold<double>(0.0, (sum, e) => sum + e.amount);
+  }
+
+  double get spentTodayLiving {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    return currentCycleExpenses
+        .where(
+          (e) =>
+              !e.createdAt.isBefore(todayStart) &&
+              (e.bucket == BudgetBucket.necessities ||
+                  e.bucket == BudgetBucket.wants),
+        )
+        .fold<double>(0.0, (sum, e) => sum + e.amount);
+  }
+
+  double get dailyBudgetAtStartOfToday {
+    final p = _profile;
+    final pl = _plan;
+    if (p == null || pl == null) return 0.0;
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final beforeToday = <BudgetBucket, double>{
+      for (final b in BudgetBucket.values) b: 0.0,
+    };
+    for (final e in currentCycleExpenses) {
+      if (e.createdAt.isBefore(todayStart)) {
+        beforeToday[e.bucket] = (beforeToday[e.bucket] ?? 0.0) + e.amount;
+      }
+    }
+    return PlanEngine.dailySafeSpend(
+      profile: p,
+      plan: pl,
+      spentByBucket: beforeToday,
+      daysLeft: daysUntilSalary,
+      currency: currency,
+    );
+  }
+
+  double get remainingToday => dailyBudgetAtStartOfToday - spentTodayLiving;
+
   List<ExpenseItem> get currentCycleExpenses {
     final p = _profile;
     if (p == null) return _expenses;
-    final start = ArabicFormatters.currentSalaryCycleStart(p.salaryDay);
+    final start = ArabicFormatters.currentCycleStartForProfile(p);
     return _expenses
         .where((e) => !e.createdAt.isBefore(start))
         .toList();
@@ -682,23 +742,27 @@ class AppController extends ChangeNotifier {
 
     final income = p.totalMonthlyIncome;
     final rem = remainingCurrentCycle;
-    final daysLeft = ArabicFormatters.daysUntilSalary(p.salaryDay);
+    final daysLeft = ArabicFormatters.daysUntilPaydayForProfile(p);
     final pct = income > 0 ? ((rem / income) * 100).round().clamp(0, 100) : 0;
 
     await widgetSync.updateWidget(
       remainingText: ArabicFormatters.formatMoney(rem, currency),
-      daysLeftText: 'متبقي $daysLeft يوم للراتب',
+      daysLeftText: p.isWeekly
+          ? 'باقي $daysLeft يوم للقبضة الجاية'
+          : 'متبقي $daysLeft يوم للراتب',
       progressPercent: pct,
       subtitleText: _plan?.healthLabelAr ?? 'فلوسك بتستاهل خطة',
     );
   }
 
   Future<void> _syncNotificationsOnly() async {
-    final weeklySaving = _plan != null
+    final p = _profile;
+    final savingCycle = _plan != null
         ? (_plan!.amountFor(BudgetBucket.savings) +
-                _plan!.amountFor(BudgetBucket.emergency)) /
-            4.0
+            _plan!.amountFor(BudgetBucket.emergency))
         : 0.0;
+    final weeklySaving =
+        (p != null && p.isWeekly) ? savingCycle : (savingCycle / 4.0);
     await notifications.syncAllSchedules(
       settings: _settings,
       profile: _profile,

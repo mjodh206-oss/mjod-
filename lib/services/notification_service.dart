@@ -86,15 +86,27 @@ class NotificationService {
       final currency = AppCurrencies.byCode(profile.currencyCode);
 
       if (settings.salaryDayReminder) {
-        final nextSalary = _nextMonthlyDateTime(profile.salaryDay, 9, 0);
-        await _scheduleSafe(
-          id: 101,
-          title: 'نزل الراتب! خلينا نوزعه 💰',
-          body:
-              'افتح BNB الآن وراجع خطتك الشهرية لـ ${ArabicFormatters.formatMoney(profile.totalMonthlyIncome, currency)}.',
-          localTarget: nextSalary,
-          match: DateTimeComponents.dayOfMonthAndTime,
-        );
+        if (profile.isWeekly) {
+          final nextSalary = _nextWeeklyDateTime(profile.weeklyPayWeekday, 9, 0);
+          await _scheduleSafe(
+            id: 101,
+            title: 'نزل راتب الأسبوع! خلينا نوزعه 💰',
+            body:
+                'افتح BNB الآن وراجع تقسيمة قبضتك لـ ${ArabicFormatters.formatMoney(profile.totalMonthlyIncome, currency)}.',
+            localTarget: nextSalary,
+            match: DateTimeComponents.dayOfWeekAndTime,
+          );
+        } else {
+          final nextSalary = _nextMonthlyDateTime(profile.salaryDay, 9, 0);
+          await _scheduleSafe(
+            id: 101,
+            title: 'نزل الراتب! خلينا نوزعه 💰',
+            body:
+                'افتح BNB الآن وراجع خطتك الشهرية لـ ${ArabicFormatters.formatMoney(profile.totalMonthlyIncome, currency)}.',
+            localTarget: nextSalary,
+            match: DateTimeComponents.dayOfMonthAndTime,
+          );
+        }
       }
 
       if (settings.eveningReminder) {

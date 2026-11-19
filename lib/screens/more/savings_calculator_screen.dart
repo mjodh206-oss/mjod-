@@ -35,7 +35,10 @@ class _SavingsCalculatorScreenState extends State<SavingsCalculatorScreen> {
     final c = widget.controller;
     final currency = c.currency;
     final theme = Theme.of(context);
+    final isWeekly = c.profile?.isWeekly ?? false;
     final salary = c.profile?.totalMonthlyIncome ?? 0;
+    final unitAdj = isWeekly ? 'أسبوعياً' : 'شهرياً';
+    final unitSingular = isWeekly ? 'أسبوع' : 'شهر';
 
     final target = double.tryParse(_targetCtrl.text.replaceAll(',', '')) ?? 0;
     final monthly = double.tryParse(_monthlyCtrl.text.replaceAll(',', '')) ?? 0;
@@ -47,23 +50,28 @@ class _SavingsCalculatorScreenState extends State<SavingsCalculatorScreen> {
 
     if (target > 0) {
       if (_solveForTime && monthly > 0) {
-        final neededMonths = (target / monthly).ceil();
-        final years = neededMonths ~/ 12;
-        final remMonths = neededMonths % 12;
-        final durationTxt = years > 0
-            ? '$years سنة${remMonths > 0 ? ' و $remMonths شهر' : ''}'
-            : '$neededMonths شهر';
-        resultTitle = 'تحتاج إلى $durationTxt';
+        final neededCycles = (target / monthly).ceil();
+        if (isWeekly) {
+          final monthsApprox = (neededCycles / 4.33).ceil();
+          resultTitle = 'تحتاج إلى $neededCycles $unitSingular (~$monthsApprox شهر)';
+        } else {
+          final years = neededCycles ~/ 12;
+          final remMonths = neededCycles % 12;
+          final durationTxt = years > 0
+              ? '$years سنة${remMonths > 0 ? ' و $remMonths شهر' : ''}'
+              : '$neededCycles شهر';
+          resultTitle = 'تحتاج إلى $durationTxt';
+        }
         resultSubtitle =
-            'عند ادخار ${ArabicFormatters.formatMoney(monthly, currency)} شهرياً ستصل إلى ${ArabicFormatters.formatMoney(target, currency)}.';
+            'عند ادخار ${ArabicFormatters.formatMoney(monthly, currency)} $unitAdj ستصل إلى ${ArabicFormatters.formatMoney(target, currency)}.';
         if (salary > 0) salarySharePct = (monthly / salary) * 100;
       } else if (!_solveForTime && months > 0) {
-        final neededMonthly = target / math.max(1, months);
+        final neededPerCycle = target / math.max(1, months);
         resultTitle =
-            'تحتاج ادخار ${ArabicFormatters.formatMoney(neededMonthly, currency)} شهرياً';
+            'تحتاج ادخار ${ArabicFormatters.formatMoney(neededPerCycle, currency)} $unitAdj';
         resultSubtitle =
-            'للوصول إلى ${ArabicFormatters.formatMoney(target, currency)} خلال $months شهر.';
-        if (salary > 0) salarySharePct = (neededMonthly / salary) * 100;
+            'للوصول إلى ${ArabicFormatters.formatMoney(target, currency)} خلال $months $unitSingular.';
+        if (salary > 0) salarySharePct = (neededPerCycle / salary) * 100;
       }
     }
 
@@ -78,14 +86,14 @@ class _SavingsCalculatorScreenState extends State<SavingsCalculatorScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'احسب المدة اللازمة أو المبلغ الشهري المطلوب لأي هدف.',
+            'احسب المدة اللازمة أو المبلغ $unitAdj المطلوب لأي هدف.',
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
           SegmentedButton<bool>(
-            segments: const [
-              ButtonSegment(value: true, label: Text('احسب كم شهراً أحتاج')),
-              ButtonSegment(value: false, label: Text('احسب كم أدخر شهرياً')),
+            segments: [
+              ButtonSegment(value: true, label: Text('احسب كم $unitSingular أحتاج')),
+              ButtonSegment(value: false, label: Text('احسب كم أدخر $unitAdj')),
             ],
             selected: {_solveForTime},
             onSelectionChanged: (s) => setState(() => _solveForTime = s.first),
@@ -109,7 +117,7 @@ class _SavingsCalculatorScreenState extends State<SavingsCalculatorScreen> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
-                labelText: 'كم تستطيع أن تدخر شهرياً؟ (${currency.symbol})',
+                labelText: 'كم تستطيع أن تدخر $unitAdj؟ (${currency.symbol})',
                 prefixIcon: const Icon(Icons.savings_rounded),
               ),
             )
@@ -119,9 +127,9 @@ class _SavingsCalculatorScreenState extends State<SavingsCalculatorScreen> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                labelText: 'خلال كم شهر تريد الوصول؟',
-                prefixIcon: Icon(Icons.calendar_month_rounded),
+              decoration: InputDecoration(
+                labelText: 'خلال كم $unitSingular تريد الوصول؟',
+                prefixIcon: const Icon(Icons.calendar_month_rounded),
               ),
             ),
           const SizedBox(height: 22),

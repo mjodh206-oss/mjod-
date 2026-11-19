@@ -5,6 +5,7 @@ import '../../core/constants/categories.dart';
 import '../../core/constants/currencies.dart';
 import '../../core/utils/arabic_formatters.dart';
 import '../../core/utils/page_transitions.dart';
+import '../../models/salary_profile.dart';
 import '../../services/plan_engine.dart';
 import '../../state/app_controller.dart';
 import '../../widgets/animated_counter.dart';
@@ -88,6 +89,9 @@ class _PlanScreenState extends State<PlanScreen> {
     );
     bool isRenting = profile.isRenting;
     String code = profile.currencyCode;
+    PayFrequency payFreq = profile.payFrequency;
+    int weeklyWeekday = profile.weeklyPayWeekday;
+    int monthlyDay = profile.salaryDay;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -99,6 +103,7 @@ class _PlanScreenState extends State<PlanScreen> {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final cur = AppCurrencies.byCode(code);
+            final isWeekly = payFreq == PayFrequency.weekly;
             return Container(
               padding: EdgeInsets.fromLTRB(
                 20,
@@ -132,6 +137,40 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: theme.textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Center(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text('راتب شهري'),
+                              ),
+                            ),
+                            selected: !isWeekly,
+                            onSelected: (_) => setSheetState(
+                              () => payFreq = PayFrequency.monthly,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Center(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text('راتب أسبوعي'),
+                              ),
+                            ),
+                            selected: isWeekly,
+                            onSelected: (_) => setSheetState(
+                              () => payFreq = PayFrequency.weekly,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
                     InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'العملة',
@@ -170,15 +209,79 @@ class _PlanScreenState extends State<PlanScreen> {
                         ),
                       ],
                       decoration: InputDecoration(
-                        labelText: 'الراتب الشهري',
+                        labelText: isWeekly
+                            ? 'الراتب الأسبوعي (كل أسبوع)'
+                            : 'الراتب الشهري',
                         suffixText: cur.symbol,
                         prefixIcon: const Icon(Icons.payments_rounded),
                       ),
                     ),
                     const SizedBox(height: 10),
+                    InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: isWeekly
+                            ? 'يوم القبض بالأسبوع'
+                            : 'يوم نزول الراتب بالشهر',
+                        prefixIcon: const Icon(Icons.event_available_rounded),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: isWeekly
+                            ? DropdownButton<int>(
+                                value: weeklyWeekday,
+                                isExpanded: true,
+                                isDense: true,
+                                items: const [
+                                  DateTime.saturday,
+                                  DateTime.sunday,
+                                  DateTime.monday,
+                                  DateTime.tuesday,
+                                  DateTime.wednesday,
+                                  DateTime.thursday,
+                                  DateTime.friday,
+                                ]
+                                    .map(
+                                      (wd) => DropdownMenuItem(
+                                        value: wd,
+                                        child: Text(
+                                          ArabicFormatters.weekdayNameAr(wd),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (v) {
+                                  if (v != null) {
+                                    setSheetState(() => weeklyWeekday = v);
+                                  }
+                                },
+                              )
+                            : DropdownButton<int>(
+                                value: monthlyDay,
+                                isExpanded: true,
+                                isDense: true,
+                                items: List.generate(28, (i) => i + 1)
+                                    .map(
+                                      (d) => DropdownMenuItem(
+                                        value: d,
+                                        child: Text('يوم $d'),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (v) {
+                                  if (v != null) {
+                                    setSheetState(() => monthlyDay = v);
+                                  }
+                                },
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('هل تدفع إيجاراً شهرياً؟'),
+                      title: Text(
+                        isWeekly
+                            ? 'هل تقتطع حصة إيجار من قبضتك؟'
+                            : 'هل تدفع إيجاراً شهرياً؟',
+                      ),
                       value: isRenting,
                       onChanged: (v) => setSheetState(() => isRenting = v),
                     ),
@@ -190,7 +293,9 @@ class _PlanScreenState extends State<PlanScreen> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         decoration: InputDecoration(
-                          labelText: 'قيمة الإيجار الشهري',
+                          labelText: isWeekly
+                              ? 'حصة الإيجار من قبضة الأسبوع'
+                              : 'قيمة الإيجار الشهري',
                           suffixText: cur.symbol,
                           prefixIcon: const Icon(Icons.home_rounded),
                         ),
@@ -202,7 +307,9 @@ class _PlanScreenState extends State<PlanScreen> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
-                        labelText: 'أقساط أو ديون شهرية (اتركه فارغاً إن لم يوجد)',
+                        labelText: isWeekly
+                            ? 'أقساط أو ديون أسبوعية (إن وجدت)'
+                            : 'أقساط أو ديون شهرية (اتركه فارغاً إن لم يوجد)',
                         suffixText: cur.symbol,
                         prefixIcon: const Icon(Icons.receipt_long_rounded),
                       ),
@@ -218,6 +325,9 @@ class _PlanScreenState extends State<PlanScreen> {
                         final debt = double.tryParse(debtCtrl.text.trim()) ?? 0;
                         await c.quickEditSalary(
                           salary: sal,
+                          payFrequency: payFreq,
+                          weeklyPayWeekday: weeklyWeekday,
+                          salaryDay: monthlyDay,
                           currencyCode: code,
                           isRenting: isRenting,
                           rentAmount: rent,
@@ -259,6 +369,8 @@ class _PlanScreenState extends State<PlanScreen> {
     final daysLeft = c.daysUntilSalary;
     final dailySafe = c.dailySafeSpend;
     final weeklySafe = c.weeklySafeSpend;
+    final spentTodayLiving = c.spentTodayLiving;
+    final remainingToday = c.remainingToday;
     final steps = PlanEngine.buildSalaryActionPlan(
       profile: profile,
       plan: plan,
@@ -267,12 +379,13 @@ class _PlanScreenState extends State<PlanScreen> {
       daysLeft: daysLeft,
     );
 
-    final annualWealth = (exactSplits[BudgetBucket.savings] ?? 0) * 12;
+    final annualWealth =
+        (exactSplits[BudgetBucket.savings] ?? 0) * profile.annualCycles;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
       children: [
-        // 1. Hero Card: Clear Salary + Daily & Weekly Safe Spend
+        // 1. Hero Card: Clear Salary + Daily & Today Safe Spend
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
@@ -303,7 +416,9 @@ class _PlanScreenState extends State<PlanScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'راتبك الشهري',
+                          profile.isWeekly
+                              ? 'قبضتك الأسبوعية (كل ${ArabicFormatters.weekdayNameAr(profile.weeklyPayWeekday)})'
+                              : 'راتبك الشهري',
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 13,
@@ -367,7 +482,9 @@ class _PlanScreenState extends State<PlanScreen> {
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            'مسموح تصرف باليوم',
+                            spentTodayLiving > 0
+                                ? 'باقي لك مصروف لليوم'
+                                : 'مسموح تصرف باليوم',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -402,17 +519,30 @@ class _PlanScreenState extends State<PlanScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      ArabicFormatters.formatMoney(dailySafe, currency),
-                      style: const TextStyle(
+                      spentTodayLiving > 0
+                          ? (remainingToday >= 0
+                              ? ArabicFormatters.formatMoney(
+                                  remainingToday,
+                                  currency,
+                                )
+                              : 'تجاوزت بـ ${ArabicFormatters.formatMoney(remainingToday.abs(), currency)}')
+                          : ArabicFormatters.formatMoney(dailySafe, currency),
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFFF5D77A),
+                        color: spentTodayLiving > 0 && remainingToday < 0
+                            ? const Color(0xFFFCA5A5)
+                            : const Color(0xFFF5D77A),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'يعني بالأسبوع: ${ArabicFormatters.formatMoney(weeklySafe, currency)} (حتى يكفيك الراتب)',
+                      spentTodayLiving > 0
+                          ? 'صرفت اليوم ${ArabicFormatters.formatMoney(spentTodayLiving, currency)} · من أصل ${ArabicFormatters.formatMoney(c.dailyBudgetAtStartOfToday, currency)} باليوم'
+                          : (profile.isWeekly
+                              ? 'موعد القبضة الجاية: ${ArabicFormatters.weekdayNameAr(profile.weeklyPayWeekday)} (بعد $daysLeft يوم)'
+                              : 'يعني بالأسبوع: ${ArabicFormatters.formatMoney(weeklySafe, currency)} (حتى يكفيك الراتب)'),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
@@ -436,12 +566,16 @@ class _PlanScreenState extends State<PlanScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'تقسيم راتبك بالمصاري',
+                  profile.isWeekly
+                      ? 'تقسيم قبضة الأسبوع بالمصاري'
+                      : 'تقسيم راتبك بالمصاري',
                   style: theme.textTheme.titleLarge,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'قديش تحط بكل ظرف أول ما ينزل راتبك (المجموع يساوي راتبك تماماً)',
+                  profile.isWeekly
+                      ? 'قديش تحط بكل ظرف أول ما تقبض هالأسبوع (المجموع يساوي قبضتك تماماً)'
+                      : 'قديش تحط بكل ظرف أول ما ينزل راتبك (المجموع يساوي راتبك تماماً)',
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 10),

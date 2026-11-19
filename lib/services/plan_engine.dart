@@ -281,6 +281,8 @@ class PlanEngine {
     final splits = exactMoneySplit(plan: plan, currency: currency);
     final steps = <SalaryActionStep>[];
     int num = 1;
+    final cycleDays = profile.cycleDays.toDouble();
+    final periodWord = profile.isWeekly ? 'الأسبوع' : 'الشهر';
 
     final savAmt = splits[BudgetBucket.savings] ?? 0.0;
     if (savAmt > 0) {
@@ -289,7 +291,7 @@ class PlanEngine {
           stepNumber: num++,
           titleAr: 'التوفير والادخار (حطه على جنب أولاً)',
           instructionAr:
-              'خبّي ${ArabicFormatters.formatMoney(savAmt, currency)} فور نزول الراتب — بالسنة بتصير ${ArabicFormatters.formatMoney(savAmt * 12, currency)}.',
+              'خبّي ${ArabicFormatters.formatMoney(savAmt, currency)} أول ما تقبض — بالسنة بتصير ${ArabicFormatters.formatMoney(savAmt * profile.annualCycles, currency)}.',
           bucket: BudgetBucket.savings,
           monthlyAmount: savAmt,
           dailyAllowance: null,
@@ -319,14 +321,16 @@ class PlanEngine {
     final necAmt = splits[BudgetBucket.necessities] ?? 0.0;
     final rent = profile.isRenting ? profile.rentAmount : 0.0;
     final necLiving = math.max(0.0, necAmt - rent);
-    final necDaily = necLiving / 30.0;
+    final necDaily = necLiving / cycleDays;
     steps.add(
       SalaryActionStep(
         stepNumber: num++,
         titleAr: 'البيت والأكل والفواتير',
         instructionAr: profile.isRenting && rent > 0
-            ? 'ادفع الإيجار (${ArabicFormatters.formatMoney(rent, currency)}) والباقي ${ArabicFormatters.formatMoney(necLiving, currency)} للأكل والفواتير.'
-            : 'للأكل والفواتير والمواصلات طوال الشهر (بحدود ${ArabicFormatters.formatMoney(necDaily, currency)} باليوم).',
+            ? (profile.isWeekly
+                ? 'خبّي حصة الإيجار (${ArabicFormatters.formatMoney(rent, currency)}) والباقي ${ArabicFormatters.formatMoney(necLiving, currency)} للأكل والفواتير.'
+                : 'ادفع الإيجار (${ArabicFormatters.formatMoney(rent, currency)}) والباقي ${ArabicFormatters.formatMoney(necLiving, currency)} للأكل والفواتير.')
+            : 'للأكل والفواتير والمواصلات طوال $periodWord (بحدود ${ArabicFormatters.formatMoney(necDaily, currency)} باليوم).',
         bucket: BudgetBucket.necessities,
         monthlyAmount: necAmt,
         dailyAllowance: necDaily,
@@ -336,14 +340,15 @@ class PlanEngine {
     );
 
     final wantsAmt = splits[BudgetBucket.wants] ?? 0.0;
-    final wantsDaily = wantsAmt / 30.0;
+    final wantsDaily = wantsAmt / cycleDays;
     if (wantsAmt > 0) {
       steps.add(
         SalaryActionStep(
           stepNumber: num++,
           titleAr: 'مصروفك الشخصي والطلعات',
-          instructionAr:
-              'إلك ${ArabicFormatters.formatMoney(wantsDaily, currency)} باليوم (أو ${ArabicFormatters.formatMoney(wantsAmt / 4.0, currency)} بالأسبوع) تصرفها على راحتك.',
+          instructionAr: profile.isWeekly
+              ? 'إلك ${ArabicFormatters.formatMoney(wantsDaily, currency)} باليوم (${ArabicFormatters.formatMoney(wantsAmt, currency)} لكل الأسبوع) تصرفها على راحتك.'
+              : 'إلك ${ArabicFormatters.formatMoney(wantsDaily, currency)} باليوم (أو ${ArabicFormatters.formatMoney(wantsAmt / 4.0, currency)} بالأسبوع) تصرفها على راحتك.',
           bucket: BudgetBucket.wants,
           monthlyAmount: wantsAmt,
           dailyAllowance: wantsDaily,
@@ -360,7 +365,7 @@ class PlanEngine {
           stepNumber: num++,
           titleAr: 'سداد الديون والأقساط',
           instructionAr:
-              'سدد ${ArabicFormatters.formatMoney(debtAmt, currency)} هذا الشهر لتخفف التزاماتك أسرع.',
+              'خصّص ${ArabicFormatters.formatMoney(debtAmt, currency)} هذا $periodWord لتخفف التزاماتك أسرع.',
           bucket: BudgetBucket.debts,
           monthlyAmount: debtAmt,
           dailyAllowance: null,

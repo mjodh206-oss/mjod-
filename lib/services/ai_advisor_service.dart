@@ -114,11 +114,13 @@ class AiAdvisorService {
   }) {
     String fmt(double v) => ArabicFormatters.formatMoney(v, currency);
 
+    final periodAr = profile.payFrequency.periodAr;
     final buf = StringBuffer()
       ..writeln('بيانات المستخدم الحالية:')
-      ..writeln('- الدخل الشهري: ${fmt(profile.totalMonthlyIncome)}')
-      ..writeln('- المتاح يومياً الآن حتى الراتب القادم: ${fmt(dailySafeSpend)} (باقي $daysLeft يوم)')
-      ..writeln('- الإيجار الشهري: ${profile.isRenting ? fmt(profile.rentAmount) : "لا يوجد إيجار"}')
+      ..writeln('- نظام الراتب: ${profile.payFrequency.labelAr}')
+      ..writeln('- الدخل كل $periodAr: ${fmt(profile.totalMonthlyIncome)}')
+      ..writeln('- المتاح يومياً الآن حتى القبضة الجاية: ${fmt(dailySafeSpend)} (باقي $daysLeft يوم)')
+      ..writeln('- حصة الإيجار في $periodAr: ${profile.isRenting ? fmt(profile.rentAmount) : "لا يوجد إيجار"}')
       ..writeln('- توزيع الخطة بالمبالغ:')
       ..writeln('  * البيت والأساسيات: ${fmt(splits[BudgetBucket.necessities] ?? 0)} (مصروف منها ${fmt(spentByBucket[BudgetBucket.necessities] ?? 0)})')
       ..writeln('  * مصروفك الشخصي: ${fmt(splits[BudgetBucket.wants] ?? 0)} (مصروف منها ${fmt(spentByBucket[BudgetBucket.wants] ?? 0)})')
@@ -128,9 +130,9 @@ class AiAdvisorService {
     final debtAmt = splits[BudgetBucket.debts] ?? 0;
     if (debtAmt > 0 || debts.isNotEmpty) {
       final totalDebt = debts.fold<double>(0.0, (s, d) => s + d.remainingBalance);
-      buf.writeln('  * الديون والأقساط: ${fmt(debtAmt)} شهرياً (إجمالي متبقي ${fmt(totalDebt)})');
+      buf.writeln('  * الديون والأقساط: ${fmt(debtAmt)} في $periodAr (إجمالي متبقي ${fmt(totalDebt)})');
     }
-    buf.writeln('- إجمالي ما صُرف هذا الشهر حتى الآن: ${fmt(totalSpentCycle)}');
+    buf.writeln('- إجمالي ما صُرف هذا $periodAr حتى الآن: ${fmt(totalSpentCycle)}');
     if (goals.isNotEmpty) {
       final g = goals.first;
       buf.writeln('- أقرب هدف ادخار: «${g.title}» (جمع ${fmt(g.savedAmount)} من ${fmt(g.targetAmount)})');
@@ -309,12 +311,15 @@ class AiAdvisorService {
       }
     }
 
+    final periodWord = profile.isWeekly ? 'الأسبوع' : 'الشهر';
     lines.add('خلاصة وضعك المالي الآن بالأرقام:');
     lines.add(
-      '1. أول ما ينزل الراتب: خبّي ${fmt(sav + emg)} للتوفير والطوارئ (تقدر توفّر ${fmt((sav + emg) * 12)} خلال سنة كاملة).',
+      '1. أول ما تقبض: خبّي ${fmt(sav + emg)} للتوفير والطوارئ (تقدر توفّر ${fmt((sav + emg) * profile.annualCycles)} خلال سنة كاملة).',
     );
     lines.add(
-      '2. مصروفك اليومي المريح الآن: ${fmt(dailySafeSpend)} باليوم (${fmt(dailySafeSpend * 7)} بالأسبوع) لمدة $days يوم لآخر الشهر.',
+      profile.isWeekly
+          ? '2. مصروفك اليومي المريح الآن: ${fmt(dailySafeSpend)} باليوم لمدة $days يوم حتى القبضة الأسبوعية الجاية.'
+          : '2. مصروفك اليومي المريح الآن: ${fmt(dailySafeSpend)} باليوم (${fmt(dailySafeSpend * 7)} بالأسبوع) لمدة $days يوم لآخر $periodWord.',
     );
 
     if (profile.isRenting &&
@@ -331,10 +336,11 @@ class AiAdvisorService {
     if (goals.isNotEmpty) {
       final g = goals.first;
       final needed = math.max(0.0, g.targetAmount - g.savedAmount);
-      final monthsNeeded = sav > 0 ? (needed / sav).ceil() : 0;
+      final cyclesNeeded = sav > 0 ? (needed / sav).ceil() : 0;
+      final unit = profile.isWeekly ? 'أسابيع' : 'أشهر';
       lines.add(
         sav > 0
-            ? '4. لهدف «${g.title}»: باقي له ${fmt(needed)}، وبوتيرة التوفير الحالية رح تحققه خلال نحو $monthsNeeded أشهر.'
+            ? '4. لهدف «${g.title}»: باقي له ${fmt(needed)}، وبوتيرة التوفير الحالية رح تحققه خلال نحو $cyclesNeeded $unit.'
             : '4. لهدف «${g.title}»: باقي له ${fmt(needed)}؛ ارفع التوفير ولو بمبلغ بسيط حتى تقترب منه.',
       );
     } else if (debts.isNotEmpty) {

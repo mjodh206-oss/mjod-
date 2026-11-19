@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/financial_tips_data.dart';
-import '../../core/utils/arabic_formatters.dart';
 import '../../state/app_controller.dart';
 import '../../widgets/quick_expense_sheet.dart';
 import '../expenses/expenses_screen.dart';
@@ -73,9 +72,7 @@ class _MainShellState extends State<MainShell> {
         final c = widget.controller;
         final theme = Theme.of(context);
         final profile = c.profile;
-        final daysLeft = profile != null
-            ? ArabicFormatters.daysUntilSalary(profile.salaryDay)
-            : 0;
+        final daysLeft = c.daysUntilSalary;
 
         final screens = [
           PlanScreen(controller: c),
@@ -112,7 +109,9 @@ class _MainShellState extends State<MainShell> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '$daysLeft يوم للراتب',
+                        profile.isWeekly
+                            ? '$daysLeft يوم للقبضة'
+                            : '$daysLeft يوم للراتب',
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 11,
@@ -140,20 +139,6 @@ class _MainShellState extends State<MainShell> {
               onPressed: c.toggleSound,
             ),
             actions: [
-              IconButton(
-                tooltip: c.settings.musicEnabled
-                    ? 'إيقاف الموسيقى الهادئة'
-                    : 'تشغيل الموسيقى الهادئة',
-                icon: Icon(
-                  c.settings.musicEnabled
-                      ? Icons.music_note_rounded
-                      : Icons.music_off_rounded,
-                  color: c.settings.musicEnabled
-                      ? theme.colorScheme.secondary
-                      : Colors.grey,
-                ),
-                onPressed: c.toggleMusic,
-              ),
               IconButton(
                 tooltip: c.settings.isDarkMode ? 'الوضع النهاري' : 'الوضع الليلي',
                 icon: Icon(

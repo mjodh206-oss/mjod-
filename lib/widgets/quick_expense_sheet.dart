@@ -240,34 +240,37 @@ class _QuickExpenseSheetState extends State<_QuickExpenseSheet> {
             Row(
               children: [
                 Text('اختر الفئة', style: theme.textTheme.titleMedium),
-                const Spacer(),
+                const SizedBox(width: 8),
                 if (plannedBucket > 0)
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (leftBucket >= 0
+                  Expanded(
+                    child: Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (leftBucket >= 0
+                                  ? bucketMeta.color
+                                  : const Color(0xFFDC2626))
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          leftBucket >= 0
+                              ? 'باقي بـ«${bucketMeta.titleAr}»: ${ArabicFormatters.formatMoney(leftBucket, currency)}'
+                              : 'تجاوزت بـ ${ArabicFormatters.formatMoney(leftBucket.abs(), currency)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: leftBucket >= 0
                                 ? bucketMeta.color
-                                : const Color(0xFFDC2626))
-                            .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        leftBucket >= 0
-                            ? 'باقي بـ«${bucketMeta.titleAr}»: ${ArabicFormatters.formatMoney(leftBucket, currency)}'
-                            : 'تجاوزت بـ ${ArabicFormatters.formatMoney(leftBucket.abs(), currency)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: leftBucket >= 0
-                              ? bucketMeta.color
-                              : const Color(0xFFDC2626),
+                                : const Color(0xFFDC2626),
+                          ),
                         ),
                       ),
                     ),

@@ -189,6 +189,11 @@ void main() {
     );
 
     expect(find.text('كم راتبك الشهري؟'), findsOneWidget);
+    expect(find.text('راتب شهري'), findsOneWidget);
+    expect(find.text('راتب أسبوعي'), findsOneWidget);
+    await tester.tap(find.text('راتب أسبوعي'));
+    await tester.pumpAndSettle();
+    expect(find.text('كم قبضتك الأسبوعية؟'), findsOneWidget);
     expect(find.text('احسب خطتي فوراً بدون أسئلة إضافية'), findsOneWidget);
   });
 
@@ -225,6 +230,10 @@ void main() {
         EnginePhase.sendSemanticsUpdate,
         const Duration(seconds: 15),
       );
+
+      // Music button must stay permanently removed from the main screen
+      expect(find.byIcon(Icons.music_note_rounded), findsNothing);
+      expect(find.byIcon(Icons.music_off_rounded), findsNothing);
 
       expect(find.text('راتبك الشهري'), findsOneWidget);
       expect(find.text('مسموح تصرف باليوم'), findsOneWidget);
@@ -310,7 +319,9 @@ void main() {
         250,
         scrollable: find.descendant(
           of: find.byType(ExpensesScreen),
-          matching: find.byType(Scrollable),
+          matching: find.byWidgetPredicate(
+            (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+          ),
         ),
       );
       expect(find.text('مقارنة بين الخطة والواقع'), findsOneWidget);
@@ -340,6 +351,62 @@ void main() {
         ),
       );
       expect(find.text('تصدير تقرير شهري PDF'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Weekly salary shows weekly plan, tracks remaining today, and repeats expense',
+    timeout: const Timeout(Duration(seconds: 30)),
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.5;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.runAsync(() async {
+        await controller.saveWizardProfile(
+          const SalaryProfile(
+            monthlySalary: 1400,
+            currencyCode: 'SYP',
+            payFrequency: PayFrequency.weekly,
+            weeklyPayWeekday: DateTime.thursday,
+          ),
+        );
+        await controller.addExpense(
+          amount: 50,
+          categoryId: 'food_grocery',
+          note: 'خبز وفطور',
+        );
+      });
+
+      await tester.pumpWidget(
+        RattibApp(
+          controller: controller,
+          homeOverride: MainShell(controller: controller),
+        ),
+      );
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 15),
+      );
+
+      expect(find.byIcon(Icons.music_note_rounded), findsNothing);
+      expect(find.byIcon(Icons.music_off_rounded), findsNothing);
+      expect(find.text('قبضتك الأسبوعية (كل الخميس)'), findsOneWidget);
+      expect(find.text('باقي لك مصروف لليوم'), findsOneWidget);
+      expect(find.text('تقسيم قبضة الأسبوع بالمصاري'), findsOneWidget);
+
+      await tester.tap(find.text('مصاريفي'));
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 15),
+      );
+      expect(find.text('مصروفك هالأسبوع حتى الآن'), findsOneWidget);
+      expect(find.text('تكرار بلمسة واحدة (بدون كتابة)'), findsOneWidget);
     },
   );
 }

@@ -30,6 +30,8 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
   bool _saving = false;
 
   late String _currencyCode;
+  PayFrequency _payFrequency = PayFrequency.monthly;
+  int _weeklyPayWeekday = DateTime.thursday;
   String _salaryDigits = '';
   bool _hasExtraIncome = false;
   final TextEditingController _extraCtrl = TextEditingController();
@@ -57,6 +59,8 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
     final existing = widget.controller.profile;
     if (existing != null) {
       _currencyCode = existing.currencyCode;
+      _payFrequency = existing.payFrequency;
+      _weeklyPayWeekday = existing.weeklyPayWeekday;
       _salaryDigits = existing.monthlySalary > 0
           ? existing.monthlySalary.toInt().toString()
           : '';
@@ -139,6 +143,18 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
 
   List<double> _quickSalaryPresets() {
     final s = _currency.sampleSalary;
+    if (_payFrequency == PayFrequency.weekly) {
+      if (s >= 1000000) {
+        return const [150000, 250000, 400000, 600000, 800000];
+      }
+      if (s >= 10000) {
+        return const [1500, 2500, 4000, 6000, 10000];
+      }
+      if (s >= 3000) {
+        return const [800, 1200, 2000, 3000, 5000];
+      }
+      return const [100, 150, 250, 400, 600];
+    }
     if (s >= 1000000) {
       return const [500000, 1000000, 1500000, 2000000, 3000000];
     }
@@ -156,7 +172,13 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
     if (_step == 0) {
       if (_parsedSalary <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('أدخل راتبك الشهري أولاً لنجهّز خطتك')),
+          SnackBar(
+            content: Text(
+              _payFrequency == PayFrequency.weekly
+                  ? 'أدخل قبضتك الأسبوعية أولاً لنجهّز خطتك'
+                  : 'أدخل راتبك الشهري أولاً لنجهّز خطتك',
+            ),
+          ),
         );
         return;
       }
@@ -169,7 +191,13 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
     } else {
       if (_isRenting && _parseCtrl(_rentCtrl) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('أدخل مبلغ الإيجار الشهري أو اختر بيت ملك')),
+          SnackBar(
+            content: Text(
+              _payFrequency == PayFrequency.weekly
+                  ? 'أدخل حصة الإيجار الأسبوعية أو اختر بيت ملك'
+                  : 'أدخل مبلغ الإيجار الشهري أو اختر بيت ملك',
+            ),
+          ),
         );
         return;
       }
@@ -207,6 +235,8 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
     final profile = SalaryProfile(
       monthlySalary: _parsedSalary,
       currencyCode: _currencyCode,
+      payFrequency: _payFrequency,
+      weeklyPayWeekday: _weeklyPayWeekday,
       extraIncome: _hasExtraIncome ? _parseCtrl(_extraCtrl) : 0,
       isRenting: _isRenting,
       rentAmount: _isRenting ? _parseCtrl(_rentCtrl) : 0,
@@ -391,20 +421,57 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
 
   Widget _buildSalaryStep(ThemeData theme) {
     final presets = _quickSalaryPresets();
+    final isWeekly = _payFrequency == PayFrequency.weekly;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
       children: [
         Text(
-          'كم راتبك الشهري؟',
+          isWeekly ? 'كم قبضتك الأسبوعية؟' : 'كم راتبك الشهري؟',
           style: theme.textTheme.headlineLarge,
         ),
         const SizedBox(height: 4),
         Text(
-          'اختر عملتك واضغط على الرقم التقريبي أو اكتبه بالأسفل',
+          'اختر طريقة قبضك وعملتك واضغط على الرقم التقريبي أو اكتبه',
           style: theme.textTheme.bodyMedium,
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
+
+        // Pay frequency toggle (Monthly vs Weekly)
+        Row(
+          children: [
+            Expanded(
+              child: ChoiceChip(
+                avatar: const Icon(Icons.calendar_month_rounded, size: 18),
+                label: const Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('راتب شهري'),
+                  ),
+                ),
+                selected: !isWeekly,
+                onSelected: (_) =>
+                    setState(() => _payFrequency = PayFrequency.monthly),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ChoiceChip(
+                avatar: const Icon(Icons.view_week_rounded, size: 18),
+                label: const Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('راتب أسبوعي'),
+                  ),
+                ),
+                selected: isWeekly,
+                onSelected: (_) =>
+                    setState(() => _payFrequency = PayFrequency.weekly),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
 
         // Currency Selector
         SizedBox(
@@ -425,11 +492,11 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
           ),
         ),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
 
         // Big Salary Display Box
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: const LinearGradient(
@@ -456,7 +523,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                'عملة الخطة: ${_currency.nameAr}',
+                '${_payFrequency.labelAr} · ${_currency.nameAr}',
                 style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 12.5,
@@ -607,8 +674,12 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
                   const SizedBox(height: 12),
                   _numberField(
                     controller: _rentCtrl,
-                    label: 'كم قيمة الإيجار الشهري؟',
-                    hint: 'مثال: 350000',
+                    label: _payFrequency == PayFrequency.weekly
+                        ? 'حصة الإيجار من قبضة الأسبوع'
+                        : 'كم قيمة الإيجار الشهري؟',
+                    hint: _payFrequency == PayFrequency.weekly
+                        ? 'لو شهري اقسمه على 4 واكتب الرقم'
+                        : 'مثال: 350000',
                     icon: Icons.apartment_rounded,
                   ),
                 ],
@@ -697,7 +768,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
 
         const SizedBox(height: 12),
 
-        // Payday picker
+        // Payday picker (Monthly day OR Weekly weekday)
         Card(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -706,25 +777,57 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
                 Icon(Icons.event_available_rounded,
                     color: theme.colorScheme.primary),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'يوم نزول الراتب بالشهر',
-                    style: TextStyle(
+                    _payFrequency == PayFrequency.weekly
+                        ? 'يوم القبض بالأسبوع'
+                        : 'يوم نزول الراتب بالشهر',
+                    style: const TextStyle(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                DropdownButton<int>(
-                  value: _salaryDay,
-                  underline: const SizedBox.shrink(),
-                  items: List.generate(28, (i) => i + 1)
-                      .map((d) => DropdownMenuItem(value: d, child: Text('يوم $d')))
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) setState(() => _salaryDay = v);
-                  },
-                ),
+                if (_payFrequency == PayFrequency.weekly)
+                  DropdownButton<int>(
+                    value: _weeklyPayWeekday,
+                    underline: const SizedBox.shrink(),
+                    items: const [
+                      DateTime.saturday,
+                      DateTime.sunday,
+                      DateTime.monday,
+                      DateTime.tuesday,
+                      DateTime.wednesday,
+                      DateTime.thursday,
+                      DateTime.friday,
+                    ]
+                        .map(
+                          (wd) => DropdownMenuItem(
+                            value: wd,
+                            child: Text(ArabicFormatters.weekdayNameAr(wd)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) setState(() => _weeklyPayWeekday = v);
+                    },
+                  )
+                else
+                  DropdownButton<int>(
+                    value: _salaryDay,
+                    underline: const SizedBox.shrink(),
+                    items: List.generate(28, (i) => i + 1)
+                        .map(
+                          (d) => DropdownMenuItem(
+                            value: d,
+                            child: Text('يوم $d'),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) setState(() => _salaryDay = v);
+                    },
+                  ),
               ],
             ),
           ),

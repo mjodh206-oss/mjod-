@@ -190,16 +190,20 @@ class _AdviceScreenState extends State<AdviceScreen> {
                     size: 24,
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'نصيحة اليوم',
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      color: Color(0xFFF5C443),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                  const Expanded(
+                    child: Text(
+                      'نصيحة اليوم',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: Color(0xFFF5C443),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Text(
                     ArabicFormatters.formatShortDate(DateTime.now()),
                     style: const TextStyle(

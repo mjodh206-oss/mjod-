@@ -47,7 +47,7 @@ class SoundService {
     try {
       final player = _ensureMusicPlayer();
       await player.setReleaseMode(ReleaseMode.loop);
-      await player.setVolume(0.22);
+      await player.setVolume(0.38);
       await player.play(AssetSource('sounds/ambient_soft.wav'));
       _isMusicPlaying = true;
     } catch (_) {

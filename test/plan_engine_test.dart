@@ -244,5 +244,47 @@ void main() {
       );
       expect(days, 5);
     });
+
+    test('weekly salary profile computes 7-day cycle, 52 annual cycles, and exact split', () {
+      const weeklyProfile = SalaryProfile(
+        monthlySalary: 1400,
+        currencyCode: 'SYP',
+        payFrequency: PayFrequency.weekly,
+        weeklyPayWeekday: DateTime.thursday,
+      );
+
+      // 2026-11-14 is a Saturday -> next Thursday is Nov 19 (5 days)
+      final daysLeft = ArabicFormatters.daysUntilPaydayForProfile(
+        weeklyProfile,
+        DateTime(2026, 11, 14),
+      );
+      expect(daysLeft, 5);
+
+      final cycleStart = ArabicFormatters.currentCycleStartForProfile(
+        weeklyProfile,
+        DateTime(2026, 11, 14),
+      );
+      expect(cycleStart, DateTime(2026, 11, 12)); // Previous Thursday
+
+      final roundTrip = SalaryProfile.fromJson(weeklyProfile.toJson());
+      expect(roundTrip.isWeekly, isTrue);
+      expect(roundTrip.weeklyPayWeekday, DateTime.thursday);
+      expect(roundTrip.annualCycles, 52);
+
+      final currency = AppCurrencies.byCode('SYP');
+      final plan = PlanEngine.generatePlan(weeklyProfile);
+      final splits = PlanEngine.exactMoneySplit(plan: plan, currency: currency);
+      final total = splits.values.fold<double>(0.0, (s, v) => s + v);
+      expect(total, 1400.0);
+
+      final steps = PlanEngine.buildSalaryActionPlan(
+        profile: weeklyProfile,
+        plan: plan,
+        spentByBucket: const {},
+        currency: currency,
+        daysLeft: daysLeft,
+      );
+      expect(steps.any((s) => s.instructionAr.contains('الأسبوع')), isTrue);
+    });
   });
 }

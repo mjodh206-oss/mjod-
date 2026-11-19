@@ -48,7 +48,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
     final c = widget.controller;
     final currency = c.currency;
-    final monthlySavingsCapacity = c.plan?.amountFor(BudgetBucket.savings) ?? 0;
+    final rawPlanSaving = c.plan?.amountFor(BudgetBucket.savings) ?? 0;
+    final monthlySavingsCapacity = (c.profile?.isWeekly ?? false)
+        ? rawPlanSaving * (52.0 / 12.0)
+        : rawPlanSaving;
 
     await showModalBottomSheet<void>(
       context: context,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/categories.dart';
 import '../../core/utils/arabic_formatters.dart';
+import '../../models/expense_item.dart';
 import '../../state/app_controller.dart';
 import '../../widgets/category_progress_bar.dart';
 import '../../widgets/quick_expense_sheet.dart';
@@ -52,7 +53,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
   List<SpendingBarPoint> _buildMonthlyPoints() {
     final p = widget.controller.profile;
-    final start = ArabicFormatters.currentSalaryCycleStart(p?.salaryDay ?? 1);
+    final start = p != null
+        ? ArabicFormatters.currentCycleStartForProfile(p)
+        : ArabicFormatters.currentSalaryCycleStart(1);
     final cycleExpenses = widget.controller.currentCycleExpenses;
     final buckets = [0.0, 0.0, 0.0, 0.0];
     for (final e in cycleExpenses) {
@@ -68,6 +71,22 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     ];
   }
 
+  List<ExpenseItem> _quickRepeatSuggestions(List<ExpenseItem> all) {
+    final seen = <String>{};
+    final out = <ExpenseItem>[];
+    for (final e in all) {
+      final title = e.note.isEmpty
+          ? AppCategories.categoryById(e.categoryId).nameAr
+          : e.note;
+      final key = '${e.categoryId}|$title|${e.amount.round()}';
+      if (seen.add(key)) {
+        out.add(e);
+        if (out.length >= 4) break;
+      }
+    }
+    return out;
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
@@ -75,10 +94,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     final currency = c.currency;
     final theme = Theme.of(context);
     final spentByBucket = c.spentByBucketCurrentCycle;
+    final isWeekly = c.profile?.isWeekly ?? false;
 
     final filteredExpenses = _selectedBucketFilter == null
         ? c.expenses
         : c.expenses.where((e) => e.bucket == _selectedBucketFilter).toList();
+    final repeatSuggestions = _quickRepeatSuggestions(c.expenses);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 116),
@@ -93,7 +114,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('مصروفك هالشهر حتى الآن', style: theme.textTheme.bodyMedium),
+                      Text(
+                        isWeekly
+                            ? 'مصروفك هالأسبوع حتى الآن'
+                            : 'مصروفك هالشهر حتى الآن',
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       const SizedBox(height: 2),
                       Text(
                         ArabicFormatters.formatMoney(
@@ -104,6 +130,16 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           color: theme.colorScheme.primary,
                         ),
                       ),
+                      if (c.spentToday > 0) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'صرفت اليوم: ${ArabicFormatters.formatMoney(c.spentToday, currency)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -120,6 +156,70 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             ),
           ),
         ),
+
+        if (repeatSuggestions.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.bolt_rounded,
+                        size: 18,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'تكرار بلمسة واحدة (بدون كتابة)',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 13.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: repeatSuggestions.map((e) {
+                      final cat = AppCategories.categoryById(e.categoryId);
+                      final title = e.note.isEmpty ? cat.nameAr : e.note;
+                      return ActionChip(
+                        avatar: Icon(cat.icon, size: 16, color: cat.color),
+                        label: Text(
+                          '$title · ${ArabicFormatters.formatCompactMoney(e.amount, currency)}',
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        onPressed: () async {
+                          await c.repeatExpense(e);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'تم تسجيل «$title» (${ArabicFormatters.formatMoney(e.amount, currency)})',
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
 
         const SizedBox(height: 12),
 
@@ -190,26 +290,24 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _isMonthlyReport
-                            ? 'التقرير الشهري (أسابيع الدورة)'
-                            : 'التقرير الأسبوعي (آخر 7 أيام)',
-                        style: theme.textTheme.titleMedium,
-                      ),
-                    ),
-                    SegmentedButton<bool>(
-                      segments: const [
-                        ButtonSegment(value: false, label: Text('أسبوعي')),
-                        ButtonSegment(value: true, label: Text('شهري')),
-                      ],
-                      selected: {_isMonthlyReport},
-                      onSelectionChanged: (s) =>
-                          setState(() => _isMonthlyReport = s.first),
-                    ),
-                  ],
+                Text(
+                  _isMonthlyReport
+                      ? 'التقرير الدوري (أسابيع الدورة)'
+                      : 'التقرير الأسبوعي (آخر 7 أيام)',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(value: false, label: Text('آخر 7 أيام')),
+                      ButtonSegment(value: true, label: Text('بالأسابيع')),
+                    ],
+                    selected: {_isMonthlyReport},
+                    onSelectionChanged: (s) =>
+                        setState(() => _isMonthlyReport = s.first),
+                  ),
                 ),
                 const SizedBox(height: 14),
                 SpendingTrendBarChart(
@@ -336,26 +434,50 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   title: Text(
                     e.note.isEmpty ? cat.nameAr : e.note,
                     style: theme.textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
-                    '${cat.nameAr} • ${ArabicFormatters.formatDateAr(e.createdAt)}',
+                    '${cat.nameAr} • ${ArabicFormatters.friendlyDayLabelAr(e.createdAt)}',
                     style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        ArabicFormatters.formatMoney(e.amount, currency),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: const Color(0xFFEF4444),
-                          fontWeight: FontWeight.w800,
+                  trailing: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 185),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            ArabicFormatters.formatMoney(e.amount, currency),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: const Color(0xFFEF4444),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, size: 20),
-                        onPressed: () => c.deleteExpense(e.id),
-                      ),
-                    ],
+                        IconButton(
+                          tooltip: 'كرّر اليوم',
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(
+                            Icons.replay_rounded,
+                            size: 19,
+                            color: theme.colorScheme.primary,
+                          ),
+                          onPressed: () => c.repeatExpense(e),
+                        ),
+                        IconButton(
+                          tooltip: 'حذف',
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            size: 19,
+                          ),
+                          onPressed: () => c.deleteExpense(e.id),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

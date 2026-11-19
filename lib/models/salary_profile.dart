@@ -5,6 +5,24 @@ enum PrimaryFinancialGoal {
   emergencyFund,
 }
 
+enum PayFrequency {
+  monthly,
+  weekly,
+}
+
+extension PayFrequencyX on PayFrequency {
+  String get labelAr =>
+      this == PayFrequency.weekly ? 'راتب أسبوعي' : 'راتب شهري';
+
+  String get shortAr => this == PayFrequency.weekly ? 'أسبوعي' : 'شهري';
+
+  String get periodAr => this == PayFrequency.weekly ? 'الأسبوع' : 'الشهر';
+
+  int get cycleDays => this == PayFrequency.weekly ? 7 : 30;
+
+  int get annualCycles => this == PayFrequency.weekly ? 52 : 12;
+}
+
 extension PrimaryFinancialGoalX on PrimaryFinancialGoal {
   String get labelAr {
     switch (this) {
@@ -24,6 +42,8 @@ class SalaryProfile {
   const SalaryProfile({
     required this.monthlySalary,
     required this.currencyCode,
+    this.payFrequency = PayFrequency.monthly,
+    this.weeklyPayWeekday = DateTime.thursday,
     this.extraIncome = 0,
     this.isRenting = false,
     this.rentAmount = 0,
@@ -43,6 +63,8 @@ class SalaryProfile {
 
   final double monthlySalary;
   final String currencyCode;
+  final PayFrequency payFrequency;
+  final int weeklyPayWeekday;
   final double extraIncome;
   final bool isRenting;
   final double rentAmount;
@@ -59,6 +81,12 @@ class SalaryProfile {
   final int salaryDay;
   final int billDueDay;
 
+  bool get isWeekly => payFrequency == PayFrequency.weekly;
+
+  int get cycleDays => payFrequency.cycleDays;
+
+  int get annualCycles => payFrequency.annualCycles;
+
   double get totalMonthlyIncome => monthlySalary + extraIncome;
 
   double get totalFixedNonDebt =>
@@ -72,6 +100,8 @@ class SalaryProfile {
   SalaryProfile copyWith({
     double? monthlySalary,
     String? currencyCode,
+    PayFrequency? payFrequency,
+    int? weeklyPayWeekday,
     double? extraIncome,
     bool? isRenting,
     double? rentAmount,
@@ -91,6 +121,8 @@ class SalaryProfile {
     return SalaryProfile(
       monthlySalary: monthlySalary ?? this.monthlySalary,
       currencyCode: currencyCode ?? this.currencyCode,
+      payFrequency: payFrequency ?? this.payFrequency,
+      weeklyPayWeekday: weeklyPayWeekday ?? this.weeklyPayWeekday,
       extraIncome: extraIncome ?? this.extraIncome,
       isRenting: isRenting ?? this.isRenting,
       rentAmount: rentAmount ?? this.rentAmount,
@@ -112,6 +144,8 @@ class SalaryProfile {
   Map<String, dynamic> toJson() => {
         'monthlySalary': monthlySalary,
         'currencyCode': currencyCode,
+        'payFrequency': payFrequency.name,
+        'weeklyPayWeekday': weeklyPayWeekday,
         'extraIncome': extraIncome,
         'isRenting': isRenting,
         'rentAmount': rentAmount,
@@ -133,6 +167,13 @@ class SalaryProfile {
     return SalaryProfile(
       monthlySalary: (json['monthlySalary'] as num?)?.toDouble() ?? 0,
       currencyCode: (json['currencyCode'] as String?) ?? 'SYP',
+      payFrequency: PayFrequency.values.firstWhere(
+        (f) => f.name == json['payFrequency'],
+        orElse: () => PayFrequency.monthly,
+      ),
+      weeklyPayWeekday:
+          ((json['weeklyPayWeekday'] as num?)?.toInt() ?? DateTime.thursday)
+              .clamp(1, 7),
       extraIncome: (json['extraIncome'] as num?)?.toDouble() ?? 0,
       isRenting: (json['isRenting'] as bool?) ?? false,
       rentAmount: (json['rentAmount'] as num?)?.toDouble() ?? 0,

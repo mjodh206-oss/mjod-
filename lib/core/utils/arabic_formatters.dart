@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import '../constants/currencies.dart';
+import '../../models/salary_profile.dart';
 
 class ArabicFormatters {
   ArabicFormatters._();
@@ -34,6 +35,19 @@ class ArabicFormatters {
     return formatMoney(value, currency);
   }
 
+  static String weekdayNameAr(int weekday) {
+    const names = [
+      'الإثنين',
+      'الثلاثاء',
+      'الأربعاء',
+      'الخميس',
+      'الجمعة',
+      'السبت',
+      'الأحد',
+    ];
+    return names[(weekday - 1).clamp(0, 6)];
+  }
+
   static String formatDateAr(DateTime date) {
     const months = [
       'كانون الثاني',
@@ -56,6 +70,16 @@ class ArabicFormatters {
     return '${date.day}/${date.month}';
   }
 
+  static String friendlyDayLabelAr(DateTime date, [DateTime? now]) {
+    final n = now ?? DateTime.now();
+    final today = DateTime(n.year, n.month, n.day);
+    final target = DateTime(date.year, date.month, date.day);
+    final diff = today.difference(target).inDays;
+    if (diff == 0) return 'اليوم';
+    if (diff == 1) return 'أمس';
+    return '${date.day}/${date.month}';
+  }
+
   static int daysUntilSalary(int salaryDay, [DateTime? now]) {
     final today = now ?? DateTime.now();
     final currentMonthDays = DateTime(today.year, today.month + 1, 0).day;
@@ -70,6 +94,12 @@ class ArabicFormatters {
     return nextPay.difference(todayOnly).inDays;
   }
 
+  static int daysUntilWeeklySalary(int targetWeekday, [DateTime? now]) {
+    final today = now ?? DateTime.now();
+    final diff = (targetWeekday - today.weekday + 7) % 7;
+    return diff == 0 ? 7 : diff;
+  }
+
   static DateTime currentSalaryCycleStart(int salaryDay, [DateTime? now]) {
     final today = now ?? DateTime.now();
     final currentMonthDays = DateTime(today.year, today.month + 1, 0).day;
@@ -82,5 +112,30 @@ class ArabicFormatters {
     final prevMonthDays = DateTime(today.year, today.month, 0).day;
     final clampedPrev = salaryDay.clamp(1, prevMonthDays);
     return DateTime(today.year, today.month - 1, clampedPrev);
+  }
+
+  static DateTime currentWeeklyCycleStart(
+    int targetWeekday, [
+    DateTime? now,
+  ]) {
+    final today = now ?? DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    final back = (todayOnly.weekday - targetWeekday + 7) % 7;
+    return todayOnly.subtract(Duration(days: back));
+  }
+
+  static int daysUntilPaydayForProfile(SalaryProfile profile, [DateTime? now]) {
+    return profile.isWeekly
+        ? daysUntilWeeklySalary(profile.weeklyPayWeekday, now)
+        : daysUntilSalary(profile.salaryDay, now);
+  }
+
+  static DateTime currentCycleStartForProfile(
+    SalaryProfile profile, [
+    DateTime? now,
+  ]) {
+    return profile.isWeekly
+        ? currentWeeklyCycleStart(profile.weeklyPayWeekday, now)
+        : currentSalaryCycleStart(profile.salaryDay, now);
   }
 }
