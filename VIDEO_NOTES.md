@@ -51,3 +51,22 @@ video works muted.
 
 **Part 2 signature:** statute ticks down both edges (`law_frame`) so the sequel is
 instantly recognisable as the same series but a different chapter.
+
+### Rebuild checklist (important)
+`build/` and `build2/` are git-ignored. If a build directory is missing, the render
+still succeeds but writes a **silent** video (no `mix.wav` to mux). Always run the
+audio builder first:
+
+    MJOD_EPISODE=1 python3 -m video.audio_build    # -> build/mix.wav
+    MJOD_EPISODE=1 python3 -m video.render         # 1080x1920 master, audio muxed
+
+    MJOD_EPISODE=2 python3 -m video.audio_build    # -> build2/mix.wav
+    MJOD_EPISODE=2 python3 -m video.render
+
+Then encode: hqdn3d → crf 22 preset slow → loudnorm I=-14 → 720p copy.
+
+### Delivery links (branch arena/94a71bdc-mjod)
+- `mjod_video.mp4` — part 1, 1:45.97, 1080x1920
+- `mjod_video_720p.mp4` — part 1 light copy
+- `mjod_video_p2.mp4` — part 2 «7 قوانين تحكم حياتك», 1:38.90
+- `mjod_video_p2_720p.mp4` — part 2 light copy
