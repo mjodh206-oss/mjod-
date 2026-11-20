@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">درع VPN</string>
+    <string name="tagline">اتصال آمن، بسرعة عالية.</string>
+    <string name="credits">تم تنفيذ وتطوير هذا التطبيق بواسطة أمجد حبيب</string>
+    <string name="status_disconnected">غير متصل</string>
+    <string name="status_connecting">جاري الاتصال...</string>
+    <string name="status_connected">متصل</string>
+    <string name="tab_arab">دول عربية</string>
+    <string name="tab_europe">دول أوروبية</string>
+</resources>

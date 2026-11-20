@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Daraa VPN</string>
+    <string name="tagline">Secure connection, high speed.</string>
+    <string name="credits">Developed and implemented by Amjad Habib</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_connecting">Connecting...</string>
+    <string name="status_connected">Connected</string>
+    <string name="tab_arab">Arab Countries</string>
+    <string name="tab_europe">European Countries</string>
+</resources>
