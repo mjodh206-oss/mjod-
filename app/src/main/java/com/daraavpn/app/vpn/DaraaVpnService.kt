@@ -70,7 +70,9 @@ class DaraaVpnService : VpnService() {
             val builder = Builder()
                 .setSession("DaraaVPN")
                 .addAddress("10.8.0.2", 24)
-                .addRoute("0.0.0.0", 0)
+                // Route only the virtual tunnel subnet until a real WireGuard server endpoint is configured,
+                // so the phone's internet connection is not blackholed.
+                .addRoute("10.8.0.0", 24)
                 .setMtu(1420)
 
             if (dnsProtection) {
