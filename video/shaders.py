@@ -387,11 +387,78 @@ def speed_lines(t, hot=(255, 210, 150), intensity=1.0, n=90, speed=2600.0):
     al = rng.uniform(0.25, 1.0, n)
     cx, cy = W / 2, H * 0.5
     for i in range(n):
-        p = (rad[i] + t * speed / 1200.0 * (0.5 + rad[i])) % 1.15
-        r0 = p * W * 0.9
+        pr = (rad[i] + t * speed / 1200.0 * (0.5 + rad[i])) % 1.15
+        r0 = pr * W * 0.9
         x0, y0 = cx + math.cos(ang[i]) * r0, cy + math.sin(ang[i]) * r0
         x1, y1 = cx + math.cos(ang[i]) * (r0 + ln[i]), cy + math.sin(ang[i]) * (r0 + ln[i])
-        fade = min(1.0, p * 1.6) * (1 - max(0.0, p - 0.75) / 0.4)
-        cv2.line(out, (int(x0), int(y0)), (int(x1), int(y1)), float(al[i] * 0.20 * max(0, fade)), 2, cv2.LINE_AA)
+        fade = min(1.0, pr * 1.6) * (1 - max(0.0, pr - 0.75) / 0.4)
+        cv2.line(out, (int(x0), int(y0)), (int(x1), int(y1)),
+                 float(al[i] * 0.20 * max(0.0, fade)), 2, cv2.LINE_AA)
     out = cv2.GaussianBlur(out, (0, 0), 0.7)
     return out[..., None] * np.array(hot, np.float32)[None, None, :] * intensity
+
+
+# ------------------------------------------------------------------ 17. clock face
+def clock(t, hot=(255, 220, 170), intensity=1.0, hour_ang=None, minute_ang=None,
+          cy=0.42, R=330):
+    """Procedural clock face — dial, ticks, sweeping hands.
+
+    Drawn as a mask then blurred, so it reads as etched light rather than a
+    cartoon icon. Used for the part-4 re-hook ("half your life").
+    """
+    g = np.zeros((H, W), np.float32)
+    cx, yc = W // 2, int(H * cy)
+    cv2.circle(g, (cx, yc), R, 0.55, 3, cv2.LINE_AA)
+    cv2.circle(g, (cx, yc), R - 16, 0.22, 1, cv2.LINE_AA)
+    for i in range(60):
+        a = i / 60 * 2 * math.pi - math.pi / 2
+        big = i % 5 == 0
+        r0 = R - (34 if big else 20)
+        r1 = R - 6
+        cv2.line(g, (int(cx + math.cos(a) * r0), int(yc + math.sin(a) * r0)),
+                 (int(cx + math.cos(a) * r1), int(yc + math.sin(a) * r1)),
+                 0.9 if big else 0.35, 6 if big else 2, cv2.LINE_AA)
+    ha = (hour_ang if hour_ang is not None else t * 0.15) - math.pi / 2
+    ma = (minute_ang if minute_ang is not None else t * 1.8) - math.pi / 2
+    cv2.line(g, (cx, yc), (int(cx + math.cos(ha) * R * 0.5), int(yc + math.sin(ha) * R * 0.5)),
+             1.0, 16, cv2.LINE_AA)
+    cv2.line(g, (cx, yc), (int(cx + math.cos(ma) * R * 0.78), int(yc + math.sin(ma) * R * 0.78)),
+             1.0, 9, cv2.LINE_AA)
+    cv2.circle(g, (cx, yc), 14, 1.0, -1, cv2.LINE_AA)
+    soft = cv2.GaussianBlur(g, (0, 0), 2.2)
+    halo = cv2.GaussianBlur(cv2.resize(g, (W // 3, H // 3)), (0, 0), 12)
+    halo = cv2.resize(halo, (W, H))
+    img = (soft * 0.85 + halo * 0.55) * intensity
+    return img[..., None] * np.array(hot, np.float32)
+
+
+# ------------------------------------------------------------------ 18. hand / mirror
+def mirror(t, hot=(255, 210, 190), intensity=1.0, open_amt=0.0):
+    """A vertical mirror plane that splits the frame into two worlds.
+
+    Left half is dark, right half is a bright reflection, separated by a
+    razor-thin seam that catches light — the part-4 "you in the mirror" beat.
+    """
+    w, h = W // 4, H // 4
+    xs, ys = _grid(w, h)
+    seam = 0.5 + 0.06 * math.sin(t * 0.7)
+    d = xs - seam
+    left = np.clip(-d * 26, 0, 1) ** 0.6
+    right = np.clip(d * 26, 0, 1) ** 0.6
+    glow = np.exp(-(d * 60) ** 2) * 2.2
+    f = fbm(xs * 5 + t * 0.12, ys * 5, 3, 11)
+    v = (right * (0.35 + 0.9 * f) + left * 0.05 + glow) * intensity
+    return _finish(v, hot)
+
+
+# ------------------------------------------------------------------ 19. radial pulse
+def radial_pulse(t, hot=(255, 200, 140), intensity=1.0, cx=0.5, cy=0.42):
+    """Breathing radial light behind a dial — gives a static face a heartbeat."""
+    w, h = W // 4, H // 4
+    xs, ys = _grid(w, h)
+    dx = (xs - cx) * (W / H)
+    dy = ys - cy
+    r = np.sqrt(dx * dx + dy * dy) + 1e-4
+    b = 0.5 + 0.5 * np.sin(t * 2.2 - r * 9.0)
+    v = np.exp(-r * 3.4) * (0.45 + 0.75 * b) * intensity
+    return _finish(v, hot)

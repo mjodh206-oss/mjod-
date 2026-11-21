@@ -77,12 +77,18 @@ def build_sections(tips=None, hook_vo="vo_00_hook", outro_vo="vo_08_outro"):
         vo_end=hook_start + hook_dur, end=hook_start + hook_dur + 0.20,
         segs=hook_segs, dur=hook_dur)
     t = hook_start + hook_dur + 0.20
+    reh = EP.get("rehook")
     for tip in (tips or []):
         d, segs = clip(tip["vo"])
         vs = t + LEAD_IN
         add(kind="tip", idx=tip["n"], start=t, vo_start=vs, vo_end=vs + d,
             end=vs + d + LEAD_OUT, segs=segs, dur=d, **tip)
         t = vs + d + LEAD_OUT
+        # mid-roll pattern interrupt: a 2.6 s beat with no voice at all
+        if reh and tip["n"] == int(reh.get("at", "m4")[1:]):
+            add(kind="rehook", idx=0, vo="", start=t, vo_start=t,
+                vo_end=t, end=t + float(reh.get("dur", 2.6)), segs=[], dur=0.0)
+            t += float(reh.get("dur", 2.6))
     out_d, out_segs = clip(outro_vo)
     add(kind="outro", idx=len(tips or []) + 1, vo=outro_vo, start=t,
         vo_start=t + LEAD_IN, vo_end=t + LEAD_IN + out_d,

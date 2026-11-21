@@ -305,7 +305,8 @@ def score(total, sections, bpm=88, chords=None, sub=1.0):
         intensity = 0.45
         for s in sections:
             if s["start"] - 0.2 <= t0 < s["end"]:
-                intensity = {"hook": 0.75, "tip": 0.55, "outro": 0.95}[s["kind"]]
+                intensity = {"hook": 0.75, "tip": 0.55, "outro": 0.95,
+                             "rehook": 0.30}[s["kind"]]
                 if s.get("idx") == 7:
                     intensity = 1.0
         cut = 900 + 2400 * intensity
@@ -332,6 +333,8 @@ def score(total, sections, bpm=88, chords=None, sub=1.0):
     # --- pulse: 8th-note plucks, denser in hotter sections
     for s in sections:
         dens = 0.5 if s["kind"] == "hook" else (1.0 if s["kind"] == "outro" else 2.0)
+        if s["kind"] == "rehook":
+            dens = 1.0
         if s["kind"] == "tip" and s["idx"] >= 5:
             dens = 2.0
         tt = s["start"]
@@ -365,6 +368,8 @@ def build(path_vo=None, out=None):
     n = int(total * SR) + SR * 2
     vo = np.zeros(n, np.float32)
     for s in SECTIONS:
+        if not s.get("vo"):
+            continue                      # silent sections (the mid-roll re-hook)
         fn = os.path.join(path_vo, prefix + "_" + s["vo"].replace("vo_", "") + ".wav")
         if not os.path.exists(fn):
             fn = os.path.join(path_vo, s["vo"] + ".wav")
@@ -406,6 +411,13 @@ def build(path_vo=None, out=None):
     add(riser(2.2, 90, 3000, 2.4), TRUTH["start"] + 1.05, 0.28)
     add(impact(3.0, 1.7), TRUTH["start"] + 0.05, 0.75)
     add(glass_shimmer(1.8), TRUTH["start"] + 0.25, 0.12, 0.3)
+    # re-hook: hard silence + one sub drop (the ear notices the absence)
+    for s in SECTIONS:
+        if s["kind"] != "rehook":
+            continue
+        add(impact(3.0, 1.9), s["start"] + 0.02, 0.9, 0.0)
+        add(whoosh(0.55, 90, 3000), s["start"] - 0.10, 0.30, -0.2)
+        add(riser_strings(1.5, (73, 110, 147, 220)), s["start"] + 0.55, 0.30)
     # outro: crowd swell + final hit
     outro = [s for s in SECTIONS if s["kind"] == "outro"][0]
     add(crowd_swell(2.4), outro["vo_end"] - 0.2, 0.14)
@@ -477,6 +489,8 @@ def build_voice_only(out=None):
     n = int(TOTAL * SR) + SR * 2
     vo = np.zeros(n, np.float32)
     for s in SECTIONS:
+        if not s.get("vo"):
+            continue
         fn = os.path.join(EP["voice_dir"], EP["prefix"] + "_" + s["vo"].replace("vo_", "") + ".wav")
         if not os.path.exists(fn):
             fn = os.path.join(EP["voice_dir"], s["vo"] + ".wav")

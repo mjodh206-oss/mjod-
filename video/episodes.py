@@ -202,7 +202,81 @@ P3 = dict(
     ],
 )
 
-EPISODES = {"1": P1, "2": P2, "3": P3}
+P4 = dict(
+    key="p4",
+    num="4",
+    title="7 أشياء تسرق عمرك",
+    short="7 سارقات",
+    top_label="7 أشياء تسرق عمرك",
+    analysis="voice/analysis_p4.json",
+    voice_dir="voice",
+    prefix="p4_vo",
+    build="build4",
+    out="mjod_video_p4.mp4",
+    mood=3,
+    music=0.105,     # even lower than part 3: retention edit, voice owns the mix
+    duck=0.82,
+    hook_vo="vo_00_hook",
+    outro_vo="vo_08_outro",
+    hook_words="سبعة أشياء تسرق عمرك الآن ليست أعداءك ولا حظك إنها عادات في يومك العادي والسابع أنت في المرآة".split(),
+    hook_label="7 أشياء تسرق عمرك",
+    hook_beats=[
+        ("سبعة أشياء", "beat1", 215),
+        ("تسرق عمرك", "beat2", 185),
+        ("الآن", "beat3", 150),
+        ("ليست أعداءك", "sub", 66),
+        ("ولا حظك", "sub2", 66),
+        ("والسابع؟", "beat4", 190),
+        ("أنت في المرآة", "beat5", 120),
+    ],
+    rehook=dict(
+        at="m4",
+        big="نصف عمرك",
+        small="يمرّ وأنت تنتظر",
+        who="الوقت",
+        who_en="THE CLOCK · NOW",
+    ),
+    outro=dict(
+        title="كل واحد يسرق يوماً",
+        l2="ارجع للثانية الأولى… وعدّها",
+        l3="كم مرة فعلتها اليوم؟",
+        cta="أمِسك بواحد",
+        comment="اكتب في التعليقات: الشيء الذي سأسحبه من حياتي",
+        follow="تابع للجزء الخامس",
+    ),
+    tips=[
+        dict(n=1, vo="vo_01_phone", who="الهاتف", who_en="THE PHONE · 4H/DAY",
+             quote="أربع ساعات يومياً", quote2="ست سنوات من عمرك",
+             words="الأول هاتفك أربع ساعات يوميا تعني ست سنوات من عمرك".split(),
+             col=((190, 220, 255), (70, 150, 255)), bg=0.38, look="tunnel_blue"),
+        dict(n=2, vo="vo_02_timing", who="انتظار اللحظة", who_en="THE PERFECT MOMENT",
+             quote="اللحظة المناسبة لا تأتي", quote2="لأنها ليست موعداً… بل قرار",
+             words="الثاني انتظار اللحظة المناسبة وهي لا تأتي أبدا لأنها ليست موعدا".split(),
+             col=((255, 226, 170), (255, 180, 60)), bg=0.36, look="energy"),
+        dict(n=3, vo="vo_03_people", who="أشخاص لا يرونك", who_en="THEY DON'T SEE YOU",
+             quote="كل يوم معهم", quote2="خصمٌ من قيمتك",
+             words="الثالث أشخاص لا يرونك كل يوم معهم خصم من قيمتك".split(),
+             col=((255, 200, 210), (255, 80, 110)), bg=0.34, look="orbs"),
+        dict(n=4, vo="vo_04_perfect", who="الكمالية", who_en="PERFECTIONISM",
+             quote="تخطط عاماً كاملاً", quote2="ولا تبدأ دقيقة واحدة",
+             words="الرابع الكمالية تخطط عاما كاملا ولا تبدأ دقيقة واحدة".split(),
+             col=((255, 240, 200), (255, 205, 90)), bg=0.34, look="shards"),
+        dict(n=5, vo="vo_05_anger", who="الغضب الصامت", who_en="SILENT ANGER",
+             quote="ظلمك مرة", quote2="تسكنه في رأسك سنوات",
+             words="الخامس الغضب الصامت من ظلمك مرة تسكنه في رأسك سنوات".split(),
+             col=((255, 170, 120), (255, 60, 20)), bg=0.40, look="vortex"),
+        dict(n=6, vo="vo_06_compare", who="المقارنة", who_en="COMPARISON",
+             quote="تقيس بدايتك", quote2="بنهاية غيرك",
+             words="السادس المقارنة تقيس بدايتك بنهاية غيرك".split(),
+             col=((205, 225, 255), (110, 120, 255)), bg=0.32, look="nebula"),
+        dict(n=7, vo="vo_07_you", who="أنت", who_en="THE MIRROR · YOU",
+             quote="تنتظر من يدفعك", quote2="وأنت الجالس على مقعدك",
+             words="والسابع أنت تنتظر من يدفعك وأنت الجالس على مقعدك".split(),
+             col=((255, 236, 224), (255, 70, 30)), bg=0.42, look="tunnel_hot"),
+    ],
+)
+
+EPISODES = {"1": P1, "2": P2, "3": P3, "4": P4}
 
 
 def get(key=None):
