@@ -4,3 +4,7 @@ build/
 build2/
 __pycache__/
 *.pyc
+
+build3/
+testlook/
+ffmpeg

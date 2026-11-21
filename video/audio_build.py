@@ -262,10 +262,19 @@ CHORDS = [
     (98.00,  [196.00, 246.94, 293.66]),   # G
 ]
 
+# part 3 is a different film: minor, slower, more menacing
+CHORDS_P3 = [
+    (73.42,  [146.83, 174.61, 220.00]),   # Dm
+    (58.27,  [116.54, 146.83, 174.61]),   # Bb
+    (87.31,  [174.61, 220.00, 261.63]),   # F
+    (65.41,  [130.81, 164.81, 196.00]),   # C
+]
 
-def score(total, sections, bpm=88):
+
+def score(total, sections, bpm=88, chords=None, sub=1.0):
     """Adaptive bed: pads + drone + pulse + plucks, intensity follows sections."""
     n = int(total * SR) + SR
+    chords = chords or CHORDS
     bed = np.zeros((n, 2), np.float32)
     beat = 60.0 / bpm
     bar = beat * 4
@@ -292,7 +301,7 @@ def score(total, sections, bpm=88):
     t0 = 0.0
     bar_i = 0
     while t0 < total:
-        root, notes = CHORDS[bar_i % 4]
+        root, notes = chords[bar_i % 4]
         intensity = 0.45
         for s in sections:
             if s["start"] - 0.2 <= t0 < s["end"]:
@@ -317,7 +326,7 @@ def score(total, sections, bpm=88):
         seg = min(8.0, total - k * 8.0)
         if seg <= 0.3:
             break
-        d = drone(seg + 1.4, root=CHORDS[(k * 2) % 4][0] / 2, cut=300, motion=True)
+        d = drone(seg + 1.4, root=chords[(k * 2) % 4][0] / 2, cut=300, motion=True)
         place(d, k * 8.0 - 0.7, 0.26, pan=0.0)
 
     # --- pulse: 8th-note plucks, denser in hotter sections
@@ -328,7 +337,7 @@ def score(total, sections, bpm=88):
         tt = s["start"]
         k = 0
         while tt < s["end"] - 0.2:
-            root, notes = CHORDS[int(tt / bar) % 4]
+            root, notes = chords[int(tt / bar) % 4]
             strong = (k % 4 == 0)
             if strong:
                 place(pulse_note(root, 0.34, 0.22), tt, 0.34, 0.0)
@@ -404,20 +413,24 @@ def build(path_vo=None, out=None):
     add(riser_strings(2.2, (110, 165, 220, 330)), outro["vo_end"] + 0.05, 0.22)
 
     sfx /= (np.abs(sfx).max() + 1e-9)
-    music = score(total, SECTIONS)
+    _mood = EP.get("mood", 1)
+    music = score(total, SECTIONS, bpm=80 if _mood == 3 else 88,
+                  chords=CHORDS_P3 if _mood == 3 else CHORDS)
     music /= (np.abs(music).max() + 1e-9)
 
-    # -------- ducking (music follows the voice) --------
+    # -------- ducking (music follows the voice)
+    duck_depth = float(EP.get("duck", 0.62))
     win = int(0.02 * SR)
     vseg = np.abs(vo[: len(music)])
     vseg = vseg[: len(vseg) // win * win].reshape(-1, win).max(1)
 
     env = np.convolve(vseg, np.ones(9) / 9, mode="same")
     env = np.interp(np.arange(len(music)), np.arange(len(vseg)) * win, vseg)
-    duck = 1.0 - 0.62 * np.clip(env / (env.max() + 1e-9) * 3.2, 0, 1)
+    duck = 1.0 - duck_depth * np.clip(env / (env.max() + 1e-9) * 3.2, 0, 1)
     duck = np.convolve(duck, np.ones(int(0.12 * SR)) / int(0.12 * SR), mode="same")
     sfx = sfx[: len(music)]
-    mix = music * (0.34 * duck)[:, None]
+    bed = float(EP.get("music", 0.34))      # <- per-episode music level
+    mix = music * (bed * duck)[:, None]
     mix[:, 0] += sfx * 0.70
     mix[:, 1] += sfx * 0.70
     # voice: gentle compression + presence EQ + short stereo ambience
