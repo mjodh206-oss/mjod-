@@ -220,3 +220,79 @@ Music: `music=0.105`, `duck=0.82` (parts 1–2 are 0.34 / 0.62), mood Dm–Bb–
 | `mjod_video_p4_720p.mp4` | light copy |
 | `poster_p4.jpg` | cover (frame 0.45 s) |
 | `audio/p4/vo_*.mp3` · `voice/p4_vo_*.wav` · `voice/analysis_p4.json` | voice + sync data |
+
+---
+
+# Part 5 — «سبع حقائق مرة» (7 bitter truths)
+
+Part 5 is **not** a reskin of parts 1–4. The neon-on-black series is gone; the
+identity is now **brutalist editorial print**: warm paper stock, black ink,
+one red spot colour, halftone dots, torn edges, ink masses. It reads like a
+risograph poster that moves, which is a language the vertical feed does not
+already have.
+
+## Why the identity changed
+Parts 1–4 all share glowing neon type on black. By part 4 the format was the
+brand — and also the ceiling: the feed is saturated with exactly that look.
+Switching to paper/ink/red does three things at once: it looks unlike anything
+else in the feed, it makes the *words* the loudest element (no glow competing),
+and it is cheap to render at high detail, so we can afford more texture.
+
+## Voice
+A new TTS voice (`voice-02`, masculine Arabic narration) replaces the one used
+in parts 1–4; the whole read is time-warped 1.09× so the delivery sits forward
+and slightly impatient. VO total 68.3 s.
+
+## The hook (0 → 12.7 s, five cuts)
+Every cut lands on a measured word onset, not on a round number:
+
+| t | cut | content |
+|---|---|---|
+| 0.00 | A | black, «لا أحد» punches in at scale 1.16 → 1.0 |
+| 1.30 | B | paper: Anton «7» at 660 px, red rules, «سبع حقائق» + red «مرة» |
+| 4.0 | C | torn page: «لا أحد يريد / أن يسمعها» (red) + «وهذا سبب أنك تحتاجها» |
+| 6.28 | D | solid red, ghost «7», «والسابعة» + «الحقيقة التي تكسر الباقي» |
+| 8.21 | E | red field + halftone: «ستكسر / كل ما تعرفه / عن نفسك» |
+
+Five distinct visual systems before 8 s, and the first frame is already type —
+no logo, no intro, no fade from black longer than 0.14 s.
+
+## The seven truths
+1. لا أحد قادم — paper · «لا منقذ»
+2. موهبتك لا تعني شيئاً — ink slab · «يُحسب لك»
+3. لن يهتم أحد — halftone · «اثنان بالمئة»
+4. الراحة تقتل — paper · «كل ما تجتنبه»
+5. الحياة ليست عادلة — torn · «اشتكِ دقيقة»
+6. ماضيك لا يهم — halftone · «الحقيقة القادمة»
+7. أنت السبب / وأنت الحل — ink slab
+
+Card grid: folio + red rule at 0.145, number (Anton 240 px) at 0.245, name at
+0.335, hairlines at 0.398/0.648, red quote band at 0.472, second quote at 0.585,
+captions at 0.815, progress rule at 0.885. The middle band also carries three
+red ticks and a rotated «الجزء الخامس» folio so no card has a dead area.
+
+## Re-hook
+At 36.7 s the voice **stops completely** for 2.6 s. Only a sub-drop and a
+riser play, over an ink plate with «اثنان بالمئة» — «فقط سيصفقون لك». Removing
+the voice mid-video is the cheapest retention interrupt available, and it
+re-arms the next four truths.
+
+## Sound
+- `paper_rip` (0.42 s, band-limited noise sweep) and `shutter` (0.14 s click)
+  fire on every section start — the paper identity is audible, not just visible
+- mood 5: F#m–D–A–E at 76 bpm, `music=0.10`, `duck=0.84` (part 4 was 0.105/0.82)
+- SFX still sit above music everywhere; the voice never competes
+
+## Render
+```bash
+MJOD_EPISODE=5 python3 -m video.audio_build   # -> build5/mix.wav
+MJOD_EPISODE=5 python3 -m video.render_p5      # -> mjod_video_p5.mp4
+MJOD_EPISODE=5 python3 -m video.preview5 0.4 2.6 7.0 37.0
+```
+
+| file | what |
+|---|---|
+| `mjod_video_p5.mp4` | master 1:16.00, 1080×1920, AAC 192k |
+| `mjod_video_p5_720p.mp4` | light copy |
+| `poster_p5.jpg` | cover (frame 0.45 s) |
+| `audio/p5/vo_*.mp3` · `voice/p5_vo_*.wav` · `voice/analysis_p5.json` | voice + sync data |

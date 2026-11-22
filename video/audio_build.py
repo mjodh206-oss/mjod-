@@ -198,6 +198,38 @@ def drone(dur, root=55, cut=520, motion=True):
     return x / (np.abs(x).max() + 1e-9)
 
 
+def paper_rip(dur=0.42):
+    """Tearing paper: burst-noise with a rising crackle — the part-5 cut sound."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    nz = rng.normal(0, 1, n)
+    body = bandpass(nz, 900, 7200) * np.exp(-t * 12)
+    crackle = np.zeros(n)
+    for i in range(26):
+        p0 = int((i / 26.0) ** 1.4 * n * 0.85)
+        w = max(1, int(0.004 * SR))
+        if p0 + w < n:
+            crackle[p0:p0 + w] += rng.normal(0, 1, w) * (1.0 - i / 30.0)
+    crackle = highpass(crackle, 1800) * 0.8
+    x = body * 0.9 + crackle
+    x *= (1 - np.abs(t / dur - 0.55) * 0.9)
+    return x / (np.abs(x).max() + 1e-9)
+
+
+def shutter(dur=0.14):
+    """Camera-shutter click: two tight transients, very dry."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    a = np.zeros(n)
+    a[:int(0.02 * SR)] = rng.normal(0, 1, int(0.02 * SR))
+    b = np.zeros(n)
+    o = int(0.055 * SR)
+    if o < n:
+        b[o:o + int(0.02 * SR)] = rng.normal(0, 1, min(int(0.02 * SR), n - o))
+    x = bandpass(a + b * 0.7, 1600, 9000) * np.exp(-t * 26)
+    return x / (np.abs(x).max() + 1e-9)
+
+
 def heartbeat(dur=1.0):
     n = int(dur * SR)
     t = np.arange(n) / SR
@@ -268,6 +300,15 @@ CHORDS_P3 = [
     (58.27,  [116.54, 146.83, 174.61]),   # Bb
     (87.31,  [174.61, 220.00, 261.63]),   # F
     (65.41,  [130.81, 164.81, 196.00]),   # C
+]
+
+
+# part 5 is the most cinematic bed: F#m - D - A - E, slow, wide
+CHORDS_P5 = [
+    (92.50,  [185.00, 220.00, 277.18]),   # F#m
+    (73.42,  [146.83, 185.00, 220.00]),   # D
+    (110.00, [220.00, 277.18, 329.63]),   # A
+    (82.41,  [164.81, 207.65, 246.94]),   # E
 ]
 
 
@@ -395,8 +436,12 @@ def build(path_vo=None, out=None):
 
     add(whoosh(1.0, 120, 4200), 0.06, 0.55, 0.0)
     add(impact(2.6, 1.6), 0.0, 0.85, 0.0)
+    _editorial = int(EP.get("mood", 1)) == 5
     for s in SECTIONS:
         add(impact(2.2, 1.35), s["start"] + 0.02, 0.62, 0.0)
+        if _editorial:
+            add(paper_rip(0.40), s["start"] + 0.01, 0.34, -0.3)
+            add(shutter(0.14), s["start"] + 0.06, 0.30, 0.25)
         add(whoosh(0.7, 260, 5600), s["start"] - 0.22, 0.28, -0.25)
         add(whoosh(0.75, 260, 5200), s["start"] + 0.02, 0.16, 0.3)
     # number slams
@@ -426,8 +471,12 @@ def build(path_vo=None, out=None):
 
     sfx /= (np.abs(sfx).max() + 1e-9)
     _mood = EP.get("mood", 1)
-    music = score(total, SECTIONS, bpm=80 if _mood == 3 else 88,
-                  chords=CHORDS_P3 if _mood == 3 else CHORDS)
+    if _mood == 5:
+        music = score(total, SECTIONS, bpm=76, chords=CHORDS_P5)
+    elif _mood == 3:
+        music = score(total, SECTIONS, bpm=80, chords=CHORDS_P3)
+    else:
+        music = score(total, SECTIONS, bpm=88, chords=CHORDS)
     music /= (np.abs(music).max() + 1e-9)
 
     # -------- ducking (music follows the voice)

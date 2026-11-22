@@ -12,8 +12,8 @@ EP = _get_ep()
 VO_ANALYSIS = EP["analysis"]
 BUILD_DIR = EP["build"]
 SPEED = 1.0           # VO already time-warped with atempo 1.09 (build/vo)
-LEAD_IN = 0.38        # beat before a section's voice starts
-LEAD_OUT = 0.24       # beat after it ends
+LEAD_IN = float(EP.get("lead_in", 0.38))    # beat before a section's voice starts
+LEAD_OUT = float(EP.get("lead_out", 0.24))  # beat after it ends
 HOOK_PRE = 0.28
 EPISODE = int(EP["num"])
 
@@ -64,7 +64,7 @@ TIPS = [
 ]
 
 # ------------------------------------------------------------------ build
-END_HOLD = 2.2
+END_HOLD = float(EP.get("end_hold", 2.2))
 
 
 def build_sections(tips=None, hook_vo="vo_00_hook", outro_vo="vo_08_outro"):

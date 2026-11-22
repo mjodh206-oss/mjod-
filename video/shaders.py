@@ -462,3 +462,97 @@ def radial_pulse(t, hot=(255, 200, 140), intensity=1.0, cx=0.5, cy=0.42):
     b = 0.5 + 0.5 * np.sin(t * 2.2 - r * 9.0)
     v = np.exp(-r * 3.4) * (0.45 + 0.75 * b) * intensity
     return _finish(v, hot)
+
+
+# ==================================================================
+# Part-5 style: brutalist editorial. These are *inverted* plates —
+# white paper, hard ink, torn edges — so the series changes identity
+# instead of looking like another episode.
+# ==================================================================
+def paper(t, intensity=1.0, seed=71, grain=0.045, vig=0.55):
+    """Off-white paper stock with fibre grain and a slow breathing exposure."""
+    w, h = W // 3, H // 3
+    xs, ys = _grid(w, h)
+    f = fbm(xs * 22 + t * 0.05, ys * 22, 3, seed)
+    f2 = fbm(xs * 90, ys * 90, 2, seed + 3)
+    base = 236.0 + 12.0 * (f - 0.5) + 8.0 * (f2 - 0.5)
+    base *= 1.0 - vig * (((xs - 0.5) ** 2 * 0.9 + (ys - 0.5) ** 2) * 1.5)
+    base *= intensity * (1.0 + 0.012 * math.sin(t * 0.8))
+    img = np.clip(base, 0, 255)[..., None]
+    out = np.repeat(img, 3, axis=2)
+    out = _up(out, interp=cv2.INTER_LINEAR)
+    # static fibre grain at full res (cheap, and it kills the "flat fill" look)
+    rng = np.random.default_rng(seed + int(t * 24) % 97)
+    n = rng.normal(0, 1, (H // 2, W // 2)).astype(np.float32)
+    n = cv2.resize(n, (W, H), interpolation=cv2.INTER_LINEAR) * (255 * grain)
+    return out + n[..., None]
+
+
+def ink_splat(t, hot=(255, 60, 20), seed=88, intensity=1.0, n=9):
+    """Torn ink mass with a soft edge — the 'brutalist' accent shape."""
+    h, w = H // 3, W // 3
+    acc = np.zeros((h, w), np.float32)
+    rng = np.random.default_rng(seed)
+    xs, ys = _grid(w, h)
+    for i in range(n):
+        # keep masses off-centre: type lives in the middle band
+        cx = rng.choice([rng.uniform(-0.14, 0.26), rng.uniform(0.74, 1.14)])
+        cy = rng.uniform(-0.10, 1.10)
+        r = rng.uniform(0.10, 0.30)
+        dx = (xs - cx) * (W / H) * 1.0
+        dy = ys - cy
+        d = np.sqrt(dx * dx + dy * dy)
+        ang = np.arctan2(dy, dx)
+        wob = 0.30 * fbm(np.cos(ang) * 2.0 + i, np.sin(ang) * 2.0, 2, seed + i)
+        acc = np.maximum(acc, np.clip((r * (0.75 + wob) - d) * 30, 0, 1))
+    acc = np.clip(acc, 0, 1)
+    soft = cv2.GaussianBlur(acc, (0, 0), 1.4)
+    img = _up(soft[..., None] * np.array(hot, np.float32) * intensity)
+    return img
+    return img
+
+
+def halftone(t, hot=(10, 10, 12), intensity=1.0, step=13, radius=0.42, drift=0.06):
+    """Halftone dot field — classic print texture, reads as 'designed' not 'CG'."""
+    out = np.zeros((H, W), np.float32)
+    r = max(1, int(step * radius))
+    step2 = step * 2
+    ys0 = np.arange(step // 2, H, step)
+    xs0 = np.arange(step // 2, W, step2)
+    for j, y0 in enumerate(ys0):
+        off = (step // 2) if (j % 2) else 0
+        for x0 in xs0 + off:
+            xx = int((x0 + t * drift * 18) % W)
+            yy = int(y0)
+            cv2.circle(out, (xx, yy), r, 1.0, -1, cv2.LINE_AA)
+    out = cv2.GaussianBlur(out, (0, 0), 0.8)
+    return out[..., None] * np.array(hot, np.float32) * intensity
+
+
+def scan_bar(t, hot=(255, 255, 255), intensity=1.0, speed=0.55, thickness=0.16):
+    """A soft horizontal light bar sweeping the frame — keeps still plates alive."""
+    ys = (np.arange(H, dtype=np.float32) / H)[:, None, None]
+    c = ((t * speed) % 1.4) - 0.2
+    band = np.exp(-(((ys - c) / thickness) ** 2))
+    return band * np.array(hot, np.float32)[None, None, :] * intensity
+
+
+def torn_edge(t, side="left", hot=(18, 18, 22), intensity=1.0, depth=0.06, seed=5):
+    """A ragged paper tear down one edge — instant editorial craft signal."""
+    w, h = W // 4, H
+    ys = np.arange(h, dtype=np.float32) / h
+    n = fbm(np.repeat(ys[:, None], 2, 1) * 16, t * 0.06 + ys[:, None] * 3, 2, seed)
+    edge = depth + 0.045 * (n[:, 0] - 0.5) * 2
+    cols = np.arange(w, dtype=np.float32)[None, :] / w
+    m = (cols < edge[:, None]).astype(np.float32) if side == "left" else \
+        (cols > 1.0 - edge[:, None]).astype(np.float32)
+    m = cv2.GaussianBlur(m, (0, 0), 2.0)
+    out = m[..., None] * np.array(hot, np.float32) * intensity
+    return cv2.resize(out, (W, H), interpolation=cv2.INTER_LINEAR)
+
+
+def vignette_map_inv(strength=0.35):
+    ys = (np.arange(H, dtype=np.float32) / H)[:, None, None]
+    xs = (np.arange(W, dtype=np.float32) / W)[None, :, None]
+    d = ((xs - 0.5) ** 2 * 1.1 + (ys - 0.5) ** 2) * 4.0
+    return np.clip(1.0 - strength * d, 0, 1)

@@ -276,7 +276,70 @@ P4 = dict(
     ],
 )
 
-EPISODES = {"1": P1, "2": P2, "3": P3, "4": P4}
+P5 = dict(
+    key="p5",
+    num="5",
+    title="7 حقائق مرة",
+    short="7 حقائق",
+    top_label="7 حقائق لا أحد يقولها",
+    analysis="voice/analysis_p5.json",
+    voice_dir="voice",
+    prefix="p5_vo",
+    build="build5",
+    out="mjod_video_p5.mp4",
+    mood=5,          # new chord bed: F#m - D - A - E, 76 bpm, cinematic minor
+    music=0.10,      # lowest bed of the series
+    duck=0.84,
+    lead_in=0.24,    # tighter law-to-law gaps than parts 1-4 (0.38)
+    lead_out=0.16,
+    end_hold=1.5,    # the outro image cuts away 0.7 s sooner
+    hook_vo="vo_00_hook",
+    outro_vo="vo_08_outro",
+    hook_words="لا أحد سيقول لك هذا سبع حقائق مرة لا أحد يريد أن يسمعها والسابعة ستكسر كل ما تعرفه عن نفسك".split(),
+    hook_label="7 حقائق مرة",
+    rehook=dict(at="m3", big="اثنان بالمئة", small="فقط سيصفقون لك",
+                who="الأرقام", who_en="THE NUMBERS"),
+    outro=dict(
+        title="هذه ليست نهاية",
+        l2="بل بداية… تبدأ الآن",
+        l3="احفظها… وأعد سماعها وأنت واقف",
+        cta="أنا أبدأ الآن",
+        comment="اكتب في التعليقات: الحقيقة التي أوجعتك",
+        follow="تابع للجزء السادس",
+    ),
+    tips=[
+        dict(n=1, vo="vo_01_nobody", who="لا أحد قادم", who_en="NOBODY IS COMING",
+             quote="لا منقذ", quote2="لا رسالة من السماء… لا شيء",
+             words="الحقيقة الأولى لا أحد قادم لا فرصة ولا منقذ ولا رسالة من السماء".split(),
+             col=((22, 22, 26), (255, 70, 30)), bg=0.30, look="paper_brutal"),
+        dict(n=2, vo="vo_02_talent", who="موهبتك لا تعني شيئاً", who_en="TALENT IS NOTHING",
+             quote="يُحسب لك", quote2="ما تفعله بها كل يوم",
+             words="الثانية موهبتك لا تعني شيئا يحسب لك ما تفعله بها كل يوم".split(),
+             col=((22, 22, 26), (230, 40, 40)), bg=0.30, look="ink_splat"),
+        dict(n=3, vo="vo_03_attention", who="لن يهتم أحد", who_en="NOBODY CARES",
+             quote="اثنان بالمئة", quote2="سيصفقون… والباقي ينتظر فشلك",
+             words="الثالثة لن يهتم أحد بأمرك اثنان بالمئة سيصفقون والباقي ينتظر أن تفشل".split(),
+             col=((22, 22, 26), (255, 90, 20)), bg=0.30, look="halftone"),
+        dict(n=4, vo="vo_04_comfort", who="الراحة تقتل", who_en="COMFORT KILLS",
+             quote="كل ما تجنّبته", quote2="صار اليوم قيداً",
+             words="الرابعة الراحة تقتل كل ما تجنبه من تعب صغير صار اليوم قيدا".split(),
+             col=((22, 22, 26), (200, 30, 30)), bg=0.30, look="paper_brutal"),
+        dict(n=5, vo="vo_05_fair", who="الحياة ليست عادلة", who_en="LIFE IS NOT FAIR",
+             quote="اشتكِ دقيقة", quote2="ثم ابدأ من مكانك",
+             words="الخامسة الحياة ليست عادلة اشتك دقيقة ثم ابدأ من مكانك".split(),
+             col=((22, 22, 26), (255, 70, 30)), bg=0.30, look="torn"),
+        dict(n=6, vo="vo_06_past", who="ماضيك لا يهم", who_en="THE PAST IS DEAD",
+             quote="الدقيقة القادمة", quote2="هي كل ما تملك",
+             words="السادسة ماضيك لا يهم فقط ما تفعله في الدقيقة القادمة".split(),
+             col=((22, 22, 26), (230, 40, 40)), bg=0.30, look="halftone"),
+        dict(n=7, vo="vo_07_you", who="أنت السبب", who_en="YOU ARE THE REASON",
+             quote="وأنت الحل", quote2="لا أحد غيرك… ولا شيء غيرك",
+             words="والسابعة أنت السبب وأنت الحل لا أحد غيرك ولا شيء غيرك".split(),
+             col=((22, 22, 26), (255, 55, 20)), bg=0.30, look="ink_splat"),
+    ],
+)
+
+EPISODES = {"1": P1, "2": P2, "3": P3, "4": P4, "5": P5}
 
 
 def get(key=None):
