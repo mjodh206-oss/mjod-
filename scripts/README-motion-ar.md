@@ -1,28 +1,27 @@
-# أدوات الحلقة الثانية «ماري سيليست» — وراء الحكاية
+# حركة «ماري سيليست» — الإصدار الحالي V3
 
-## اختيار أدوات GitHub
-بحثت في مستودعات توليد الفيديو والمؤثرات الصوتية الأعلى شعبية/الأقرب للمهمة وقت التنفيذ:
+## محرك الحركة
+بحثت في أدوات موشن غرافيك مفتوحة المصدر على GitHub، واخترت [Remotion](https://github.com/remotion-dev/remotion) لبناء الإصدار الحالي: مكتبة لإنشاء الفيديو برمجيًا باستخدام React/Chromium. وقت الفحص كان للمستودع نحو 74.8 ألف نجمة. قارنتها أيضًا بـ[Motion Canvas](https://github.com/motion-canvas/motion-canvas)، نحو 20.1 ألف نجمة، وبـ[Natron](https://github.com/NatronGitHub/Natron)، برنامج تركيب عقدي أقرب إلى After Effects/Nuke. Remotion هو الأنسب هنا لتوقيت عناصر عربية وخرائط ومعلومات متحركة مع مقاطع التعليق ومقاسات 16:9 و9:16.
 
-- [Wan2.1](https://github.com/Wan-Video/Wan2.1) — نحو **17.5 ألف نجمة**، ويدعم توليد الفيديو من النص والصورة وتحريره. README الرسمي يذكر أن نسخة T2V-1.3B تحتاج قرابة 8.19 GB VRAM، وأن مقطع 480p لخمس ثوانٍ يستغرق قرابة أربع دقائق على RTX 4090.
-- [CogVideo](https://github.com/zai-org/CogVideo) — نحو **13.2 ألف نجمة**، لتوليد الفيديو من النص والصورة.
-- [AudioCraft من Meta](https://github.com/facebookresearch/audiocraft) — نحو **23.9 ألف نجمة**؛ المكتبة الصوتية الأعلى شعبية في البحث، وتضم نماذج توليد صوت/موسيقى مثل AudioGen وMusicGen.
-- [FoleyCrafter من OpenMMLab](https://github.com/open-mmlab/FoleyCrafter) — نحو **665 نجمة**؛ أقل شعبية من AudioCraft، لكنه أقرب للمهمة تحديدًا: توليد أصوات متزامنة مع مشاهد الفيديو.
+**تنويه:** هذا محرك تحريك ومونتاج برمجي، وليس مولد فيديو بالذكاء الاصطناعي، ولم تُشغّل نماذج توليد فيديو ثقيلة. أصول الصور في المشروع توضيحية وليست أرشيفًا تاريخيًا؛ لذلك لا نعرضها على أنها صور حقيقية من 1872.
 
-الأعداد تقريبية وتتغير على GitHub. بيئة التنفيذ هنا لا تملك GPU أو أوزان تلك النماذج؛ لذلك لم أزعم استخدام Wan أو AudioCraft أو FoleyCrafter فعليًا. أنشأت بدلًا منها مسارًا محليًا قابلًا لإعادة التشغيل، بلا عينات صوتية محمية:
-
-- `render_mary_celeste_v2.py`: موشن غرافيك 720p/20fps، والسفينة تتمايل وتتقدم/تبتعد، والموج والرغوة يتحركان، ومسار الخريطة يُكشف مع مؤشر متحرك، ومشاهد سطح السفينة والملف فيها حركة كاميرا/مطر/ورق، والتوقيت مربوط بمقاطع التعليق الصوتي الفعلية.
-- `render_mary_celeste_short_v2.py`: يقتطع لقطات متحركة من الفيديو الرئيسي ويركبها بصيغة عمودية 9:16 مع ترجمة الشورت.
-- `synthesize_mary_celeste_sfx.py`: يصنع مؤثرات أصلية إجرائية للموج والريح وصرير الخشب والحبال وتقليب الورق والمسح الصوتي؛ ثم تُخفض تلقائيًا تحت التعليق وتُمزج به.
-
-**ملاحظة:** هذه لقطات تمثيلية ورسوم/موشن غرافيك، وليست تصويرًا حيًا أو لقطات مولدة بالكامل بنموذج فيديو. لمرحلة أكثر واقعية، نحتاج تشغيل Wan2.1 أو FoleyCrafter على جهاز يملك GPU مناسبًا وأوزان النماذج.
+## تغييرات V3
+- فصول مترابطة بتحريك كاميرا وطبقات، وخط رحلة يُرسم تدريجيًا، وبطاقات أدلة/فرضيات وعناوين عربية بخط Noto.
+- تصميم شورت عمودي مستقل؛ لا يقتصر على تدوير/قصّ الحلقة الأفقية.
+- نص تحرير جديد أكثر تحفظًا: تاريخ العثور، تفاصيل الرحلة والحمولة، حالة السفينة، التحقيق، والفرضيات مع وسمها بوضوح بأنها غير مثبتة.
+- تخفيض صوت البحر، رفع أولوية التعليق، side-chain ducking للمؤثرات، وموازنة المزيج إلى قرابة ‎-16 LUFS.
 
 ## إعادة الإنتاج
+من جذر المستودع:
 
 ```bash
 python -m pip install -r scripts/requirements-motion.txt
-python scripts/synthesize_mary_celeste_sfx.py
-python scripts/render_mary_celeste_v2.py --output Mary-Celeste-main.mp4
-python scripts/render_mary_celeste_short_v2.py
+npm install --prefix scripts/remotion-v3
+python scripts/remotion-v3/prepare-assets.py
+python scripts/build_mary_celeste_v3_audio.py
+node scripts/remotion-v3/render.mjs
+node scripts/remotion-v3/render.mjs --short
+python scripts/mux_mary_celeste_v3.py
 ```
 
-الأصول المحلية في `brand/motion/` و`brand/episode-01-visuals/`، والتعليق والصوت الممزوج والترجمة في `audio/episode-01/` و`deliverables/`.
+ينتج Remotion فيديوهين صامتين مؤقتين، ثم يضيف سكربت mux المكساج النهائي. أما `render_mary_celeste_motion.py` و`render_mary_celeste_v2.py` فهما مساران أقدم محفوظان لإعادة إنتاج النسخ السابقة.
