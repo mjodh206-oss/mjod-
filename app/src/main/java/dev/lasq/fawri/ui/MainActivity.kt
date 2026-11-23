@@ -193,6 +193,14 @@ class MainActivity : FragmentActivity() {
         prompt.authenticate(info.build())
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        val config = android.content.res.Configuration(newBase.resources.configuration)
+        val ar = java.util.Locale.forLanguageTag("ar")
+        config.setLocale(ar)
+        config.setLayoutDirection(ar)
+        super.attachBaseContext(newBase.createConfigurationContext(config))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         super.onCreate(savedInstanceState)
@@ -217,7 +225,8 @@ class MainActivity : FragmentActivity() {
                 }
                 val protected = o.lock && !unlocked
                 LaunchedEffect(ready, foreground, protected, o.intro) {
-                    vm.visible.value = ready && foreground && !protected && o.intro
+                    vm.visible.value =
+                        ready && foreground && !protected && o.intro && app.integrity.first
                     if (vm.visible.value) {
                         vm.refresh()
                         app.cleanLater()

@@ -5,8 +5,8 @@ log=$(mktemp); trap 'rm -f "$log"' EXIT
 python3 - "$log" <<'PY'
 import re,sys
 lines=open(sys.argv[1],errors='replace').read().splitlines()
-errors=[s for s in lines if re.search(r'^(e:|error:|> |Execution failed|What went wrong)|error: | FAILED$|^.+ > .+ FAILED', s)]
-msg='\n'.join((errors or lines[-30:])[:100]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
+errors=[s for s in lines if re.search(r'^\s*(e:|error:|> (?!Task |Configure)|Execution failed|\* What went wrong)|error: | FAILED$|^.+ > .+ FAILED', s)]
+msg='\n'.join((errors or lines[-40:])[-100:]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
 print('::error title=Gradle diagnostics::'+msg)
 PY
 exit 1

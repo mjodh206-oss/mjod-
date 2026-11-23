@@ -32,6 +32,7 @@ class PasteAccess : AccessibilityService() {
             if (
                 !Rules.permits(pkg, packageName, app.prefs.value) ||
                     root.isPassword ||
+                    (android.os.Build.VERSION.SDK_INT >= 34 && root.isAccessibilityDataSensitive) ||
                     PasteBoard.privateEditor == pkg
             )
                 return null
@@ -40,6 +41,7 @@ class PasteAccess : AccessibilityService() {
                 node != null &&
                     (node.packageName?.toString() != pkg ||
                         node.isPassword ||
+                        (android.os.Build.VERSION.SDK_INT >= 34 && node.isAccessibilityDataSensitive) ||
                         Checks.password(node.inputType))
             )
                 return null

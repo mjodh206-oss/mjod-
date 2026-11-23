@@ -5,3 +5,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "LasqFawri"
 include(":app")
+// Two tiny, independent apps used only on disposable test emulators.
+include(":fixtures")

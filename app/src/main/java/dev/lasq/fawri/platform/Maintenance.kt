@@ -49,8 +49,10 @@ class Maintenance : JobService() {
                     }
             val delay = (next - now).coerceAtLeast(1_000)
             val js = c.system<JobScheduler>()
+            if (js.getPendingJob(ID)?.extras?.getLong("due") == next) return
             val info =
                 JobInfo.Builder(ID, ComponentName(c, Maintenance::class.java))
+                    .setExtras(android.os.PersistableBundle().apply { putLong("due", next) })
                     .setMinimumLatency(delay)
                     .setOverrideDeadline(delay + 60_000L)
                     .setPersisted(true)

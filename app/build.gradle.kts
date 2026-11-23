@@ -72,3 +72,5 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
+
+dependencies { androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0") }

@@ -2,7 +2,7 @@ name: Lasq Fawri · Android
 on:
   push:
     branches: ['arena/0d4372c5-mjod', main]
-    paths: ['app/**', 'scripts/**', 'gradle/**', '*gradle*', '.github/workflows/lasq.yml']
+    paths: ['app/**', 'fixtures/**', 'scripts/**', 'gradle/**', '*gradle*', '.github/workflows/lasq.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,7 +26,9 @@ jobs:
           pass=$(openssl rand -hex 32)
           echo "::add-mask::$pass"
           keytool -genkeypair -storetype PKCS12 -keystore "$RUNNER_TEMP/preview.p12" -storepass "$pass" -alias lasq -keyalg RSA -keysize 3072 -validity 3650 -dname 'CN=Lasq Fawri Preview'
-          LASQ_KEYSTORE="$RUNNER_TEMP/preview.p12" LASQ_STORE_PASSWORD="$pass" LASQ_PREVIEW=true scripts/ci-gradle.sh :app:testDebugUnitTest :app:assembleRelease :app:assembleDebug :app:assembleDebugAndroidTest
+          export LASQ_KEYSTORE="$RUNNER_TEMP/preview.p12" LASQ_STORE_PASSWORD="$pass" LASQ_PREVIEW=true
+          scripts/ci-gradle.sh :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin
+          scripts/ci-gradle.sh :app:testDebugUnitTest :app:assembleRelease :app:assembleDebug :app:assembleDebugAndroidTest :fixtures:assembleDebug
           mkdir -p deliver
           cp app/build/outputs/apk/release/*.apk deliver/lasq-fawri-1.0-preview.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs deliver/*.apk
@@ -41,6 +43,7 @@ jobs:
           path: |
             app/build/outputs/apk/debug/*.apk
             app/build/outputs/apk/androidTest/debug/*.apk
+            fixtures/build/outputs/apk/*/debug/*.apk
       - name: Report Room schema
         run: python3 -c 'import glob,json; print("::notice title=Room schema::"+json.dumps(json.load(open(glob.glob("app/schemas/*/1.json")[0])),separators=(",",":")))'
   device:
@@ -68,3 +71,17 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: scripts/device-tests.sh
+  deliver:
+    if: github.ref == 'refs/heads/arena/0d4372c5-mjod' && contains(github.event.head_commit.message, '[deliver apk]')
+    needs: [build, device]
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with: { name: lasq-fawri-apk, path: deliver }
+      - name: Publish verified APK without replacing any existing release
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          (cd deliver && sha256sum -c SHA256SUMS.txt)
+          gh release create lasq-v1.0.0-preview.1 deliver/lasq-fawri-1.0-preview.apk deliver/SHA256SUMS.txt --target "$GITHUB_SHA" --prerelease --latest=false --title 'لصق فوري ١٫٠ — نسخة تجريبية' --notes-file docs/RELEASE-ar.md
