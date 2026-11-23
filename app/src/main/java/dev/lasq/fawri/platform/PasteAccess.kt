@@ -16,6 +16,21 @@ class PasteAccess : AccessibilityService() {
 
     override fun onServiceConnected() {
         instance = this
+        syncScope()
+    }
+
+    /** Do not even subscribe to focus events while monitoring is off. */
+    fun syncScope() {
+        val info = serviceInfo ?: return
+        val o = app.prefs.value
+        info.eventTypes =
+            if (app.active.value && o.consent)
+                AccessibilityEvent.TYPE_VIEW_FOCUSED or AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+            else 0
+        info.packageNames =
+            if (o.allowList) o.allowed.filter { Rules.permits(it, packageName, o) }.toTypedArray()
+            else null
+        serviceInfo = info
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {

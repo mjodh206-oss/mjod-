@@ -19,7 +19,7 @@ object Surfaces {
 class Control : BroadcastReceiver() {
     override fun onReceive(c: Context, i: Intent) {
         when (i.action) {
-            "stop" -> Monitor.instance?.halt(true)
+            "stop" -> Monitor.instance?.halt(true) ?: Surfaces.refresh(c)
             "confirm" -> Monitor.instance?.confirm(i.getLongExtra("token", -1))
             "toggle" ->
                 if (c.app.active.value) Monitor.instance?.halt(true)
@@ -36,7 +36,8 @@ class LasqWidget : AppWidgetProvider() {
         v.setTextViewText(R.id.widget_status, if (on) "قيد التشغيل  •  إيقاف" else "متوقف  •  تشغيل")
         v.setOnClickPendingIntent(
             R.id.widget_root,
-            if (!on && (c.app.prefs.value.lock || Checks.reason(c) != null)) Alerts.open(c)
+            if (on) Alerts.action(c, "stop")
+            else if (c.app.prefs.value.lock || Checks.reason(c) != null) Alerts.open(c)
             else Alerts.action(c, "toggle"),
         )
         m.updateAppWidget(ids, v)

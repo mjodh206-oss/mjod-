@@ -13,6 +13,14 @@ object ClipboardPort {
 
     private fun manager(c: Context) = c.system<ClipboardManager>()
 
+    fun unchangedPublic(c: Context, stamp: Long): Boolean {
+        val d = manager(c).primaryClipDescription ?: return false
+        return d.timestamp == stamp &&
+            d.extras?.getBoolean(PRIVATE) != true &&
+            d.extras?.getBoolean(OWN) != true &&
+            d.hasMimeType("text/*")
+    }
+
     fun read(c: Context, ignoreOwn: Boolean): Sample? {
         val cm = manager(c)
         val desc = cm.primaryClipDescription ?: return null

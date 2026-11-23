@@ -159,8 +159,18 @@ class Vault(private val ctx: Context) {
                     }
             }
 
-    suspend fun <T> read(f: (ClipDao) -> T): T =
-        withContext(Dispatchers.IO) { synchronized(monitor) { f(open().clips()) } }
+    private val generation = java.util.concurrent.atomic.AtomicLong()
+
+    suspend fun <T> read(f: (ClipDao) -> T): T {
+        val before = generation.get()
+        return withContext(Dispatchers.IO) {
+            synchronized(monitor) {
+                if (generation.get() != before)
+                    throw kotlinx.coroutines.CancellationException("Vault reset")
+                f(open().clips())
+            }
+        }
+    }
 
     suspend fun <T> write(f: (ClipDao) -> T): T = read(f).also { revision.update { n -> n + 1 } }
 
@@ -171,7 +181,8 @@ class Vault(private val ctx: Context) {
         return first?.plus(days * DAY)
     }
 
-    suspend fun erase() =
+    suspend fun erase() {
+        generation.incrementAndGet()
         withContext(Dispatchers.IO) {
             synchronized(monitor) {
                 db?.close()
@@ -184,4 +195,5 @@ class Vault(private val ctx: Context) {
                 revision.update { it + 1 }
             }
         }
+    }
 }

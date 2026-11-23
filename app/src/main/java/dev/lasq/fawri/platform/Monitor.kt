@@ -43,7 +43,7 @@ class Monitor : Service(), ClipboardManager.OnPrimaryClipChangedListener {
     private var lastStamp = 0L
     private var since = 0L
     private var bound: Field? = null
-    private var nonce = 0L
+    private var nonce = java.security.SecureRandom().nextLong()
     private var approved = false
     private var approvalUntil = 0L
     private val expire = Runnable { cancelTicket() }
@@ -64,6 +64,7 @@ class Monitor : Service(), ClipboardManager.OnPrimaryClipChangedListener {
         super.onCreate()
         instance = this
         Alerts.setup(this)
+        Alerts.hide(this, Alerts.PROMPT)
         registerReceiver(
             stateChange,
             IntentFilter(Intent.ACTION_SCREEN_OFF).apply {
@@ -83,11 +84,13 @@ class Monitor : Service(), ClipboardManager.OnPrimaryClipChangedListener {
             observing = true
             since = System.currentTimeMillis()
             app.active.value = true
+            PasteAccess.instance?.syncScope()
             system<ClipboardManager>().addPrimaryClipChangedListener(this)
             Surfaces.refresh(this)
             scope.launch {
                 app.prefs.flow.drop(1).collect {
                     cancelTicket()
+                    PasteAccess.instance?.syncScope()
                     if (Checks.reason(this@Monitor) != null) halt(false) else scheduleClear()
                 }
             }
@@ -97,13 +100,19 @@ class Monitor : Service(), ClipboardManager.OnPrimaryClipChangedListener {
     }
 
     override fun onPrimaryClipChanged() {
-        cancelTicket() // even rejected/sensitive changes invalidate a previous copy
-        if (!observing || !Checks.unlocked(this)) return
+        if (!observing || !Checks.unlocked(this)) {
+            cancelTicket()
+            return
+        }
         if (Checks.reason(this) != null) {
             halt(false)
             return
         }
         try {
+            // Some Android versions notify again when classification finishes. A repeat of the
+            // same non-sensitive clip must not discard an armed paste; delivery rechecks its text.
+            gate.current?.let { if (ClipboardPort.unchangedPublic(this, it.stamp)) return }
+            cancelTicket()
             val source = PasteAccess.instance?.focused { f, _ -> f.field } ?: return
             val sample = ClipboardPort.read(this, ignoreOwn = true) ?: return
             val now = System.currentTimeMillis()
@@ -258,6 +267,7 @@ class Monitor : Service(), ClipboardManager.OnPrimaryClipChangedListener {
         if (observing) system<ClipboardManager>().removePrimaryClipChangedListener(this)
         observing = false
         app.active.value = false
+        PasteAccess.instance?.syncScope()
         handler.removeCallbacks(clear)
         Surfaces.refresh(this)
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -269,6 +279,7 @@ class Monitor : Service(), ClipboardManager.OnPrimaryClipChangedListener {
         if (observing) system<ClipboardManager>().removePrimaryClipChangedListener(this)
         observing = false
         app.active.value = false
+        PasteAccess.instance?.syncScope()
         cancelTicket()
         handler.removeCallbacksAndMessages(null)
         scope.cancel()
