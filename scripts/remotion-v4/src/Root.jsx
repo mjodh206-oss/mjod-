@@ -355,32 +355,200 @@ function EndingHalo({frame,mode}){
     <path d={`M${W*.32} ${H*.3} Q${W*.5} ${H*.28} ${W*.68} ${H*.3} M${W*.37} ${H*.36} Q${W*.5} ${H*.34} ${W*.63} ${H*.36}`} fill="none" stroke="#E0C182" strokeOpacity=".45" strokeWidth="2"/>
   </g>;
 }
+function MapJourneyScene({frame,portrait}){
+  const {width:W,height:H}=useVideoConfig(),f=frame/24;
+  const p=smooth((f-(portrait?0:8))/(portrait?10:22));
+  const px=lerp(W*.19,W*.80,p),py=H*(portrait?.55:.59)+Math.sin(frame*.035)*H*.018;
+  const mapY=portrait?H*.28:H*.19,mapH=portrait?H*.36:H*.54;
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><linearGradient id="map-bg-v5" x2="0" y2="1"><stop stopColor="#102633"/><stop offset="1" stopColor="#07131D"/></linearGradient><radialGradient id="map-glow-v5"><stop stopColor="#E9C985" stopOpacity=".15"/><stop offset="1" stopColor="#E9C985" stopOpacity="0"/></radialGradient></defs>
+    <rect width={W} height={H} fill="url(#map-bg-v5)"/><circle cx={W*.52} cy={H*.48} r={H*.58} fill="url(#map-glow-v5)"/>
+    <text x={W*.5} y={H*.105} textAnchor="middle" fill={GOLD} fontFamily="Noto Sans Arabic" fontSize={portrait?22:25} fontWeight="700" direction="rtl">رحلة عبر الأطلسي · نوفمبر ١٨٧٢</text>
+    <g transform={`translate(${W*.08} ${mapY})`}>
+      <rect width={W*.84} height={mapH} rx={portrait?22:28} fill="#D8C99F" stroke="#F1E4C5" strokeWidth="4"/>
+      {[.2,.4,.6,.8].map((n,i)=><path key={`v${i}`} d={`M${W*.84*n} 0 V${mapH}`} stroke="#827B65" strokeOpacity=".2" strokeDasharray="5 8"/>)}
+      {[.25,.5,.75].map((n,i)=><path key={`h${i}`} d={`M0 ${mapH*n} H${W*.84}`} stroke="#827B65" strokeOpacity=".2" strokeDasharray="5 8"/>)}
+      <path d={`M${W*.10} ${mapH*.18} Q${W*.18} ${mapH*.08} ${W*.25} ${mapH*.22} L${W*.28} ${mapH*.46} Q${W*.21} ${mapH*.6} ${W*.12} ${mapH*.5}Z M${W*.68} ${mapH*.15} Q${W*.78} ${mapH*.07} ${W*.9} ${mapH*.21} L${W*.95} ${mapH*.46} Q${W*.9} ${mapH*.58} ${W*.8} ${mapH*.51} L${W*.7} ${mapH*.38}Z`} fill="#8B977F" stroke="#687365" strokeWidth="3"/>
+      <path d={`M${W*.18} ${mapH*.48} C${W*.34} ${mapH*.15} ${W*.57} ${mapH*.79} ${W*.83} ${mapH*.45}`} fill="none" stroke="#A14E43" strokeWidth={portrait?4:6} strokeDasharray={W*.76} strokeDashoffset={W*.76*(1-p)} strokeLinecap="round"/>
+      <circle cx={W*.18} cy={mapH*.48} r={portrait?7:10} fill="#A14E43"/><circle cx={W*.83} cy={mapH*.45} r={portrait?7:10} fill="#A14E43"/>
+      <g transform={`translate(${W*.84*p} ${mapH*(.48-.15*p)})`}>
+        <circle r={portrait?12:15} fill="#112935" stroke="#F4E6C7" strokeWidth="3"/>
+        <path d={`M${-W*.012} 2 l${W*.012} -${H*.018} l${W*.012} ${H*.018}Z`} fill={GOLD}/>
+      </g>
+      <text x={W*.18} y={mapH*.68} textAnchor="middle" fill="#3E5148" fontFamily="Noto Sans Arabic" fontSize={portrait?15:18} direction="rtl">نيويورك</text>
+      <text x={W*.83} y={mapH*.68} textAnchor="middle" fill="#3E5148" fontFamily="Noto Sans Arabic" fontSize={portrait?15:18} direction="rtl">الأزور</text>
+    </g>
+    <g transform={`translate(${W*.5} ${H*(portrait?.77:.80)})`}>
+      <circle r={portrait?30:35} fill="none" stroke={TEAL} strokeOpacity=".28" strokeWidth="2"/>
+      <path d="M0 -25 L7 0 0 25 -7 0Z" fill={GOLD} transform={`rotate(${frame*.55})`}/>
+      <text y={portrait?66:63} textAnchor="middle" fill="#CFD6D0" fontFamily="Noto Sans Arabic" fontSize={portrait?16:19} direction="rtl">المسار التقريبي عبر الأطلسي</text>
+    </g>
+    <path d={`M${px} ${py} l-22 -12 18 2 10 -12 2 16 16 10 -20 -2 -8 13Z`} fill="#F4E6C5" stroke="#8B6240" strokeWidth="2"/>
+  </svg>;
+}
+function CargoScene({frame,portrait}){
+  const {width:W,height:H}=useVideoConfig(),f=frame/24,p=smooth((f-(portrait?8:34))/3);
+  const count=Math.round(1701*p).toLocaleString('ar-EG');
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><linearGradient id="cargo-bg-v5" x2="0" y2="1"><stop stopColor="#292920"/><stop offset="1" stopColor="#0B1720"/></linearGradient><linearGradient id="cargo-card-v5" x2="0" y2="1"><stop stopColor="#E4D4B0"/><stop offset="1" stopColor="#B9A47A"/></linearGradient></defs>
+    <rect width={W} height={H} fill="url(#cargo-bg-v5)"/><circle cx={W*.5} cy={H*.52} r={H*.52} fill="#D8B675" fillOpacity=".07"/>
+    <g transform={`translate(${W*.5} ${H*(portrait?.42:.42)}) scale(${.7+.3*p})`}>
+      <rect x={-W*.34} y={-H*.21} width={W*.68} height={H*.42} rx={portrait?22:26} fill="url(#cargo-card-v5)" stroke="#F1E3C1" strokeWidth="4"/>
+      <path d={`M${-W*.29} ${-H*.12} H${W*.29} M${-W*.29} ${H*.12} H${W*.29}`} stroke="#806C49" strokeOpacity=".45" strokeWidth="3"/>
+      <text y={-H*.075} textAnchor="middle" fill="#67543A" fontFamily="Noto Sans Arabic" fontSize={portrait?20:24} direction="rtl">سجل الشحنة</text>
+      <text y={portrait?H*.035:H*.045} textAnchor="middle" fill="#20323A" fontFamily="Noto Sans Arabic" fontSize={portrait?59:76} fontWeight="700" direction="rtl">{count}</text>
+      <text y={H*.105} textAnchor="middle" fill="#67543A" fontFamily="Noto Sans Arabic" fontSize={portrait?19:23} direction="rtl">برميل كحول مُدرج في السجل</text>
+      <circle cx={W*.25} cy={-H*.13} r={portrait?19:23} fill="none" stroke="#9E4C40" strokeWidth="4" strokeDasharray="5 4" transform={`rotate(${frame*1.3})`}/>
+    </g>
+    {Array.from({length:5},(_,i)=>{
+      const x=W*(.22+i*.14),y=H*(portrait?.72:.76),rise=(1-p)*H*.07;
+      return <g key={i} transform={`translate(${x} ${y+rise})`} opacity={p}>
+        <ellipse cy="0" rx={portrait?34:43} ry={portrait?12:15} fill="#050B0F" opacity=".55"/>
+        <path d={`M-28 -8 Q-35 -36 -24 -61 Q0 -72 24 -61 Q35 -36 28 -8 Q0 1 -28 -8Z`} fill={i%2?'#71563A':'#86643F'} stroke={GOLD} strokeWidth="3"/>
+        <path d="M-31 -22 Q0 -12 31 -22 M-29 -45 Q0 -35 29 -45" fill="none" stroke="#C9A36B" strokeWidth="4"/>
+        <ellipse cy="-61" rx="24" ry="7" fill="#A38355" stroke={GOLD} strokeWidth="2"/>
+      </g>;
+    })}
+  </svg>;
+}
+function LogbookScene({frame,portrait}){
+  const {width:W,height:H}=useVideoConfig(),f=frame/24,start=portrait?25:56,p=smooth((f-start)/1.2),line=smooth((f-start-1)/2.6);
+  const x=W*(portrait?.08:.13),y=H*(portrait?.19:.18),w=W*(portrait?.84:.74),h=H*(portrait?.61:.64);
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><linearGradient id="paper-bg-v5" x2="0" y2="1"><stop stopColor="#23313A"/><stop offset="1" stopColor="#09141D"/></linearGradient><linearGradient id="paper-v5" x2="0" y2="1"><stop stopColor="#EEE1C2"/><stop offset="1" stopColor="#C8B58E"/></linearGradient></defs>
+    <rect width={W} height={H} fill="url(#paper-bg-v5)"/><rect x={x} y={y+H*.018} width={w} height={h} rx={portrait?15:19} fill="#050B10" opacity=".4"/>
+    <g transform={`translate(${x} ${y}) rotate(${Math.sin(frame*.025)*.5} ${w/2} ${h/2})`} opacity={p}>
+      <rect width={w} height={h} rx={portrait?14:18} fill="url(#paper-v5)" stroke="#F7EBCB" strokeWidth="4"/>
+      <path d={`M${w*.14} 0 V${h} M${w*.18} ${h*.13} H${w*.91}`} stroke="#A16B51" strokeOpacity=".48" strokeWidth="2"/>
+      <text x={w*.55} y={h*.09} textAnchor="middle" fill="#7D5944" fontFamily="Noto Naskh Arabic" fontSize={portrait?20:25} direction="rtl">مقتطف من سجلّ السفينة</text>
+      {[.25,.37,.49,.61,.73].map((r,i)=><path key={i} d={`M${w*.24} ${h*r} H${w*(.24+.65*line)}`} stroke="#6B6554" strokeOpacity=".54" strokeWidth={portrait?2.2:3} strokeDasharray={w*.65} strokeDashoffset={w*.65*(1-line)}/>)}
+      <text x={w*.77} y={h*.86} textAnchor="middle" fill="#9D493D" fontFamily="Noto Sans Arabic" fontSize={portrait?22:28} fontWeight="700" direction="rtl">٢٥ نوفمبر ١٨٧٢</text>
+      <g transform={`translate(${w*(.31+.47*line)} ${h*.62}) rotate(-18)`}>
+        <path d={`M0 0 L${W*.012} ${-H*.15} Q${W*.017} ${-H*.18} ${W*.02} ${-H*.15} L${W*.007} 0Z`} fill="#283741"/>
+        <path d={`M0 0 L${W*.007} ${-H*.018} L${W*.014} 0Z`} fill="#A74D40"/>
+      </g>
+    </g>
+    <circle cx={W*.83} cy={H*.68} r={H*.055} fill="none" stroke="#B45B4C" strokeWidth="4" strokeDasharray="8 7" opacity={p}/>
+  </svg>;
+}
+function CrewScene({frame}){
+  const {width:W,height:H}=useVideoConfig(),p=smooth((frame-8*24)/18);
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><radialGradient id="crew-bg-v5"><stop stopColor="#26404A"/><stop offset="1" stopColor="#07131D"/></radialGradient></defs>
+    <rect width={W} height={H} fill="url(#crew-bg-v5)"/><circle cx={W*.5} cy={H*.48} r={H*.3} fill="none" stroke={GOLD} strokeOpacity=".14" strokeWidth="2" strokeDasharray="5 12"/>
+    <text x={W*.5} y={H*.15} textAnchor="middle" fill={GOLD} fontFamily="Noto Sans Arabic" fontSize="24" direction="rtl">القائمة الأخيرة · عشرة أسماء</text>
+    <g opacity={p}>
+      {Array.from({length:10},(_,i)=>{
+        const col=i%5,row=Math.floor(i/5),x=W*(.15+col*.175),y=H*(.39+row*.20),pop=spring({frame:Math.max(0,frame-(8*24+i*5)),fps:24,config:{damping:14,stiffness:110}});
+        return <g key={i} transform={`translate(${x} ${y}) scale(${.65+.35*pop})`} opacity={pop}>
+          <circle r={H*.064} fill="#112936" stroke={i<3?'#D7AE67':TEAL} strokeWidth="3"/>
+          <circle cy={-H*.018} r={H*.012} fill="#E7DFCC"/>
+          <path d={`M${-H*.016} ${H*.014} Q0 ${H*.002} ${H*.016} ${H*.014} L${H*.022} ${H*.037} H${-H*.022}Z`} fill="#C3B48F"/>
+          <text y={H*.055} textAnchor="middle" fill={GOLD} fontFamily="Noto Sans Arabic" fontSize="12" direction="rtl">{i+1}</text>
+        </g>;
+      })}
+    </g>
+  </svg>;
+}
+function MissingBoatScene({frame,portrait}){
+  const {width:W,height:H}=useVideoConfig(),f=frame/24,p=smooth((f-(portrait?16:0))/4),y=H*(portrait?.64:.64);
+  const bx=W*(.5+.025*Math.sin(frame*.05)),by=y+Math.sin(frame*.08)*H*.008;
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><linearGradient id="empty-sky-v5" x2="0" y2="1"><stop stopColor="#556A70"/><stop offset=".62" stopColor="#263F48"/><stop offset=".63" stopColor="#183541"/><stop offset="1" stopColor="#07151E"/></linearGradient></defs>
+    <rect width={W} height={H} fill="url(#empty-sky-v5)"/><circle cx={W*.77} cy={H*.24} r={H*.12} fill="#E7D7B1" fillOpacity=".08"/>
+    {[0,1,2,3].map(i=><path key={i} d={lineWave(W,y+H*(.06+i*.075),H*.009,frame*.035+i*2,W*.15)} fill="none" stroke="#A7C0C2" strokeOpacity={.23-i*.035} strokeWidth="2"/>)}
+    <text x={W*.5} y={H*.18} textAnchor="middle" fill={GOLD} fontFamily="Noto Sans Arabic" fontSize={portrait?22:27} direction="rtl">السفينة طافية… لكن قارب النجاة اختفى</text>
+    <g transform={`translate(${bx} ${by})`} opacity={p}>
+      <ellipse cy={H*.025} rx={W*(portrait?.25:.12)} ry={H*.016} fill="#03090D" opacity=".65"/>
+      <path d={`M${-W*(portrait?.22:.12)} 0 Q0 ${H*.045} ${W*(portrait?.22:.12)} 0 L${W*(portrait?.17:.12)} ${H*.045} Q0 ${H*.07} ${-W*(portrait?.17:.12)} ${H*.045}Z`} fill="none" stroke={GOLD} strokeWidth={portrait?4:5} strokeDasharray="12 8"/>
+      <path d={`M${-W*.05} ${H*.012} V${-H*.06} M${W*.05} ${H*.012} V${-H*.06}`} stroke="#D7BE89" strokeWidth="3" strokeDasharray="6 5"/>
+      <path d={`M${-W*.05} ${-H*.055} Q0 ${-H*.073} ${W*.05} ${-H*.055}`} fill="none" stroke="#D7BE89" strokeWidth="3"/>
+    </g>
+    <circle cx={bx} cy={by} r={H*(.1+.025*Math.sin(frame*.08))} fill="none" stroke={GOLD} strokeOpacity={.22+.2*p} strokeWidth="2"/>
+  </svg>;
+}
+function InvestigationScene({frame,portrait}){
+  const {width:W,height:H}=useVideoConfig(),f=frame/24,p=smooth((f-(portrait?35:102))/2);
+  const positions=portrait?[[.12,.25],[.56,.25],[.12,.52],[.56,.52]]:[[.09,.25],[.37,.25],[.65,.25],[.22,.52],[.52,.52]];
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><radialGradient id="board-bg-v5"><stop stopColor="#253740"/><stop offset="1" stopColor="#09141D"/></radialGradient></defs>
+    <rect width={W} height={H} fill="url(#board-bg-v5)"/><path d={`M${W*.05} ${H*.1} H${W*.95} V${H*.88} H${W*.05}Z`} fill="#172831" stroke="#B89058" strokeOpacity=".35" strokeWidth="3"/>
+    <text x={W*.5} y={H*.16} textAnchor="middle" fill={GOLD} fontFamily="Noto Sans Arabic" fontSize={portrait?22:26} direction="rtl">ما الذي كان معروفًا عند العثور عليها؟</text>
+    <path d={`M${W*.2} ${H*.36} Q${W*.5} ${H*.48} ${W*.78} ${H*.36} M${W*.22} ${H*.66} Q${W*.48} ${H*.53} ${W*.76} ${H*.66}`} fill="none" stroke="#A85348" strokeWidth="2.5" strokeDasharray="8 10" strokeDashoffset={1200*(1-p)} opacity=".7"/>
+    {positions.map(([ax,ay],i)=>{
+      const delay=(portrait?35:102)+i*1.8,sp=spring({frame:Math.max(0,frame-delay*24),fps:24,config:{damping:15,stiffness:105}}),x=W*ax,y=H*ay;
+      return <g key={i} transform={`translate(${(1-sp)*W*.08} ${(1-sp)*H*.04})`} opacity={sp}>
+        <rect x={x} y={y} width={W*(portrait?.31:.23)} height={H*(portrait?.17:.19)} rx="14" fill={i===2?'#DED0AD':'#11232E'} stroke={i===2?'#D2A85E':TEAL} strokeWidth="3"/>
+        {i===0&&<g transform={`translate(${x+W*.115} ${y+H*.10})`}><rect x={-W*.04} y={-H*.055} width={W*.08} height={H*.11} rx="8" fill="#172F39" stroke={GOLD} strokeWidth="3"/><path d={`M${-W*.025} ${H*.018} Q0 ${-H*.005} ${W*.025} ${H*.018}`} fill="none" stroke={TEAL} strokeWidth="4"/></g>}
+        {i===1&&<g transform={`translate(${x+W*.115} ${y+H*.10})`}><circle r={H*.045} fill="none" stroke={GOLD} strokeWidth="4"/><path d={`M${W*.03} ${H*.03} L${W*.06} ${H*.06}`} stroke={GOLD} strokeWidth="6"/></g>}
+        {i===2&&<g stroke="#766349" strokeWidth="3" opacity=".65"><path d={`M${x+W*.035} ${y+H*.05} H${x+W*.16} M${x+W*.035} ${y+H*.085} H${x+W*.17} M${x+W*.035} ${y+H*.12} H${x+W*.13}`}/></g>}
+        {i===3&&<g transform={`translate(${x+W*.11} ${y+H*.12})`}><path d="M-30 12 Q0 -8 30 12" fill="none" stroke={TEAL} strokeWidth="5"/><path d="M-20 2 V-20 M20 2 V-20 M-20 -20 H20" fill="none" stroke={GOLD} strokeWidth="5"/></g>}
+        {i===4&&<g transform={`translate(${x+W*.11} ${y+H*.12})`}><circle r={H*.04} fill="none" stroke="#A84E43" strokeWidth="4" strokeDasharray="6 5"/><text y={H*.015} textAnchor="middle" fill="#A84E43" fontSize={H*.05} fontFamily="Noto Sans Arabic">?</text></g>}
+        <text x={x+W*.115} y={y+H*.174} textAnchor="middle" fill={i===2?'#62533B':CREAM} fontFamily="Noto Sans Arabic" fontSize={portrait?15:15} fontWeight="600" direction="rtl">{['المضخة','البوصلة','السجل','مستوى الماء','قارب النجاة'][i]}</text>
+      </g>;
+    })}
+  </svg>;
+}
+function TheoryScene({frame,portrait}){
+  const {width:W,height:H}=useVideoConfig(),f=frame/24,start=portrait?30:150;
+  const defs=[['الماء والمضخة','ماذا تعني آثار الماء؟'],['أبخرة الشحنة','هل خشي الطاقم حريقًا؟'],['الطقس والتيارات','هل غيّر البحر مسارها؟']];
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><linearGradient id="theory-bg-v5" x2="0" y2="1"><stop stopColor="#142B37"/><stop offset="1" stopColor="#07131D"/></linearGradient></defs>
+    <rect width={W} height={H} fill="url(#theory-bg-v5)"/><circle cx={W*.5} cy={H*.53} r={H*.48} fill="#6BA3A7" fillOpacity=".055"/>
+    <text x={W*.5} y={H*(portrait?.13:.15)} textAnchor="middle" fill={GOLD} fontFamily="Noto Naskh Arabic" fontSize={portrait?28:37} fontWeight="700" direction="rtl">ثلاث فرضيات… ولا واحدة مثبتة</text>
+    {defs.map(([title,sub],i)=>{
+      const delay=start+i*4,sp=spring({frame:Math.max(0,(f-delay)*24),fps:24,config:{damping:17,stiffness:95}});
+      const w=portrait?W*.82:W*.27,h=portrait?H*.17:H*.40,x=portrait?W*.09:W*(.06+i*.30),y=portrait?H*(.24+i*.19):H*.31;
+      const hot=Math.max(0,1-Math.abs((f-(delay+3))/3));
+      return <g key={title} transform={`translate(0 ${(1-sp)*H*.05})`} opacity={sp}>
+        <rect x={x} y={y} width={w} height={h} rx="18" fill={hot>.05?'#1D3843':'#10242E'} stroke={i===1?'#D5AB60':TEAL} strokeOpacity={.55+.4*hot} strokeWidth="3"/>
+        <circle cx={x+w*.5} cy={y+h*.36} r={h*.2} fill="#17313B" stroke={GOLD} strokeOpacity=".5" strokeWidth="2"/>
+        {i===0&&<g transform={`translate(${x+w*.5} ${y+h*.36})`}><path d="M-34 5 Q-16 -5 0 5 T34 5 M-23 0 V-28 M23 0 V-28 M-23 -28 H23" fill="none" stroke={TEAL} strokeWidth="4"/><path d="M0 -25 V-41" stroke={GOLD} strokeWidth="4"/></g>}
+        {i===1&&<g transform={`translate(${x+w*.5} ${y+h*.36})`}>{[0,1,2].map((n)=><circle key={n} cx={Math.sin(frame*.04+n)*18} cy={-n*18} r={7-n} fill={GOLD} opacity={.8-n*.15}/>)}</g>}
+        {i===2&&<g transform={`translate(${x+w*.5} ${y+h*.36})`}>{[-1,0,1].map((n)=><path key={n} d={`M-38 ${n*15} Q0 ${n*15-8*Math.sin(frame*.03+n)} 38 ${n*15}`} fill="none" stroke={TEAL} strokeWidth="3"/>)}<path d="M0 -32 V32" stroke={GOLD} strokeDasharray="5 5"/></g>}
+        <text x={x+w*.5} y={y+h*.73} textAnchor="middle" fill={CREAM} fontFamily="Noto Sans Arabic" fontSize={portrait?21:23} fontWeight="700" direction="rtl">{title}</text>
+        <text x={x+w*.5} y={y+h*.86} textAnchor="middle" fill="#C4CFCC" fontFamily="Noto Sans Arabic" fontSize={portrait?15:16} direction="rtl">{sub}</text>
+      </g>;
+    })}
+  </svg>;
+}
+function FinalScene({frame,portrait}){
+  const {width:W,height:H}=useVideoConfig(),p=smooth((frame/24-(portrait?42:217))/2);
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%'}}>
+    <defs><linearGradient id="final-bg-v5" x2="0" y2="1"><stop stopColor="#1C3340"/><stop offset=".55" stopColor="#52636A"/><stop offset=".56" stopColor="#17333F"/><stop offset="1" stopColor="#07131D"/></linearGradient><radialGradient id="final-light-v5"><stop stopColor="#E9D6AD" stopOpacity=".3"/><stop offset="1" stopColor="#E9D6AD" stopOpacity="0"/></radialGradient></defs>
+    <rect width={W} height={H} fill="url(#final-bg-v5)"/><circle cx={W*.5} cy={H*.39} r={H*.34} fill="url(#final-light-v5)"/>
+    {[0,1,2,3,4].map(i=><path key={i} d={lineWave(W,H*(.58+i*.075),H*.008,frame*.025+i*1.4,W*.17)} fill="none" stroke="#B7C5C0" strokeOpacity={.22-i*.025} strokeWidth="2"/>)}
+    <circle cx={W*.5} cy={H*.36} r={H*(.09+.025*p)} fill="none" stroke={GOLD} strokeOpacity={.55} strokeWidth="3" strokeDasharray="8 10" transform={`rotate(${frame*.25} ${W*.5} ${H*.36})`}/>
+    <text x={W*.5} y={H*.39} textAnchor="middle" fill={CREAM} fontFamily="Noto Naskh Arabic" fontSize={portrait?54:68} fontWeight="700">؟</text>
+    <path d={`M${W*.22} ${H*.80} Q${W*.5} ${H*.77} ${W*.78} ${H*.80}`} fill="none" stroke={GOLD} strokeOpacity=".55" strokeWidth="3" strokeDasharray={W*.56} strokeDashoffset={W*.56*(1-p)}/>
+  </svg>;
+}
 function MotionArtwork({mode}){
   const frame=useCurrentFrame(),{width:W,height:H}=useVideoConfig(),portrait=mode==='short',s=frame/24;
-  const zoom=1.012+.012*Math.sin(frame*.012), shiftX=Math.sin(frame*.017)*W*.006,shiftY=Math.cos(frame*.015)*H*.005;
-  const facts=s>=108&&s<151&&!portrait;
-  const myths=s>=128&&s<153&&!portrait;
+  const active=portrait
+    ?(s<8?'opening':s<16?'crew':s<25?'missing':s<30?'log':s<43?'theory':'final')
+    :(s<8?'opening':s<34?'journey':s<56?'cargo':s<67?'log':s<103?'discovery':s<151?'investigation':s<217?'theory':'final');
+  const ranges=portrait
+    ?{opening:[0,8],crew:[8,16],missing:[16,25],log:[25,30],theory:[30,43],final:[42,45.84]}
+    :{opening:[0,8],journey:[8,34],cargo:[34,56],log:[56,67],discovery:[67,103],investigation:[102,151],theory:[150,217],final:[217,226.38]};
+  const [a,b]=ranges[active],sceneStyle={position:'absolute',inset:0,opacity:sceneAlpha(s,a,b,.85),transform:`scale(${1.025-.025*smooth((s-a)/1.3)})`};
   return <>
-    <OceanArt frame={frame} mode={mode}/>
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{position:'absolute',inset:0,width:'100%',height:'100%',transform:`translate(${shiftX}px,${shiftY}px) scale(${zoom})`}}>
-      <MainArt frame={frame} mode={mode}/>
-      {!portrait&&s>=8&&s<40&&<MapLayer frame={frame} mode={mode}/>}
-      {!portrait&&s>=56&&s<68&&<Logbook t={s} W={W} H={H} portrait={false}/>}
-      {portrait&&s>=25&&s<35&&<Logbook t={s} W={W} H={H} portrait/>}
-      {s>= (portrait?16:84) && s<=(portrait?27:114)&&<EvidenceLayer frame={frame} mode={mode}/>}
-      {!portrait&&s>=106&&s<151&&<InvestigationLayer frame={frame} mode={mode}/>}
-      {s>=(portrait?30:150)&&s<=(portrait?43:217)&&<TheoryCards t={frame} W={W} H={H} portrait={portrait}/>}
-      <EndingHalo frame={frame} mode={mode}/>
-      <rect width={W} height={H} fill="none" stroke="#D3B36F" strokeOpacity=".23" strokeWidth={3}/>
-    </svg>
+    <div style={sceneStyle}>
+      {active==='opening'&&<><OceanArt frame={frame} mode={mode}/><svg viewBox={`0 0 ${W} ${H}`} style={{position:'absolute',inset:0,width:'100%',height:'100%'}}><MainArt frame={frame} mode={mode}/></svg></>}
+      {active==='journey'&&<MapJourneyScene frame={frame} portrait={false}/>}
+      {active==='cargo'&&<CargoScene frame={frame} portrait={false}/>}
+      {active==='log'&&<LogbookScene frame={frame} portrait={portrait}/>}
+      {active==='crew'&&<CrewScene frame={frame}/>}
+      {active==='missing'&&<MissingBoatScene frame={frame} portrait/>}
+      {active==='discovery'&&<><OceanArt frame={frame} mode={mode}/><svg viewBox={`0 0 ${W} ${H}`} style={{position:'absolute',inset:0,width:'100%',height:'100%'}}><MainArt frame={frame} mode={mode}/></svg></>}
+      {active==='investigation'&&<InvestigationScene frame={frame} portrait={false}/>}
+      {active==='theory'&&<TheoryScene frame={frame} portrait={portrait}/>}
+      {active==='final'&&<FinalScene frame={frame} portrait={portrait}/>}
+    </div>
     {!portrait&&s<8&&titleCard(s,false)}
     {portrait&&s<7&&titleCard(s,true)}
-    <SceneLabel frame={frame} vertical={portrait} mode={mode}/>
     <div style={{position:'absolute',top:portrait?75:34,right:portrait?26:50,zIndex:30,color:CREAM,font:'700 16px "Noto Sans Arabic"',textShadow:'0 2px 8px #000',direction:'rtl'}}>وراء الحكاية <span style={{color:GOLD,marginInlineStart:8}}>·</span></div>
-    {facts&&<Badge vertical={false} top={112}>الوقائع الموثقة</Badge>}
-    {myths&&<Badge vertical={false} top={112}>الأسطورة ليست دليلًا</Badge>}
-    {!portrait&&s>=150&&s<217&&<div style={{position:'absolute',top:160,left:60,right:60,zIndex:24,textAlign:'center',font:'700 31px "Noto Naskh Arabic"',color:CREAM,textShadow:'0 3px 16px #000',opacity:sceneAlpha(s,150,217,2)}}>ثلاث فرضيات · لا جواب محسوم</div>}
-    <div style={{position:'absolute',left:portrait?28:64,right:portrait?28:64,bottom:portrait?185:28,height:2,zIndex:35,background:'rgba(255,255,255,.15)'}}><div style={{width:`${100*frame/(mode==='short'?1092:5409)}%`,height:'100%',background:GOLD}}/></div>
+    <div style={{position:'absolute',left:portrait?28:64,right:portrait?28:64,bottom:portrait?185:28,height:2,zIndex:35,background:'rgba(255,255,255,.15)'}}><div style={{width:`${100*frame/(portrait?1100:5433)}%`,height:'100%',background:GOLD}}/></div>
   </>;
 }
 function MainVideo({cues}){
@@ -392,6 +560,6 @@ function ShortVideo({cues}){
   return <AbsoluteFill style={{background:INK,overflow:'hidden'}}><MotionArtwork mode="short"/><Subtitle cues={cues} frame={frame} vertical/></AbsoluteFill>;
 }
 export const RemotionV4Root=()=> <>
-  <Composition id="MaryCelesteMotionV4" component={MainVideo} durationInFrames={5433} width={1280} height={720} fps={24} defaultProps={{cues:[]}}/>
-  <Composition id="MaryCelesteShortMotionV4" component={ShortVideo} durationInFrames={1100} width={720} height={1280} fps={24} defaultProps={{cues:[]}}/>
+  <Composition id="MaryCelesteMotionV5" component={MainVideo} durationInFrames={5433} width={1280} height={720} fps={24} defaultProps={{cues:[]}}/>
+  <Composition id="MaryCelesteShortMotionV5" component={ShortVideo} durationInFrames={1100} width={720} height={1280} fps={24} defaultProps={{cues:[]}}/>
 </>;

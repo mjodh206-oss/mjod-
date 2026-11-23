@@ -15,8 +15,8 @@ const browserExecutable = await chromium.executablePath();
 const compositor = path.join(here, 'node_modules/@remotion/compositor-linux-x64-gnu/ffmpeg');
 const short = process.argv.includes('--short');
 const still = process.argv.includes('--still');
-const id = short ? 'MaryCelesteShortMotionV4' : 'MaryCelesteMotionV4';
-const output = path.join(here, 'renders', short ? 'short-silent.mp4' : 'main-silent.mp4');
+const id = short ? 'MaryCelesteShortMotionV5' : 'MaryCelesteMotionV5';
+const output = path.join(here, 'renders', short ? 'short-v5-silent.mp4' : 'main-v5-silent.mp4');
 const props = {cues: short ? timeline.shortCues : timeline.cues};
 const composition = await selectComposition({
   serveUrl, id, inputProps: props, browserExecutable,
@@ -41,7 +41,7 @@ if (still) {
       const pct = Math.floor(progress * 100);
       if (pct >= last + 5) { last = pct; console.log(`${pct}% (${renderedFrames}/${composition.durationInFrames})`); }
     },
-    metadata: {title: short ? 'ماري سيليست — موشن غرافيك V4 عمودي' : 'ماري سيليست — موشن غرافيك V4',
+    metadata: {title: short ? 'ماري سيليست — موشن غرافيك V5 عمودي' : 'ماري سيليست — موشن غرافيك V5',
       comment: 'Remotion vector motion graphics; illustrative reconstruction, not archival footage.'},
   });
   console.log(`Rendered silent master: ${output} (${composition.durationInFrames} frames)`);

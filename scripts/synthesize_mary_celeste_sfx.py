@@ -75,6 +75,19 @@ def make_event(kind: str, seconds: float, rng=RNG):
     elif kind == "tap":
         raw = np.sin(2 * np.pi * 620 * t) + 0.35 * np.sin(2 * np.pi * 980 * t)
         env = np.exp(-t * 12.0)
+    elif kind == "knock":
+        f0 = rng.uniform(76, 112)
+        raw = np.sin(2 * np.pi * f0 * t) + .28 * np.sin(2 * np.pi * f0 * 2.6 * t)
+        raw += .12 * shaped_noise(n, "rustle", rng)
+        env = np.exp(-t * 8.5) * np.clip(t / .012, 0, 1)
+    elif kind == "bell":
+        f0 = rng.uniform(560, 760)
+        raw = np.sin(2 * np.pi * f0 * t) + .42 * np.sin(2 * np.pi * f0 * 2.71 * t + .2)
+        raw += .16 * np.sin(2 * np.pi * f0 * 4.08 * t + .7)
+        env = np.exp(-t * 3.4) * np.clip(t / .008, 0, 1)
+    elif kind == "rattle":
+        raw = shaped_noise(n, "rustle", rng)
+        env = (.45 + .55 * np.sin(2 * np.pi * 15 * t) ** 8) * np.exp(-t * 2.4)
     elif kind in ("paper", "swoosh", "splash"):
         noise_kind = "rustle" if kind == "paper" else ("sea" if kind == "splash" else "swoosh")
         raw = shaped_noise(n, noise_kind, rng)

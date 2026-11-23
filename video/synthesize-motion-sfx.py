@@ -57,42 +57,38 @@ def build(seconds: float, short: bool) -> np.ndarray:
     if short:
         events = [
             (0.5, 'splash', 2.0, 0.075, -0.2), (3.1, 'creak', 1.2, 0.052, 0.25),
-            (6.9, 'swoosh', 0.8, 0.050, 0.0), (8.5, 'rope', 1.1, 0.060, -0.25),
-            (14.5, 'swoosh', 0.8, 0.045, 0.2), (16.4, 'tap', 0.45, 0.050, -0.15),
-            (22.8, 'paper', 0.9, 0.054, -0.3), (25.0, 'splash', 1.6, 0.055, 0.25),
-            (30.4, 'swoosh', 0.9, 0.058, 0.0), (34.2, 'paper', 0.85, 0.045, -0.2),
-            (37.0, 'tap', 0.40, 0.045, 0.18), (41.0, 'swoosh', 1.2, 0.060, 0.0),
-            (43.1, 'splash', 1.8, 0.065, 0.2),
+            (7.8, 'bell', 0.8, 0.040, 0.0), (8.8, 'tap', 0.35, 0.045, -0.2),
+            (15.7, 'swoosh', 0.9, 0.055, 0.0), (16.5, 'knock', 0.65, 0.048, -0.1),
+            (23.8, 'paper', 1.0, 0.060, -0.3), (24.8, 'swoosh', 0.8, 0.055, 0.15),
+            (30.0, 'swoosh', 0.9, 0.062, 0.0), (33.5, 'bell', 0.8, 0.035, 0.2),
+            (38.0, 'splash', 1.4, 0.050, -0.2), (42.0, 'swoosh', 1.0, 0.060, 0.0),
+            (43.3, 'splash', 1.8, 0.065, 0.2),
         ]
     else:
         events = [
-            # Opening, route reveal, voyage and cargo beats.
-            (0.6, 'splash', 2.2, 0.070, -0.20), (3.6, 'creak', 1.35, 0.050, 0.25),
-            (8.0, 'swoosh', 0.95, 0.052, 0.0), (9.1, 'paper', 1.0, 0.048, -0.35),
-            (14.0, 'tap', 0.45, 0.042, 0.20), (22.5, 'paper', 0.85, 0.042, 0.30),
-            (34.8, 'swoosh', 0.85, 0.045, 0.0), (43.8, 'creak', 1.1, 0.045, -0.25),
-            (50.0, 'tap', 0.42, 0.040, 0.25),
-            # Weather and the last ship's-log entry.
-            (54.0, 'swoosh', 1.0, 0.058, -0.15), (56.5, 'splash', 2.8, 0.078, 0.25),
-            (59.2, 'paper', 1.15, 0.055, -0.30), (63.2, 'tap', 0.45, 0.050, 0.10),
-            (66.2, 'creak', 1.2, 0.045, -0.20),
-            # De Gratia sighting; small boat and sailors on the ladder.
-            (67.2, 'swoosh', 1.25, 0.065, 0.0), (70.0, 'splash', 2.2, 0.060, -0.25),
-            (76.0, 'rope', 1.3, 0.055, 0.25), (81.2, 'swoosh', 0.9, 0.055, 0.0),
-            (82.5, 'rope', 1.5, 0.065, -0.2), (84.2, 'tap', 0.32, 0.047, 0.1),
-            (86.1, 'tap', 0.32, 0.047, -0.1), (88.0, 'splash', 2.2, 0.072, 0.25),
-            # Empty deck, pump, waterline, and investigation papers.
-            (90.0, 'swoosh', 0.9, 0.052, 0.0), (92.2, 'creak', 1.6, 0.055, -0.2),
-            (96.0, 'splash', 1.8, 0.045, 0.18), (105.5, 'paper', 1.2, 0.064, -0.35),
-            (108.0, 'swoosh', 0.85, 0.048, 0.0), (115.0, 'tap', 0.4, 0.045, 0.25),
-            (125.7, 'paper', 1.1, 0.050, 0.35), (128.2, 'swoosh', 0.9, 0.050, 0.0),
-            # Myth-busting, then three distinct hypothesis graphics.
-            (132.0, 'paper', 1.0, 0.045, -0.2), (148.0, 'swoosh', 1.1, 0.055, 0.0),
-            (153.0, 'tap', 0.35, 0.043, -0.25), (168.5, 'tap', 0.35, 0.043, 0.20),
-            (184.0, 'paper', 0.85, 0.042, -0.20), (201.0, 'tap', 0.35, 0.038, 0.22),
-            # Quiet, warm ending swell.
-            (214.5, 'swoosh', 1.45, 0.058, 0.0), (218.5, 'creak', 1.2, 0.047, 0.25),
-            (221.0, 'splash', 2.8, 0.064, -0.15),
+            # Opening and illustrated route map.
+            (0.6, 'splash', 2.2, 0.068, -0.20), (3.6, 'creak', 1.35, 0.048, 0.25),
+            (8.0, 'swoosh', 1.0, 0.062, 0.0), (9.4, 'bell', 1.3, 0.035, -0.25),
+            (18.5, 'tap', 0.35, 0.040, 0.20), (27.5, 'bell', 0.9, 0.035, 0.30),
+            # Cargo ledger: a soft wooden knock and barrel rattle.
+            (34.0, 'swoosh', 0.9, 0.058, 0.0), (35.4, 'knock', 0.7, 0.053, -0.22),
+            (40.5, 'rattle', 1.1, 0.044, 0.20), (49.5, 'knock', 0.6, 0.039, 0.22),
+            # Close-up of the ship's final log entry.
+            (55.8, 'paper', 1.4, 0.063, -0.35), (60.7, 'tap', 0.36, 0.042, 0.18),
+            (65.8, 'swoosh', 0.9, 0.055, 0.0),
+            # De Gratia discovery and the missing boat.
+            (67.0, 'swoosh', 1.2, 0.064, 0.0), (70.0, 'splash', 2.5, 0.057, -0.25),
+            (76.0, 'rope', 1.35, 0.055, 0.25), (82.5, 'knock', 0.65, 0.044, -0.15),
+            (88.0, 'splash', 2.2, 0.068, 0.25), (100.8, 'swoosh', 1.0, 0.058, 0.0),
+            # Investigation table: evidence cards, magnifier, and pump diagram.
+            (102.2, 'knock', 0.6, 0.047, 0.0), (104.0, 'paper', 1.35, 0.062, -0.35),
+            (111.0, 'tap', 0.38, 0.042, 0.22), (124.5, 'paper', 1.0, 0.052, 0.35),
+            (137.2, 'bell', 0.8, 0.032, -0.15), (149.5, 'swoosh', 1.1, 0.057, 0.0),
+            # Hypotheses: three distinct, soft transition accents.
+            (151.2, 'knock', 0.7, 0.044, -0.25), (172.5, 'swoosh', 0.9, 0.044, 0.2),
+            (194.0, 'tap', 0.35, 0.038, -0.2), (215.8, 'swoosh', 1.5, 0.057, 0.0),
+            # Quiet closing swell, never masking the final line.
+            (219.5, 'creak', 1.1, 0.042, 0.25), (222.0, 'splash', 2.3, 0.052, -0.15),
         ]
     for when, kind, length, gain, pan in events:
         if when < seconds:
@@ -116,9 +112,9 @@ def main():
     parser.add_argument('--out-dir', type=Path, default=ROOT / 'audio/episode-01')
     args = parser.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    write_wav(args.out_dir / 'v4-motion-sfx-main.wav', build(args.main_seconds, False))
-    write_wav(args.out_dir / 'v4-motion-sfx-short.wav', build(args.short_seconds, True))
-    print('Wrote V4 motion-synchronized Foley WAVs.')
+    write_wav(args.out_dir / 'v5-motion-sfx-main.wav', build(args.main_seconds, False))
+    write_wav(args.out_dir / 'v5-motion-sfx-short.wav', build(args.short_seconds, True))
+    print('Wrote V5 scene-specific motion Foley WAVs.')
 
 if __name__ == '__main__':
     main()
