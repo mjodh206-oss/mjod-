@@ -1,0 +1,33 @@
+[Script Info]
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 720
+PlayResY: 1280
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Caption,DejaVu Sans,29,&H00F2EEE5,&H00FFFFFF,&HCC07131D,&HAA07131D,0,0,0,0,100,100,0,0,3,1.6,0,2,48,48,170,1
+Style: Label,DejaVu Sans,21,&H0075B6D8,&H00FFFFFF,&HCC07131D,&HAA07131D,1,0,0,0,100,100,0,0,3,1,0,8,30,30,235,1
+Style: Title,DejaVu Sans,53,&H0075B6D8,&H00FFFFFF,&HDD07131D,&HBB07131D,1,0,0,0,100,100,0,0,1,2,1,8,50,50,820,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:06.79,Caption,,0,0,0,,{\fad(180,160)}في عام 1872، عثر بحّارة على سفينة\Nاسمها ماري سيليست تمضي وحدها في
+Dialogue: 0,0:00:06.79,0:00:08.36,Caption,,0,0,0,,{\fad(180,160)}المحيط الأطلسي.
+Dialogue: 0,0:00:08.36,0:00:15.46,Caption,,0,0,0,,{\fad(180,160)}لم يكن على متنها القبطان، ولا زوجته\Nوابنته، ولا أيٌّ من أفراد الطاقم
+Dialogue: 0,0:00:15.46,0:00:16.19,Caption,,0,0,0,,{\fad(180,160)}السبعة.
+Dialogue: 0,0:00:16.19,0:00:23.19,Caption,,0,0,0,,{\fad(180,160)}السفينة بقيت طافية، ومعظم حمولتها في\Nمكانها، لكن قارب النجاة اختفى.
+Dialogue: 0,0:00:23.19,0:00:29.98,Caption,,0,0,0,,{\fad(180,160)}آخر ملاحظة في دفترها كُتبت قرب\Nالأزور قبل نحو عشرة أيام من العثور
+Dialogue: 0,0:00:29.98,0:00:30.61,Caption,,0,0,0,,{\fad(180,160)}عليها.
+Dialogue: 0,0:00:30.61,0:00:37.61,Caption,,0,0,0,,{\fad(180,160)}طُرحت فرضيات عن عطل في المضخة أو\Nالخوف من أبخرة الكحول، لكن لم يثبت
+Dialogue: 0,0:00:37.61,0:00:38.55,Caption,,0,0,0,,{\fad(180,160)}أي تفسير.
+Dialogue: 0,0:00:38.55,0:00:39.90,Caption,,0,0,0,,{\fad(180,160)}السفينة عادت…
+Dialogue: 0,0:00:39.90,0:00:43.66,Caption,,0,0,0,,{\fad(180,160)}أما ركابها العشرة، فلم يُعرف مصيرهم.
+Dialogue: 0,0:00:43.66,0:00:45.44,Caption,,0,0,0,,{\fad(180,160)}هذه وراء الحكاية.
+Dialogue: 1,0:00:00.00,0:00:08.00,Label,,0,0,0,,{\fad(220,220)}المحيط الأطلسي · ١٨٧٢ · إعادة بناء توضيحية
+Dialogue: 1,0:00:16.00,0:00:25.00,Label,,0,0,0,,{\fad(220,220)}السفينة بقيت طافية · قارب النجاة مفقود
+Dialogue: 1,0:00:25.00,0:00:34.00,Label,,0,0,0,,{\fad(220,220)}آخر سجل معروف · قرب جزر الأزور
+Dialogue: 1,0:00:34.00,0:00:43.00,Label,,0,0,0,,{\fad(220,220)}فرضيات — لا تفسير مثبت
+Dialogue: 1,0:00:42.00,0:00:45.50,Label,,0,0,0,,{\fad(220,220)}وراء الحكاية · قصص حقيقية… وما لم يُحكَ منها
+Dialogue: 2,0:00:00.00,0:00:07.00,Title,,0,0,0,,{\an8\pos(360,320)\fad(400,300)}سفينة بلا طاقم؟
