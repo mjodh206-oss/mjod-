@@ -35,72 +35,367 @@ import dev.lasq.fawri.core.*
 import dev.lasq.fawri.platform.*
 import kotlinx.coroutines.delay
 
-enum class Screen(val label:String,val icon:G) { HOME("الرئيسية",G.HOME),HISTORY("السجل",G.HISTORY),APPS("التطبيقات",G.GRID),SETTINGS("الإعدادات",G.TUNE),PERMISSIONS("الأذونات",G.KEY),ABOUT("حول التطبيق",G.INFO),TEMPLATES("القوالب",G.STACK),PRIVACY("الخصوصية",G.SHIELD) }
-class MainActivity: FragmentActivity() {
-    val vm: AppModel by viewModels(); var epoch by mutableIntStateOf(0); private set
-    private var unlocked by mutableStateOf(false); private var foreground by mutableStateOf(false)
-    private var shared by mutableStateOf<String?>(null); private var transfer by mutableStateOf<Pair<Uri,Boolean>?>(null)
-    private var authDone: (() -> Unit)?=null
-    private val credential=registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result -> if(result.resultCode==RESULT_OK) authenticated() else authDone=null }
-    private val notify=registerForActivityResult(ActivityResultContracts.RequestPermission()) { epoch++; if(!it) toast("الإشعارات مطلوبة للتشغيل. يمكنك استخدام السجل اليدوي دونها.") }
-    private val create=registerForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { if(it!=null) transfer=it to true }
-    private val doc=registerForActivityResult(ActivityResultContracts.OpenDocument()) { if(it!=null) transfer=it to false }
-    fun pickFile(export:Boolean) { if(export) create.launch("سجل-لصق-فوري.lasq") else doc.launch(arrayOf("application/octet-stream","*/*")) }
-    fun toast(text:String)=Toast.makeText(this,text,Toast.LENGTH_LONG).show()
-    fun external(intent: Intent) { try { startActivity(intent) } catch(_: Exception) { toast("لم نجد شاشة نظام مناسبة على هذا الجهاز.") } }
+enum class Screen(val label: String, val icon: G) {
+    HOME("الرئيسية", G.HOME),
+    HISTORY("السجل", G.HISTORY),
+    APPS("التطبيقات", G.GRID),
+    SETTINGS("الإعدادات", G.TUNE),
+    PERMISSIONS("الأذونات", G.KEY),
+    ABOUT("حول التطبيق", G.INFO),
+    TEMPLATES("القوالب", G.STACK),
+    PRIVACY("الخصوصية", G.SHIELD),
+}
+
+class MainActivity : FragmentActivity() {
+    val vm: AppModel by viewModels()
+    var epoch by mutableIntStateOf(0)
+        private set
+
+    private var unlocked by mutableStateOf(false)
+    private var foreground by mutableStateOf(false)
+    private var shared by mutableStateOf<String?>(null)
+    private var transfer by mutableStateOf<Pair<Uri, Boolean>?>(null)
+    private var authDone: (() -> Unit)? = null
+    private val credential =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) authenticated() else authDone = null
+        }
+    private val notify =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            epoch++
+            if (!it) toast("الإشعارات مطلوبة للتشغيل. يمكنك استخدام السجل اليدوي دونها.")
+        }
+    private val create =
+        registerForActivityResult(
+            object : ActivityResultContracts.CreateDocument("application/octet-stream") {
+                override fun createIntent(context: Context, input: String) =
+                    super.createIntent(context, input).putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+            },
+        ) {
+            if (it != null) transfer = it to true
+        }
+    private val doc =
+        registerForActivityResult(
+            object : ActivityResultContracts.OpenDocument() {
+                override fun createIntent(context: Context, input: Array<String>) =
+                    super.createIntent(context, input).putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+            },
+        ) {
+            if (it != null) transfer = it to false
+        }
+
+    fun pickFile(export: Boolean) {
+        if (export) create.launch("سجل-لصق-فوري.lasq")
+        else doc.launch(arrayOf("application/octet-stream", "*/*"))
+    }
+
+    fun toast(text: String) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+
+    fun external(intent: Intent) {
+        try {
+            startActivity(intent)
+        } catch (_: Exception) {
+            toast("لم نجد شاشة نظام مناسبة على هذا الجهاز.")
+        }
+    }
+
     fun notifyPermission() {
-        if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED && (!getPreferences(MODE_PRIVATE).getBoolean("asked",false) || shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))) {
-            getPreferences(MODE_PRIVATE).edit().putBoolean("asked",true).apply();notify.launch(Manifest.permission.POST_NOTIFICATIONS)
-        } else external(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,packageName))
+        if (
+            Build.VERSION.SDK_INT >= 33 &&
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                    android.content.pm.PackageManager.PERMISSION_GRANTED &&
+                (!getPreferences(MODE_PRIVATE).getBoolean("asked", false) ||
+                    shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
+        ) {
+            getPreferences(MODE_PRIVATE).edit().putBoolean("asked", true).apply()
+            notify.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else
+            external(
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
+            )
     }
-    fun chooseBoard() { val im=getSystemService(InputMethodManager::class.java);if(im.enabledInputMethodList.any { it.packageName==packageName }) im.showInputMethodPicker() else external(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)) }
-    private fun authenticated() { unlocked=true; authDone?.invoke();authDone=null }
-    @Suppress("DEPRECATION") private fun deviceCredential() { val i=getSystemService(KeyguardManager::class.java).createConfirmDeviceCredentialIntent("لصق فوري","أكّد هويتك لفتح مساحتك الخاصة."); if(i!=null) credential.launch(i) else {authDone=null;toast("عيّن قفل شاشة من إعدادات الجهاز أولاً.")} }
-    fun authenticate(done:()->Unit={}) {
-        if(!getSystemService(KeyguardManager::class.java).isDeviceSecure) { toast("عيّن رمز PIN أو قفل شاشة آمن على جهازك أولاً."); return }
-        authDone=done
-        val supported=if(Build.VERSION.SDK_INT>=30) BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL else BiometricManager.Authenticators.BIOMETRIC_STRONG
-        if(BiometricManager.from(this).canAuthenticate(supported)!=BiometricManager.BIOMETRIC_SUCCESS) { deviceCredential();return }
-        val prompt=BiometricPrompt(this,object:BiometricPrompt.AuthenticationCallback(){
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) { authenticated() }
-            override fun onAuthenticationError(errorCode:Int,errString:CharSequence) { if(errorCode==BiometricPrompt.ERROR_NEGATIVE_BUTTON && Build.VERSION.SDK_INT<30) deviceCredential() else {authDone=null;if(errorCode!=BiometricPrompt.ERROR_USER_CANCELED && errorCode!=BiometricPrompt.ERROR_CANCELED) toast("تعذّر التحقق من الهوية. أعد المحاولة بقفل الجهاز.")} }
-        });val info=BiometricPrompt.PromptInfo.Builder().setTitle("فتح لصق فوري").setSubtitle("تحقق محلي ببصمة أو بقفل الجهاز").setAllowedAuthenticators(supported)
-        if(Build.VERSION.SDK_INT<30) info.setNegativeButtonText("استخدام قفل الجهاز");prompt.authenticate(info.build())
+
+    fun chooseBoard() {
+        val im = system<InputMethodManager>()
+        if (im.enabledInputMethodList.any { it.packageName == packageName }) im.showInputMethodPicker()
+        else external(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
     }
-    override fun onCreate(savedInstanceState:Bundle?) {
-        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE);super.onCreate(savedInstanceState);enableEdgeToEdge();Alerts.setup(this);readIntent(intent)
+
+    private fun authenticated() {
+        unlocked = true
+        authDone?.invoke()
+        authDone = null
+    }
+
+    @Suppress("DEPRECATION")
+    private fun deviceCredential() {
+        val i =
+            system<KeyguardManager>()
+                .createConfirmDeviceCredentialIntent("لصق فوري", "أكّد هويتك لفتح مساحتك الخاصة.")
+        if (i != null) credential.launch(i)
+        else {
+            authDone = null
+            toast("عيّن قفل شاشة من إعدادات الجهاز أولاً.")
+        }
+    }
+
+    fun authenticate(done: () -> Unit = {}) {
+        if (!system<KeyguardManager>().isDeviceSecure) {
+            toast("عيّن رمز PIN أو قفل شاشة آمن على جهازك أولاً.")
+            return
+        }
+        authDone = done
+        val supported =
+            if (Build.VERSION.SDK_INT >= 30)
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            else BiometricManager.Authenticators.BIOMETRIC_STRONG
+        if (
+            BiometricManager.from(this).canAuthenticate(supported) != BiometricManager.BIOMETRIC_SUCCESS
+        ) {
+            deviceCredential()
+            return
+        }
+        val prompt =
+            BiometricPrompt(
+                this,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(
+                        result: BiometricPrompt.AuthenticationResult,
+                    ) {
+                        authenticated()
+                    }
+
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        if (
+                            errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON &&
+                                Build.VERSION.SDK_INT < 30
+                        )
+                            deviceCredential()
+                        else {
+                            authDone = null
+                            if (
+                                errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
+                                    errorCode != BiometricPrompt.ERROR_CANCELED
+                            )
+                                toast("تعذّر التحقق من الهوية. أعد المحاولة بقفل الجهاز.")
+                        }
+                    }
+                },
+            )
+        val info =
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle("فتح لصق فوري")
+                .setSubtitle("تحقق محلي ببصمة أو بقفل الجهاز")
+                .setAllowedAuthenticators(supported)
+        if (Build.VERSION.SDK_INT < 30) info.setNegativeButtonText("استخدام قفل الجهاز")
+        prompt.authenticate(info.build())
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        Alerts.setup(this)
+        readIntent(intent)
         setContent {
-            val o by vm.prefs.flow.collectAsState();LasqTheme(o.theme,o.locale) {
-                val light=Colors.current.canvas.luminance()>.5;val view=LocalView.current
-                SideEffect { WindowCompat.getInsetsController(window,view).apply { isAppearanceLightStatusBars=light;isAppearanceLightNavigationBars=light } }
-                var ready by remember { mutableStateOf(false) };LaunchedEffect(Unit){ delay(780);ready=true }
-                val protected=o.lock && !unlocked
-                LaunchedEffect(ready,foreground,protected,o.intro) { vm.visible.value=ready && foreground && !protected && o.intro; if(vm.visible.value) { vm.refresh();app.cleanLater() } }
-                Box(Modifier.fillMaxSize().background(Colors.current.canvas).statusBarsPadding().navigationBarsPadding().imePadding(),contentAlignment=Alignment.Center) {
+            val o by vm.prefs.flow.collectAsState()
+            LasqTheme(o.theme, o.locale) {
+                val light = Colors.current.canvas.luminance() > .5
+                val view = LocalView.current
+                SideEffect {
+                    WindowCompat.getInsetsController(window, view).apply {
+                        isAppearanceLightStatusBars = light
+                        isAppearanceLightNavigationBars = light
+                    }
+                }
+                var ready by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    delay(780)
+                    ready = true
+                }
+                val protected = o.lock && !unlocked
+                LaunchedEffect(ready, foreground, protected, o.intro) {
+                    vm.visible.value = ready && foreground && !protected && o.intro
+                    if (vm.visible.value) {
+                        vm.refresh()
+                        app.cleanLater()
+                    }
+                }
+                Box(
+                    Modifier.fillMaxSize()
+                        .background(Colors.current.canvas)
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                        .imePadding(),
+                    contentAlignment = Alignment.Center,
+                ) {
                     when {
                         !ready -> Splash()
-                        !app.integrity.first -> Empty(G.SHIELD,"تعذر التحقق من توقيع التطبيق","لا تفتح هذه النسخة سجلك ولا تشغّل خدمة النسخ. استخدم نسخة موثوقة.")
-                        protected -> Column(Modifier.widthIn(max=500.dp).padding(28.dp),horizontalAlignment=Alignment.CenterHorizontally) { Logo(64);Spacer(Modifier.height(24.dp));Title("مساحتك مقفلة","تحقق من هويتك لعرض الحافظة والإعدادات.");Spacer(Modifier.height(24.dp));Primary("فتح التطبيق",{authenticate()},icon=G.LOCK) }
-                        !o.intro -> Intro { vm.settings { it.copy(intro=true) }; if(it) openSetup=true }
+                        !app.integrity.first ->
+                            Empty(
+                                G.SHIELD,
+                                "تعذر التحقق من توقيع التطبيق",
+                                "لا تفتح هذه النسخة سجلك ولا تشغّل خدمة النسخ. استخدم نسخة موثوقة.",
+                            )
+                        protected ->
+                            Column(
+                                Modifier.widthIn(max = 500.dp).padding(28.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Logo(64)
+                                Spacer(Modifier.height(24.dp))
+                                Title("مساحتك مقفلة", "تحقق من هويتك لعرض الحافظة والإعدادات.")
+                                Spacer(Modifier.height(24.dp))
+                                Primary("فتح التطبيق", { authenticate() }, icon = G.LOCK)
+                            }
+                        !o.intro ->
+                            Intro {
+                                vm.settings { it.copy(intro = true) }
+                                if (it) openSetup = true
+                            }
                         else -> {
-                            MainShell(this@MainActivity,vm,o,openSetup) {openSetup=false}
-                            shared?.let { body -> Confirm("حفظ النص المُشارك؟",body.take(200)+"\n\nسيُحفظ محلياً بعد موافقتك فقط.","حفظ في السجل",{shared=null}) { vm.manual(body,"مشاركة يدوية");shared=null } }
-                            transfer?.let { (uri,export) -> Passphrase(export,{transfer=null}) { pass-> transfer=null;vm.transfer(uri,export,pass) } }
+                            MainShell(this@MainActivity, vm, o, openSetup) { openSetup = false }
+                            shared?.let { body ->
+                                Confirm(
+                                    "حفظ النص المُشارك؟",
+                                    body.take(200) + "\n\nسيُحفظ محلياً بعد موافقتك فقط.",
+                                    "حفظ في السجل",
+                                    { shared = null },
+                                ) {
+                                    vm.manual(body, "مشاركة يدوية")
+                                    shared = null
+                                }
+                            }
+                            transfer?.let { (uri, export) ->
+                                Passphrase(export, { transfer = null }) { pass ->
+                                    transfer = null
+                                    vm.transfer(uri, export, pass)
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
+
     private var openSetup by mutableStateOf(false)
-    private fun readIntent(i:Intent?) { if(i?.action==Intent.ACTION_SEND) { shared=runCatching {
-        if(i.type!="text/plain" || i.clipData?.description?.extras?.getBoolean("android.content.extra.IS_SENSITIVE")==true) null else i.getCharSequenceExtra(Intent.EXTRA_TEXT)?.takeIf { it.length in 1..MAX_TEXT && it.isNotBlank() }?.toString()
-    }.getOrNull();if(shared==null) toast("نقبل نصاً غير حساس فقط، بحد أقصى ٢٤ ألف حرف.");setIntent(Intent(this,MainActivity::class.java)) } }
-    override fun onNewIntent(intent:Intent){super.onNewIntent(intent);readIntent(intent)}
-    override fun onStart(){super.onStart();foreground=true}
-    override fun onResume(){super.onResume();epoch++;Surfaces.refresh(this); if(app.active.value && Checks.reason(this)!=null) Monitor.instance?.halt(false) }
-    override fun onStop(){foreground=false;unlocked=false;vm.visible.value=false;super.onStop()}
-    override fun onWindowFocusChanged(hasFocus:Boolean){super.onWindowFocusChanged(hasFocus);if(hasFocus){epoch++; if(!app.prefs.value.lock || unlocked) runCatching { ClipboardPort.expire(this,foreground=true) } } }
+
+    private fun readIntent(i: Intent?) {
+        if (i?.action == Intent.ACTION_SEND) {
+            shared =
+                runCatching {
+                    if (
+                        i.type != "text/plain" ||
+                            i.clipData
+                                ?.description
+                                ?.extras
+                                ?.getBoolean("android.content.extra.IS_SENSITIVE") == true
+                    )
+                        null
+                    else
+                        i.getCharSequenceExtra(Intent.EXTRA_TEXT)
+                            ?.takeIf { it.length in 1..MAX_TEXT && it.isNotBlank() }
+                            ?.toString()
+                }
+                    .getOrNull()
+            if (shared == null) toast("نقبل نصاً غير حساس فقط، بحد أقصى ٢٤ ألف حرف.")
+            setIntent(Intent(this, MainActivity::class.java))
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        readIntent(intent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        foreground = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        epoch++
+        Surfaces.refresh(this)
+        if (app.active.value && Checks.reason(this) != null) Monitor.instance?.halt(false)
+    }
+
+    override fun onStop() {
+        foreground = false
+        unlocked = false
+        vm.visible.value = false
+        super.onStop()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            epoch++
+            if (!app.prefs.value.lock || unlocked)
+                runCatching { ClipboardPort.expire(this, foreground = true) }
+        }
+    }
 }
-@Composable private fun Splash() { val a=remember {Animatable(.74f)};LaunchedEffect(Unit){a.animateTo(1f,tween(550))};Column(horizontalAlignment=Alignment.CenterHorizontally) { Box(Modifier.scale(a.value)){Logo(80)};Spacer(Modifier.height(16.dp));Txt("لصق فوري",32,bold=true);Txt(CREDIT,14,Colors.current.muted) } }
-@Composable private fun Passphrase(export:Boolean,close:()->Unit,ok:(CharArray)->Unit) { var pass by remember {mutableStateOf("")};var again by remember{mutableStateOf("")};AlertDialog(onDismissRequest=close,title={Txt(if(export)"تشفير النسخة" else "فتح النسخة",21,bold=true)},text={Column(verticalArrangement=Arrangement.spacedBy(9.dp)){Txt(if(export)"اختر عبارة مرور من ١٠ أحرف على الأقل. لا يمكننا استعادتها." else "أدخل عبارة مرور الملف. لن تُستورد العناصر المنتهية.",14,Colors.current.muted);OutlinedTextField(pass,{pass=it.take(256)},singleLine=true,visualTransformation=PasswordVisualTransformation(),label={Txt("عبارة المرور",13)});if(export) OutlinedTextField(again,{again=it.take(256)},singleLine=true,visualTransformation=PasswordVisualTransformation(),label={Txt("تأكيد العبارة",13)})}},confirmButton={TextButton({ok(pass.toCharArray());pass="";again=""},enabled=pass.length>=10 && (!export || pass==again)){Txt(if(export)"تصدير" else "استيراد",color=LocalContentColor.current)}},dismissButton={TextButton(close){Txt("إلغاء")}}) }
+
+@Composable
+private fun Splash() {
+    val a = remember { Animatable(.74f) }
+    LaunchedEffect(Unit) { a.animateTo(1f, tween(550)) }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(Modifier.scale(a.value)) { Logo(80) }
+        Spacer(Modifier.height(16.dp))
+        Txt("لصق فوري", 32, bold = true)
+        Txt(CREDIT, 14, Colors.current.muted)
+    }
+}
+
+@Composable
+private fun Passphrase(export: Boolean, close: () -> Unit, ok: (CharArray) -> Unit) {
+    var pass by remember { mutableStateOf("") }
+    var again by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = close,
+        title = { Txt(if (export) "تشفير النسخة" else "فتح النسخة", 21, bold = true) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                Txt(
+                    if (export) "اختر عبارة مرور من ١٠ أحرف على الأقل. لا يمكننا استعادتها."
+                    else "أدخل عبارة مرور الملف. لن تُستورد العناصر المنتهية.",
+                    14,
+                    Colors.current.muted,
+                )
+                OutlinedTextField(
+                    pass,
+                    { pass = it.take(256) },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    label = { Txt("عبارة المرور", 13) },
+                )
+                if (export)
+                    OutlinedTextField(
+                        again,
+                        { again = it.take(256) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        label = { Txt("تأكيد العبارة", 13) },
+                    )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                {
+                    ok(pass.toCharArray())
+                    pass = ""
+                    again = ""
+                },
+                enabled = pass.length >= 10 && (!export || pass == again),
+            ) {
+                Txt(if (export) "تصدير" else "استيراد", color = LocalContentColor.current)
+            }
+        },
+        dismissButton = { TextButton(close) { Txt("إلغاء") } },
+    )
+}

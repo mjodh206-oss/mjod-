@@ -8,11 +8,28 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class LasqApp : Application() {
-    val prefs by lazy { Prefs(this) }; val vault by lazy { Vault(this) }
+    val prefs by lazy { Prefs(this) }
+    val vault by lazy { Vault(this) }
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    val active = MutableStateFlow(false); val messages = MutableSharedFlow<String>(extraBufferCapacity=8)
+    val active = MutableStateFlow(false)
+    val messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val integrity by lazy { Integrity.inspect(this) }
-    fun report(s: String) { messages.tryEmit(s) }
-    fun cleanLater() { scope.launch { try { val due = vault.prune(prefs.value.days); Maintenance.plan(this@LasqApp, due) } catch (_: Exception) { report("تعذّر فتح السجل المشفّر. لم نحذف بياناتك.") } } }
+
+    fun report(s: String) {
+        messages.tryEmit(s)
+    }
+
+    fun cleanLater() {
+        scope.launch {
+            try {
+                val due = vault.prune(prefs.value.days)
+                Maintenance.plan(this@LasqApp, due)
+            } catch (_: Exception) {
+                report("تعذّر فتح السجل المشفّر. لم نحذف بياناتك.")
+            }
+        }
+    }
 }
-val Context.app get() = applicationContext as LasqApp
+
+val Context.app
+    get() = applicationContext as LasqApp
