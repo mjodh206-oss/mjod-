@@ -2,7 +2,7 @@
   "name": "mary-celeste-remotion-v4",
   "private": true,
   "type": "module",
-  "scripts": {"render": "node render.mjs", "render:short": "node render.mjs --short", "finalize": "node finalize.mjs"},
+  "scripts": {"render": "node render.mjs", "render:short": "node render.mjs --short", "cover": "node render.mjs --cover", "finalize": "node finalize.mjs"},
   "dependencies": {
     "@fontsource/noto-sans-arabic": "5.3.0",
     "@fontsource/noto-naskh-arabic": "5.3.0",

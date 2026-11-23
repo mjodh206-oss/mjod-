@@ -15,20 +15,23 @@ const browserExecutable = await chromium.executablePath();
 const compositor = path.join(here, 'node_modules/@remotion/compositor-linux-x64-gnu/ffmpeg');
 const short = process.argv.includes('--short');
 const still = process.argv.includes('--still');
-const id = short ? 'MaryCelesteShortMotionV5' : 'MaryCelesteMotionV5';
-const output = path.join(here, 'renders', short ? 'short-v5-silent.mp4' : 'main-v5-silent.mp4');
-const props = {cues: short ? timeline.shortCues : timeline.cues};
+const cover = process.argv.includes('--cover');
+const id = cover ? 'MaryCelesteShortCoverV6' : short ? 'MaryCelesteShortMotionV6' : 'MaryCelesteMotionV6';
+const output = path.join(here, 'renders', short ? 'short-v6-silent.mp4' : 'main-v6-silent.mp4');
+const props = cover ? {} : {cues: short ? timeline.shortCues : timeline.cues};
 const composition = await selectComposition({
   serveUrl, id, inputProps: props, browserExecutable,
   chromiumOptions: {enableMultiProcessOnLinux: false},
 });
-if (still) {
-  const frame = Number(process.env.FRAME ?? (short ? 480 : 2500));
-  const jpg = path.join(here, 'renders', `${short ? 'short' : 'main'}-frame-${frame}.jpg`);
-  fs.mkdirSync(path.dirname(jpg), {recursive: true});
-  await renderStill({composition, serveUrl, output: jpg, frame, inputProps: props,
-    browserExecutable, chromiumOptions: {enableMultiProcessOnLinux: false}, imageFormat: 'jpeg'});
-  console.log(`Rendered preview frame ${frame}: ${jpg}`);
+if (still || cover) {
+  const frame = cover ? 0 : Number(process.env.FRAME ?? (short ? 480 : 2500));
+  const image = cover
+    ? path.join(repo, 'brand/episode-01-short-cover-v6.png')
+    : path.join(here, 'renders', `${short ? 'short' : 'main'}-frame-${frame}.jpg`);
+  fs.mkdirSync(path.dirname(image), {recursive: true});
+  await renderStill({composition, serveUrl, output: image, frame, inputProps: props,
+    browserExecutable, chromiumOptions: {enableMultiProcessOnLinux: false}, imageFormat: cover ? 'png' : 'jpeg'});
+  console.log(cover ? `Rendered Shorts cover: ${image}` : `Rendered preview frame ${frame}: ${image}`);
 } else {
   fs.mkdirSync(path.dirname(output), {recursive: true});
   let last = -5;
@@ -41,7 +44,7 @@ if (still) {
       const pct = Math.floor(progress * 100);
       if (pct >= last + 5) { last = pct; console.log(`${pct}% (${renderedFrames}/${composition.durationInFrames})`); }
     },
-    metadata: {title: short ? 'ماري سيليست — موشن غرافيك V5 عمودي' : 'ماري سيليست — موشن غرافيك V5',
+    metadata: {title: short ? 'ماري سيليست — موشن غرافيك V6 عمودي' : 'ماري سيليست — موشن غرافيك V6',
       comment: 'Remotion vector motion graphics; illustrative reconstruction, not archival footage.'},
   });
   console.log(`Rendered silent master: ${output} (${composition.durationInFrames} frames)`);

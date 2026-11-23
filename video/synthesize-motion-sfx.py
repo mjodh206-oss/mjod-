@@ -112,9 +112,9 @@ def main():
     parser.add_argument('--out-dir', type=Path, default=ROOT / 'audio/episode-01')
     args = parser.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    write_wav(args.out_dir / 'v5-motion-sfx-main.wav', build(args.main_seconds, False))
-    write_wav(args.out_dir / 'v5-motion-sfx-short.wav', build(args.short_seconds, True))
-    print('Wrote V5 scene-specific motion Foley WAVs.')
+    write_wav(args.out_dir / 'v6-motion-sfx-main.wav', build(args.main_seconds, False))
+    write_wav(args.out_dir / 'v6-motion-sfx-short.wav', build(args.short_seconds, True))
+    print('Wrote V6 scene-specific motion Foley WAVs.')
 
 if __name__ == '__main__':
     main()

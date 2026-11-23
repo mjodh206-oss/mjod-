@@ -27,8 +27,8 @@ run(python, [
 ]);
 
 function finalize({short, seconds, voiceName, sfxName, silentName, outputName, title}) {
-  const voiceWav = path.join(rendersDir, `${short ? 'short' : 'main'}-voice-v5.wav`);
-  const mixedWav = path.join(rendersDir, `${short ? 'short' : 'main'}-mix-v5.wav`);
+  const voiceWav = path.join(rendersDir, `${short ? 'short' : 'main'}-voice-v6.wav`);
+  const mixedWav = path.join(rendersDir, `${short ? 'short' : 'main'}-mix-v6.wav`);
   const sfx = path.join(audioDir, sfxName);
   const output = path.join(repo, 'deliverables', outputName);
   const tmp = `${output}.tmp.mp4`;
@@ -57,13 +57,13 @@ function finalize({short, seconds, voiceName, sfxName, silentName, outputName, t
 
 finalize({
   short: false, seconds: mainSeconds,
-  voiceName: 'v3-final-mix.mp3', sfxName: 'v5-motion-sfx-main.wav',
-  silentName: 'main-v5-silent.mp4', outputName: 'episode-01-main-motion-v5.mp4',
-  title: 'ماري سيليست — موشن غرافيك V5',
+  voiceName: 'v3-final-mix.mp3', sfxName: 'v6-motion-sfx-main.wav',
+  silentName: 'main-v6-silent.mp4', outputName: 'episode-01-main-motion-v6.mp4',
+  title: 'ماري سيليست — موشن غرافيك V6',
 });
 finalize({
   short: true, seconds: shortSeconds,
-  voiceName: 'v3-short-final-mix.mp3', sfxName: 'v5-motion-sfx-short.wav',
-  silentName: 'short-v5-silent.mp4', outputName: 'episode-01-short-motion-v5.mp4',
-  title: 'ماري سيليست — موشن غرافيك V5 عمودي',
+  voiceName: 'v3-short-final-mix.mp3', sfxName: 'v6-motion-sfx-short.wav',
+  silentName: 'short-v6-silent.mp4', outputName: 'episode-01-short-motion-v6.mp4',
+  title: 'ماري سيليست — موشن غرافيك V6 عمودي',
 });
