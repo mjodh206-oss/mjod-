@@ -1,0 +1,37 @@
+name: Lasq Fawri · Android
+on:
+  push:
+    branches: ['arena/0d4372c5-mjod', main]
+    paths: ['app/**', 'gradle/**', '*gradle*', '.github/workflows/lasq.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lasq-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { cache-read-only: false }
+      - name: Make an installable preview (temporary signing identity)
+        shell: bash
+        run: |
+          set -eu
+          pass=$(openssl rand -hex 32)
+          echo "::add-mask::$pass"
+          keytool -genkeypair -storetype PKCS12 -keystore "$RUNNER_TEMP/preview.p12" -storepass "$pass" -alias lasq -keyalg RSA -keysize 3072 -validity 3650 -dname 'CN=Lasq Fawri Preview'
+          LASQ_KEYSTORE="$RUNNER_TEMP/preview.p12" LASQ_STORE_PASSWORD="$pass" LASQ_PREVIEW=true ./gradlew --stacktrace :app:testDebugUnitTest :app:assembleRelease :app:assembleDebugAndroidTest
+          mkdir -p deliver
+          cp app/build/outputs/apk/release/*.apk deliver/lasq-fawri-1.0-preview.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs deliver/*.apk
+          (cd deliver && sha256sum *.apk > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with: { name: lasq-fawri-apk, path: deliver/ }
+      - uses: actions/upload-artifact@v4
+        with: { name: room-schema, path: app/schemas/ }
