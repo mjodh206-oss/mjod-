@@ -30,7 +30,7 @@ jobs:
           scripts/ci-gradle.sh :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin
           scripts/ci-gradle.sh :app:testDebugUnitTest :app:assembleRelease :app:assembleDebug :app:assembleDebugAndroidTest :fixtures:assembleDebug
           mkdir -p deliver
-          cp app/build/outputs/apk/release/*.apk deliver/lasq-fawri-1.0-preview.apk
+          cp app/build/outputs/apk/release/*.apk deliver/lasq-fawri-simple-1.1.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs deliver/*.apk
           (cd deliver && sha256sum *.apk > SHA256SUMS.txt)
       - uses: actions/upload-artifact@v4
@@ -45,7 +45,7 @@ jobs:
             app/build/outputs/apk/androidTest/debug/*.apk
             fixtures/build/outputs/apk/*/debug/*.apk
       - name: Report Room schema
-        run: python3 -c 'import glob,json; print("::notice title=Room schema::"+json.dumps(json.load(open(glob.glob("app/schemas/*/1.json")[0])),separators=(",",":")))'
+        run: python3 -c 'import glob,json; print("::notice title=Room schema::"+json.dumps(json.load(open(glob.glob("app/schemas/*/2.json")[0])),separators=(",",":")))'
   device:
     needs: build
     runs-on: ubuntu-latest
@@ -84,4 +84,4 @@ jobs:
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
           (cd deliver && sha256sum -c SHA256SUMS.txt)
-          gh release create lasq-v1.0.0-preview.1 deliver/lasq-fawri-1.0-preview.apk deliver/SHA256SUMS.txt --target "$GITHUB_SHA" --prerelease --latest=false --title 'لصق فوري ١٫٠ — نسخة تجريبية' --notes-file docs/RELEASE-ar.md
+          gh release create lasq-v1.1.0-simple.1 deliver/lasq-fawri-simple-1.1.apk deliver/SHA256SUMS.txt --target "$GITHUB_SHA" --prerelease --latest=false --title 'لصق فوري ١٫١ — سجل النسخ المبسّط' --notes-file docs/RELEASE-ar.md

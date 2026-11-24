@@ -1,8 +1,6 @@
 <resources>
-  <string name="app_name">لصق فوري</string><string name="access_label">لصق فوري · الحقل النشط</string>
-  <string name="access_desc">بعد موافقتك وتشغيل الخدمة، نتحقق من اسم التطبيق وخصائص الحقل النشط فقط لحجب الحقول الحساسة وتنفيذ أمر اللصق. لا نقرأ النص المكتوب ولا نراقب ضغطات المفاتيح.</string>
-  <string name="access_summary">لصق محلي في الحقل المسموح فقط</string>
-  <string name="ime_label">لوحة لصق فوري</string><string name="widget_desc">تشغيل وإيقاف خدمة اللصق دون عرض المحتوى</string>
+  <string name="app_name">لصق فوري · السجل</string>
+  <string name="ime_label">لوحة الحفظ · لصق فوري</string>
   <color name="brand">#6750CF</color>
   <style name="LasqTheme" parent="android:style/Theme.Material.Light.NoActionBar"><item name="android:windowBackground">#F7F7FB</item><item name="android:fontFamily">sans</item><item name="android:colorAccent">@color/brand</item><item name="android:windowLightStatusBar">true</item><item name="android:windowActionModeOverlay">true</item><item name="android:windowNoTitle">true</item></style>
 </resources>

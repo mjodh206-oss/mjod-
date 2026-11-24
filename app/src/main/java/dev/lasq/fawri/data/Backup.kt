@@ -70,7 +70,7 @@ object Backup {
         return out.toByteArray()
     }
 
-    fun open(bytes: ByteArray, pass: CharArray, now: Long, days: Int): List<Clip> {
+    fun open(bytes: ByteArray, pass: CharArray): List<Clip> {
         require(bytes.size in 53..LIMIT)
         val plain =
             cipher(Cipher.DECRYPT_MODE, pass, bytes.copyOfRange(0, 33))
@@ -90,24 +90,24 @@ object Backup {
             val rows =
                 List(count) {
                     val body = string(MAX_TEXT)
-                    require(body.isNotBlank())
+                    require(body.isNotEmpty())
                     val source = string(255)
                     val time = input.readLong()
-                    require(time in 1L..now)
+                    require(time > 0)
                     val pin = input.readBoolean()
                     val group = string(12)
-                    require(Group.entries.any { it.name == group })
+                    require(group in setOf("NONE", "WORK", "PERSONAL"))
                     Clip(
                         body = body,
                         source = source,
                         time = time,
-                        kind = Rules.kind(body).name,
+                        kind = "TEXT",
                         pinned = pin,
                         bucket = group,
                     )
                 }
             require(input.available() == 0)
-            return rows.filter { it.time > now - days * DAY }
+            return rows
         } finally {
             plain.fill(0)
         }

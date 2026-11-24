@@ -24,10 +24,10 @@ data class Clip(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val body: String,
     val time: Long,
-    val source: String,
-    val kind: String,
+    val source: String = "الحافظة",
+    val kind: String = "TEXT",
     val pinned: Boolean = false,
-    val bucket: String = Group.NONE.name,
+    val bucket: String = "NONE",
 )
 
 @Entity(tableName = "snippets")
@@ -37,50 +37,68 @@ data class Snippet(
     val body: String,
 )
 
+// The v1 tables are retained verbatim: an in-place upgrade never replaces the user's history.
+@Entity(tableName = "clipboard_cursor")
+data class Cursor(@PrimaryKey val slot: Int = 1, val stamp: Long, val fingerprint: String)
+
+data class Preview(val id: Long, val preview: String, val time: Long)
+
 @Dao
-interface ClipDao {
-    @Insert fun add(c: Clip): Long
+abstract class ClipDao {
+    @Insert abstract fun add(c: Clip): Long
 
-    @Insert fun addAll(c: List<Clip>)
-
-    @Query(
-        "SELECT * FROM clips WHERE time > :after AND (instr(lower(body),lower(:query))>0 OR instr(lower(source),lower(:query))>0) AND (:groupName='' OR bucket=:groupName) AND (:pins=0 OR pinned=1) ORDER BY pinned DESC, time DESC, id DESC LIMIT :limit",
-    )
-    fun search(after: Long, query: String, groupName: String, pins: Boolean, limit: Int): List<Clip>
-
-    @Query("SELECT * FROM clips WHERE time > :after ORDER BY time DESC,id DESC LIMIT 3")
-    fun recent(after: Long): List<Clip>
-
-    @Query("SELECT count(*) FROM clips WHERE time > :after") fun count(after: Long): Int
-
-    @Query("UPDATE clips SET pinned=NOT pinned WHERE id=:id") fun pin(id: Long)
-
-    @Query("UPDATE clips SET bucket=:bucket WHERE id=:id") fun group(id: Long, bucket: String)
-
-    @Query("DELETE FROM clips WHERE id=:id") fun delete(id: Long)
-
-    @Query("DELETE FROM clips WHERE time <= :before") fun expire(before: Long): Int
-
-    @Query("SELECT MIN(time) FROM clips") fun oldest(): Long?
+    @Insert abstract fun addAll(rows: List<Clip>)
 
     @Query(
-        "SELECT COALESCE(SUM(length(CAST(body AS BLOB))+length(CAST(source AS BLOB))+40),0) FROM clips WHERE time > :after",
+        "SELECT id, substr(body,1,200) AS preview, time FROM clips WHERE instr(lower(body),lower(:term))>0 ORDER BY time DESC, id DESC LIMIT :limit",
     )
-    fun exportSize(after: Long): Long
+    abstract fun page(term: String, limit: Int): List<Preview>
 
-    @Query("SELECT * FROM clips WHERE time > :after ORDER BY time,id LIMIT :limit")
-    fun export(after: Long, limit: Int): List<Clip>
+    @Query("SELECT body FROM clips WHERE id=:id") abstract fun text(id: Long): String?
 
-    @Query("SELECT * FROM snippets ORDER BY id DESC") fun templates(): List<Snippet>
+    @Query("SELECT count(*) FROM clips") abstract fun count(): Int
 
-    @Insert fun addSnippet(s: Snippet): Long
+    @Query("DELETE FROM clips WHERE id=:id") abstract fun delete(id: Long)
 
-    @Query("DELETE FROM snippets WHERE id=:id") fun deleteSnippet(id: Long)
+    @Query("DELETE FROM clips") abstract fun clear()
+
+    @Query("SELECT * FROM clipboard_cursor WHERE slot=1") abstract fun cursor(): Cursor?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE) abstract fun remember(c: Cursor)
+
+    /** Advancing the cursor and adding the rows succeed together. Deletion never rewinds the cursor. */
+    @Transaction
+    open fun capture(e: CopyEvent): Boolean {
+        val next = Cursor(stamp = e.stamp, fingerprint = e.fingerprint())
+        if (cursor() == next) return false
+        addAll(e.parts.map { Clip(body = it, time = e.stamp) })
+        remember(next)
+        return true
+    }
+
+    @Query(
+        "SELECT COALESCE(SUM(length(CAST(body AS BLOB))+length(CAST(source AS BLOB))+40),0) FROM clips",
+    )
+    abstract fun exportSize(): Long
+
+    @Query("SELECT * FROM clips ORDER BY time,id LIMIT :limit")
+    abstract fun export(limit: Int): List<Clip>
 }
 
-@Database(entities = [Clip::class, Snippet::class], version = 1, exportSchema = true)
+@Database(entities = [Clip::class, Snippet::class, Cursor::class], version = 2, exportSchema = true)
 abstract class PrivateDb : RoomDatabase() {
     abstract fun clips(): ClipDao
+
+    companion object {
+        val FROM_ONE =
+            object : androidx.room.migration.Migration(1, 2) {
+                override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS clipboard_cursor (slot INTEGER NOT NULL, stamp INTEGER NOT NULL, fingerprint TEXT NOT NULL, PRIMARY KEY(slot))",
+                    )
+                }
+            }
+    }
 }
 
 /**
@@ -90,9 +108,11 @@ class Vault(private val ctx: Context) {
     private val name = "lasq-vault.db"
     private val alias = "lasq.wrap.v1"
     private val wrapped = AtomicFile(File(ctx.noBackupFilesDir, "lasq.wrap"))
-    private val monitor = Any()
+    // All captures, deletes and snapshots use one ordered lane. A delayed callback cannot
+    // enqueue an older write behind a deletion. Also serialises first-open/key creation.
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private val io = Dispatchers.IO.limitedParallelism(1)
     private var db: PrivateDb? = null
-    private var memoryKey: ByteArray? = null
     val revision = MutableStateFlow(0L)
 
     private fun ks() = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
@@ -151,49 +171,19 @@ class Vault(private val ctx: Context) {
                 val pass = password()
                 Room.databaseBuilder(ctx, PrivateDb::class.java, name)
                     .openHelperFactory(SupportOpenHelperFactory(pass))
+                    .addMigrations(PrivateDb.FROM_ONE)
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
                     .build()
                     .also {
                         db = it
-                        memoryKey = pass
                     }
             }
 
-    private val generation = java.util.concurrent.atomic.AtomicLong()
-
-    suspend fun <T> read(f: (ClipDao) -> T): T {
-        val before = generation.get()
-        return withContext(Dispatchers.IO) {
-            synchronized(monitor) {
-                if (generation.get() != before)
-                    throw kotlinx.coroutines.CancellationException("Vault reset")
-                f(open().clips())
-            }
-        }
-    }
+    suspend fun <T> read(f: (ClipDao) -> T): T = withContext(io) { f(open().clips()) }
 
     suspend fun <T> write(f: (ClipDao) -> T): T = read(f).also { revision.update { n -> n + 1 } }
 
-    suspend fun prune(days: Int): Long? {
-        val (changed, first) =
-            read { it.expire(System.currentTimeMillis() - days * DAY) to it.oldest() }
-        if (changed > 0) revision.update { it + 1 }
-        return first?.plus(days * DAY)
-    }
-
-    suspend fun erase() {
-        generation.incrementAndGet()
-        withContext(Dispatchers.IO) {
-            synchronized(monitor) {
-                db?.close()
-                db = null
-                memoryKey?.fill(0)
-                memoryKey = null
-                ks().deleteEntry(alias)
-                wrapped.delete()
-                ctx.deleteDatabase(name)
-                revision.update { it + 1 }
-            }
-        }
+    suspend fun capture(event: CopyEvent) {
+        if (read { it.capture(event) }) revision.update { it + 1 }
     }
 }

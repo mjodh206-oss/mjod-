@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import dev.lasq.fawri.R
-import dev.lasq.fawri.core.Theme
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -75,8 +74,8 @@ val LocaleHere = staticCompositionLocalOf { Locale.forLanguageTag("ar") }
 @Composable fun n(value: Number): String = NumberFormat.getInstance(LocaleHere.current).format(value)
 
 @Composable
-fun LasqTheme(t: Theme, locale: String, content: @Composable () -> Unit) {
-    val dark = t == Theme.DARK || (t == Theme.SYSTEM && isSystemInDarkTheme())
+fun LasqTheme(content: @Composable () -> Unit) {
+    val dark = isSystemInDarkTheme()
     val p = if (dark) night else daylight
     val scheme =
         (if (dark) darkColorScheme() else lightColorScheme()).copy(
@@ -95,7 +94,7 @@ fun LasqTheme(t: Theme, locale: String, content: @Composable () -> Unit) {
     CompositionLocalProvider(
         Colors provides p,
         LocalLayoutDirection provides LayoutDirection.Rtl,
-        LocaleHere provides Locale.forLanguageTag(locale),
+        LocaleHere provides Locale.forLanguageTag("ar"),
     ) {
         MaterialTheme(colorScheme = scheme) {
             ProvideTextStyle(TextStyle(fontFamily = Plex, color = p.text, fontSize = 15.sp)) {

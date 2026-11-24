@@ -24,7 +24,7 @@ public final class Editor extends Activity {
         field.setHint("Test editor");
         layout.addView(field);
         if (source) {
-            for (String name : new String[]{"instant", "confirm", "archive", "sensitive"}) {
+            for (String name : new String[]{"instant", "first", "last", "paused", "sensitive"}) {
                 Button copy = new Button(this);
                 copy.setText(name);
                 copy.setContentDescription("copy-" + name);

@@ -1,87 +1,52 @@
 package dev.lasq.fawri.platform
 
 import android.content.*
-import android.os.*
+import android.os.PersistableBundle
 import dev.lasq.fawri.app
-import dev.lasq.fawri.core.MAX_TEXT
+import dev.lasq.fawri.core.*
 
 object ClipboardPort {
     private const val OWN = "dev.lasq.fawri.LOCAL_COPY"
-    private const val PRIVATE = "android.content.extra.IS_SENSITIVE"
+    const val PRIVATE = "android.content.extra.IS_SENSITIVE"
 
-    data class Sample(val stamp: Long, val text: String)
-
-    private fun manager(c: Context) = c.system<ClipboardManager>()
-
-    fun unchangedPublic(c: Context, stamp: Long): Boolean {
-        val d = manager(c).primaryClipDescription ?: return false
-        return d.timestamp == stamp &&
-            d.extras?.getBoolean(PRIVATE) != true &&
-            d.extras?.getBoolean(OWN) != true &&
-            d.hasMimeType("text/*")
-    }
-
-    fun read(c: Context, ignoreOwn: Boolean): Sample? {
-        val cm = manager(c)
+    /** Snapshot only real text. Never coerce a content URI, follow an intent, or read editor text. */
+    fun read(c: Context, privateEditor: Boolean): CopyEvent? {
+        val cm = c.system<ClipboardManager>()
         val desc = cm.primaryClipDescription ?: return null
-        fun allowed(d: ClipDescription) =
-            d.hasMimeType("text/*") &&
-                d.extras?.getBoolean(PRIVATE) != true &&
-                !(ignoreOwn && d.extras?.getBoolean(OWN) == true)
-        if (!allowed(desc)) return null
-        val clip = cm.primaryClip ?: return null
-        if (
-            clip.itemCount != 1 ||
-                !allowed(clip.description) ||
-                clip.description.timestamp != desc.timestamp
-        )
+        val stamp = desc.timestamp
+        if (stamp <= 0) return null
+        if (privateEditor || desc.extras?.getBoolean(PRIVATE) == true) {
+            c.app.prefs.privateStamp = stamp
             return null
-        val item = clip.getItemAt(0)
-        if (item.uri != null || item.intent != null) return null
-        val text = item.text ?: return null
-        if (text.length !in 1..MAX_TEXT || text.isBlank()) return null
-        return Sample(desc.timestamp, text.toString())
+        }
+        fun eligible(d: ClipDescription) =
+            d.hasMimeType("text/*") &&
+                d.timestamp == stamp &&
+                d.extras?.getBoolean(OWN) != true &&
+                d.extras?.getBoolean(PRIVATE) != true
+        if (stamp == c.app.prefs.privateStamp || !eligible(desc)) return null
+        val clip = cm.primaryClip ?: return null
+        if (!eligible(clip.description)) return null
+        val parts = ArrayList<String>()
+        var length = 0L
+        for (i in 0 until clip.itemCount) {
+            val item = clip.getItemAt(i)
+            if (item.uri != null || item.intent != null) continue
+            val text = item.text ?: continue
+            if (text.isEmpty()) continue
+            length += text.length
+            if (length > MAX_TEXT) throw TextTooLarge()
+            parts += text.toString()
+        }
+        return if (parts.isEmpty()) null else CopyEvent(stamp, parts)
     }
 
-    fun put(c: Context, text: String): Long {
-        require(text.length in 1..MAX_TEXT)
+    /** Only called by the explicit Copy button in the archive; never by the listener. */
+    fun copy(c: Context, text: String) {
         val clip = ClipData.newPlainText("لصق فوري", text)
         clip.description.extras = PersistableBundle().apply { putBoolean(OWN, true) }
-        val cm = manager(c)
-        cm.setPrimaryClip(clip)
-        val stamp = cm.primaryClipDescription?.timestamp ?: 0
-        remember(c, stamp)
-        return stamp
+        c.system<ClipboardManager>().setPrimaryClip(clip)
     }
 
-    private fun meta(c: Context) = c.getSharedPreferences("expiry", Context.MODE_PRIVATE)
-
-    fun remember(c: Context, stamp: Long) {
-        if (stamp > 0) meta(c).edit().putLong("stamp", stamp).apply()
-    }
-
-    fun due(c: Context): Long? {
-        val stamp = meta(c).getLong("stamp", 0)
-        val sec = c.app.prefs.value.clearSeconds
-        return if (sec > 0 && stamp > 0) stamp + sec * 1000L else null
-    }
-
-    fun forget(c: Context) {
-        meta(c).edit().clear().apply()
-    }
-
-    fun expire(c: Context, foreground: Boolean = false, force: Boolean = false) {
-        if (!force && (due(c) ?: return) > System.currentTimeMillis()) return
-        if ((!foreground && !Checks.canObserve(c)) || !Checks.unlocked(c)) return
-        val cm = manager(c)
-        val stamp = meta(c).getLong("stamp", 0)
-        if (stamp <= 0) return
-        val current = cm.primaryClipDescription ?: return
-        // Never erase a newer clipboard in order to expire an older one.
-        if (current.timestamp == stamp) {
-            if (Build.VERSION.SDK_INT >= 28) cm.clearPrimaryClip()
-            else cm.setPrimaryClip(ClipData.newPlainText("", ""))
-        }
-        forget(c)
-    }
+    class TextTooLarge : IllegalArgumentException()
 }

@@ -24,8 +24,8 @@ android {
         applicationId = "dev.lasq.fawri"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "SIGNER_SHA256", "\"$expectedCert\"")
     }
@@ -39,7 +39,7 @@ android {
         debug { applicationIdSuffix = ".debug" }
         release {
             isMinifyEnabled = true; isShrinkResources = true
-            if (previewBuild) { applicationIdSuffix = ".preview"; versionNameSuffix = "-preview" }
+            if (previewBuild) { applicationIdSuffix = ".simple.preview"; versionNameSuffix = "-preview" }
             if (storePath != null) signingConfig = signingConfigs.getByName("provided")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

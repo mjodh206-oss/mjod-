@@ -11,23 +11,13 @@ class LasqApp : Application() {
     val prefs by lazy { Prefs(this) }
     val vault by lazy { Vault(this) }
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    val active = MutableStateFlow(false)
-    val messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val integrity by lazy { Integrity.inspect(this) }
+    val recorder by lazy { Recorder(this) }
 
-    fun report(s: String) {
-        messages.tryEmit(s)
-    }
-
-    fun cleanLater() {
-        scope.launch {
-            try {
-                val due = vault.prune(prefs.value.days)
-                Maintenance.plan(this@LasqApp, due)
-            } catch (_: Exception) {
-                report("تعذّر فتح السجل المشفّر. لم نحذف بياناتك.")
-            }
-        }
+    override fun onCreate() {
+        super.onCreate()
+        // v1 could have a persisted expiry job. Upgrades have no such job or service.
+        system<android.app.job.JobScheduler>().cancel(4760)
     }
 }
 

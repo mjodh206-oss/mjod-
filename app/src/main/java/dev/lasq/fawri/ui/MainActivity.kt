@@ -1,6 +1,5 @@
 package dev.lasq.fawri.ui
 
-import android.Manifest
 import android.app.KeyguardManager
 import android.content.*
 import android.net.Uri
@@ -33,18 +32,6 @@ import androidx.fragment.app.FragmentActivity
 import dev.lasq.fawri.*
 import dev.lasq.fawri.core.*
 import dev.lasq.fawri.platform.*
-import kotlinx.coroutines.delay
-
-enum class Screen(val label: String, val icon: G) {
-    HOME("الرئيسية", G.HOME),
-    HISTORY("السجل", G.HISTORY),
-    APPS("التطبيقات", G.GRID),
-    SETTINGS("الإعدادات", G.TUNE),
-    PERMISSIONS("الأذونات", G.KEY),
-    ABOUT("حول التطبيق", G.INFO),
-    TEMPLATES("القوالب", G.STACK),
-    PRIVACY("الخصوصية", G.SHIELD),
-}
 
 class MainActivity : FragmentActivity() {
     val vm: AppModel by viewModels()
@@ -59,11 +46,6 @@ class MainActivity : FragmentActivity() {
     private val credential =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) authenticated() else authDone = null
-        }
-    private val notify =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            epoch++
-            if (!it) toast("الإشعارات مطلوبة للتشغيل. يمكنك استخدام السجل اليدوي دونها.")
         }
     private val create =
         registerForActivityResult(
@@ -99,23 +81,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    fun notifyPermission() {
-        if (
-            Build.VERSION.SDK_INT >= 33 &&
-                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
-                    android.content.pm.PackageManager.PERMISSION_GRANTED &&
-                (!getPreferences(MODE_PRIVATE).getBoolean("asked", false) ||
-                    shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
-        ) {
-            getPreferences(MODE_PRIVATE).edit().putBoolean("asked", true).apply()
-            notify.launch(Manifest.permission.POST_NOTIFICATIONS)
-        } else
-            external(
-                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
-            )
-    }
-
     fun chooseBoard() {
         val im = system<InputMethodManager>()
         if (im.enabledInputMethodList.any { it.packageName == packageName }) im.showInputMethodPicker()
@@ -124,6 +89,7 @@ class MainActivity : FragmentActivity() {
 
     private fun authenticated() {
         unlocked = true
+        syncWindow()
         authDone?.invoke()
         authDone = null
     }
@@ -205,11 +171,10 @@ class MainActivity : FragmentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        Alerts.setup(this)
         readIntent(intent)
         setContent {
-            val o by vm.prefs.flow.collectAsState()
-            LasqTheme(o.theme, o.locale) {
+            val lock by app.prefs.locked.collectAsState()
+            LasqTheme {
                 val light = Colors.current.canvas.luminance() > .5
                 val view = LocalView.current
                 SideEffect {
@@ -218,20 +183,7 @@ class MainActivity : FragmentActivity() {
                         isAppearanceLightNavigationBars = light
                     }
                 }
-                var ready by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) {
-                    delay(780)
-                    ready = true
-                }
-                val protected = o.lock && !unlocked
-                LaunchedEffect(ready, foreground, protected, o.intro) {
-                    vm.visible.value =
-                        ready && foreground && !protected && o.intro && app.integrity.first
-                    if (vm.visible.value) {
-                        vm.refresh()
-                        app.cleanLater()
-                    }
-                }
+                LaunchedEffect(lock, unlocked, foreground) { syncWindow() }
                 Box(
                     Modifier.fillMaxSize()
                         .background(Colors.current.canvas)
@@ -241,39 +193,29 @@ class MainActivity : FragmentActivity() {
                     contentAlignment = Alignment.Center,
                 ) {
                     when {
-                        !ready -> Splash()
                         !app.integrity.first ->
-                            Empty(
-                                G.SHIELD,
-                                "تعذر التحقق من توقيع التطبيق",
-                                "لا تفتح هذه النسخة سجلك ولا تشغّل خدمة النسخ. استخدم نسخة موثوقة.",
-                            )
-                        protected ->
+                            Empty(G.SHIELD, "هذه النسخة غير معتمدة", "لم نفتح السجل أو نشغّل الحفظ.")
+                        lock && !unlocked ->
                             Column(
-                                Modifier.widthIn(max = 500.dp).padding(28.dp),
+                                Modifier.padding(28.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Logo(64)
-                                Spacer(Modifier.height(24.dp))
-                                Title("مساحتك مقفلة", "تحقق من هويتك لعرض الحافظة والإعدادات.")
-                                Spacer(Modifier.height(24.dp))
-                                Primary("فتح التطبيق", { authenticate() }, icon = G.LOCK)
-                            }
-                        !o.intro ->
-                            Intro {
-                                vm.settings { it.copy(intro = true) }
-                                if (it) openSetup = true
+                                Logo(60)
+                                Spacer(Modifier.height(14.dp))
+                                Txt("سجلك مقفل", 24, bold = true)
+                                Spacer(Modifier.height(16.dp))
+                                Primary("فتح السجل", { authenticate() }, icon = G.LOCK)
                             }
                         else -> {
-                            MainShell(this@MainActivity, vm, o, openSetup) { openSetup = false }
+                            ArchivePage(this@MainActivity, vm, lock)
                             shared?.let { body ->
                                 Confirm(
-                                    "حفظ النص المُشارك؟",
-                                    body.take(200) + "\n\nسيُحفظ محلياً بعد موافقتك فقط.",
-                                    "حفظ في السجل",
+                                    "إضافة النص المُشارك؟",
+                                    body.take(200),
+                                    "حفظ",
                                     { shared = null },
                                 ) {
-                                    vm.manual(body, "مشاركة يدوية")
+                                    vm.shared(body)
                                     shared = null
                                 }
                             }
@@ -290,7 +232,17 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private var openSetup by mutableStateOf(false)
+    fun changeRecording(value: Boolean) {
+        if (!vm.visible.value) return
+        app.recorder.setEnabled(value)
+        if (value) LegacyMonitor.ensure(this)
+    }
+
+    private fun syncWindow() {
+        val allowed = foreground && (!app.prefs.locked.value || unlocked) && app.integrity.first
+        vm.visible.value = allowed
+        app.recorder.focus(allowed && hasWindowFocus())
+    }
 
     private fun readIntent(i: Intent?) {
         if (i?.action == Intent.ACTION_SEND) {
@@ -306,11 +258,11 @@ class MainActivity : FragmentActivity() {
                         null
                     else
                         i.getCharSequenceExtra(Intent.EXTRA_TEXT)
-                            ?.takeIf { it.length in 1..MAX_TEXT && it.isNotBlank() }
+                            ?.takeIf { it.length in 1..MAX_TEXT && it.isNotEmpty() }
                             ?.toString()
                 }
                     .getOrNull()
-            if (shared == null) toast("نقبل نصاً غير حساس فقط، بحد أقصى ٢٤ ألف حرف.")
+            if (shared == null) toast("نقبل نصاً غير حساس فقط، ضمن حجم الحافظة المتاح.")
             setIntent(Intent(this, MainActivity::class.java))
         }
     }
@@ -323,41 +275,27 @@ class MainActivity : FragmentActivity() {
     override fun onStart() {
         super.onStart()
         foreground = true
+        syncWindow()
     }
 
     override fun onResume() {
         super.onResume()
         epoch++
-        Surfaces.refresh(this)
-        if (app.active.value && Checks.reason(this) != null) Monitor.instance?.halt(false)
+        syncWindow()
+        LegacyMonitor.ensure(this)
     }
 
     override fun onStop() {
         foreground = false
         unlocked = false
-        vm.visible.value = false
+        syncWindow()
         super.onStop()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            epoch++
-            if (!app.prefs.value.lock || unlocked)
-                runCatching { ClipboardPort.expire(this, foreground = true) }
-        }
-    }
-}
-
-@Composable
-private fun Splash() {
-    val a = remember { Animatable(.74f) }
-    LaunchedEffect(Unit) { a.animateTo(1f, tween(550)) }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(Modifier.scale(a.value)) { Logo(80) }
-        Spacer(Modifier.height(16.dp))
-        Txt("لصق فوري", 32, bold = true)
-        Txt(CREDIT, 14, Colors.current.muted)
+        epoch++
+        syncWindow()
     }
 }
 
@@ -372,7 +310,7 @@ private fun Passphrase(export: Boolean, close: () -> Unit, ok: (CharArray) -> Un
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 Txt(
                     if (export) "اختر عبارة مرور من ١٠ أحرف على الأقل. لا يمكننا استعادتها."
-                    else "أدخل عبارة مرور الملف. لن تُستورد العناصر المنتهية.",
+                    else "أدخل عبارة مرور الملف لإضافة نصوصه إلى سجلك، مهما كان عمرها.",
                     14,
                     Colors.current.muted,
                 )
