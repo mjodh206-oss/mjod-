@@ -20,7 +20,7 @@ public final class Editor extends Activity {
         field.setSingleLine(true);
         field.setShowSoftInputOnFocus(false);
         boolean source = getPackageName().endsWith(".source");
-        field.setText(source ? "Original fixture field" : "");
+        field.setText(source ? "Original fixture field" : "Unchanged destination field");
         field.setHint("Test editor");
         layout.addView(field);
         if (source) {

@@ -13,19 +13,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
@@ -318,6 +313,10 @@ private fun Passphrase(export: Boolean, close: () -> Unit, ok: (CharArray) -> Un
                     pass,
                     { pass = it.take(256) },
                     singleLine = true,
+                    keyboardOptions =
+                        androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Password,
+                        ),
                     visualTransformation = PasswordVisualTransformation(),
                     label = { Txt("عبارة المرور", 13) },
                 )
@@ -326,6 +325,10 @@ private fun Passphrase(export: Boolean, close: () -> Unit, ok: (CharArray) -> Un
                         again,
                         { again = it.take(256) },
                         singleLine = true,
+                        keyboardOptions =
+                            androidx.compose.foundation.text.KeyboardOptions(
+                                keyboardType = androidx.compose.ui.text.input.KeyboardType.Password,
+                            ),
                         visualTransformation = PasswordVisualTransformation(),
                         label = { Txt("تأكيد العبارة", 13) },
                     )

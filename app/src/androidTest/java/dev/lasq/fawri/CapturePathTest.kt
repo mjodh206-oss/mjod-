@@ -90,7 +90,11 @@ class CapturePathTest {
                 assertTrue(device.hasObject(By.res(source, "editor").text("Original fixture field")))
                 open(destination)
                 SystemClock.sleep(300)
-                assertFalse(device.hasObject(By.text("LASQ_FIXTURE_instant")))
+                // Android 13+ may show the copied text in SystemUI's own clipboard preview.
+                // Inspect the real target editor, not the unrelated system overlay.
+                assertTrue(
+                    device.hasObject(By.res(destination, "editor").text("Unchanged destination field")),
+                )
                 inst.runOnMainSync { ctx.app.recorder.setEnabled(false) }
                 open(source)
                 copy("paused")
